@@ -1,0 +1,25 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import FormCommunity from "@/sections/FormCommunity.astro";
+import HeaderPage from "@/sections/HeaderPage.astro";
+const { id } = Astro.params;
+---
+
+<Layout
+  title="Comunidades dentro de esta parroquia | Comunidad"
+  description="Gestión de comunidades dentro de la parroquia en la plataforma de comunidades."
+>
+  <div class="flex flex-col gap-6">
+    <!-- header si llega haber en algun momento -->
+    <HeaderPage />
+    <main class="grid grid-cols-[1fr_3fr] gap-6">
+      <FormCommunity />
+      <section class="card-section" transition:name="section-view">
+        <header>
+          <h2 class="text-2xl font-semibold mb-4">Comunidades</h2>
+        </header>
+        <!-- <ViewParishes client:load /> -->
+      </section>
+    </main>
+  </div>
+</Layout>

@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@import './buttons.css';
+@import './forms.css';
+@import './notifications.css';
+@import './tables.css';
+
+@import '@fontsource/forum';
+/* Supports weights 100-900 */
+@import '@fontsource-variable/inter';
+
+body {
+  font-family: 'Forum', system-ui;
+  background-color: var(--color-neutral-50);
+  color: var(--color-neutral-950);
+  padding: 1rem;
+}
+
+.value, .title {
+  font-family: 'Inter Variable', sans-serif;
+}
+
+.card-section {
+  background-color: var(--color-white);
+  border: 2px solid var(--color-neutral-200);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  height: min-content;
+}

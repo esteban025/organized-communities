@@ -1,0 +1,7 @@
+<!-- el componente debe permitir class desde fuera -->
+<article
+  class="bg-white rounded-2xl shadow-md border border-neutral-300 transition-all hover:shadow-lg duration-200"
+  class:list={Astro.props.class}
+>
+  <slot />
+</article>

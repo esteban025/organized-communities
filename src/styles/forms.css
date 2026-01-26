@@ -1,0 +1,59 @@
+.design-form {
+
+  & fieldset {
+    border: 2px solid var(--color-neutral-300);
+    border-radius: .875rem;
+    padding: .5rem;
+
+    & legend {
+      padding: 0 .5rem;
+      font-weight: 600;
+      font-size: larger;
+    }
+  }
+}
+
+.content-input {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+
+  & label {
+    font-weight: 500;
+  }
+
+  & input {
+    border: 2px solid var(--color-neutral-300);
+    border-radius: 33rem;
+    padding: .5rem 1rem;
+    font-family: 'Inter Variable', sans-serif;
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-neutral-500);
+      background-color: var(--color-neutral-100);
+      box-shadow: 0 0 0 2px var(--color-neutral-200);
+    }
+  }
+
+  &:has(input:valid) input {
+    outline: none;
+    border-color: var(--color-neutral-500);
+    background-color: var(--color-neutral-100);
+    box-shadow: 0 0 0 2px var(--color-neutral-200);
+  }
+
+  &:has(input:focus) svg,
+  &:has(input:valid) svg{
+    color: var(--color-success-500);
+  }
+}
+
+
+.content-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}

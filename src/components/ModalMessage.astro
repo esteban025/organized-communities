@@ -1,0 +1,30 @@
+---
+interface Props {
+  id?: string;
+}
+const { id = "modal-message" } = Astro.props;
+---
+
+<div
+  id={id}
+  class="modal-overlay fixed inset-0 z-90 bg-black/80 items-center justify-center p-4 backdrop-blur-md hidden transition-opacity duration-300 opacity-0"
+>
+  <div
+    class="bg-white max-w-200 mx-auto rounded-lg shadow-lg p-4 flex flex-col items-center"
+  >
+    <h3 class="title-message text-2xl font-bold mb-3"></h3>
+    <p class="text-message"></p>
+    <div class="flex items-center gap-2 mt-4 w-full">
+      <button class="btn btn-secondary btn-cancel w-full">Cancelar</button>
+      <button class="btn btn-primary btn-accept w-full">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .show {
+    display: flex;
+    opacity: 1;
+    overflow: visible;
+  }
+</style>

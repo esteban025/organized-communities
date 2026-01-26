@@ -1,0 +1,18 @@
+---
+interface Props {
+  id?: string;
+}
+
+const { id = "notification" } = Astro.props;
+---
+
+<div
+  id={id}
+  class="notification-container fixed top-4 right-4 z-80 hidden transition-all duration-300"
+>
+  <div
+    class="notification-content bg-white border-2 border-gray-300 rounded-full px-6 py-4 shadow-lg min-w-75 max-w-100"
+  >
+    <p class="notification-message text-sm font-medium text-gray-800"></p>
+  </div>
+</div>

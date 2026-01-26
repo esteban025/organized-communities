@@ -1,0 +1,151 @@
+---
+import { actions } from "astro:actions";
+---
+
+<section class="card-section" transition:name="section-form">
+  <form id="form-parish" class="design-form" action={actions.postParish}>
+    <fieldset>
+      <legend>Nueva parroquia</legend>
+      <input type="hidden" name="id-parish" id="id-parish" />
+      <div class="content-input">
+        <label for="name-parish">Nombre</label>
+        <input
+          type="text"
+          name="name-parish"
+          id="name-parish"
+          autocomplete="off"
+          required
+        />
+      </div>
+
+      <div class="content-input">
+        <label for="tag-parish">Tag</label>
+        <input
+          type="text"
+          name="tag-parish"
+          id="tag-parish"
+          autocomplete="off"
+          required
+        />
+      </div>
+
+      <div class="content-input">
+        <label for="aka-parish">Aka</label>
+        <input
+          type="text"
+          name="aka-parish"
+          id="aka-parish"
+          autocomplete="off"
+          required
+        />
+      </div>
+
+      <div class="content-actions">
+        <button type="reset" class="btn btn-secondary w-full">Resetear</button>
+        <button type="submit" class="btn btn-primary w-full">Agregar</button>
+      </div>
+
+      <!-- localizacion proximamente -->
+    </fieldset>
+  </form>
+</section>
+
+<script>
+  import { $id } from "@/utils/getElements";
+  import { actions } from "astro:actions";
+  import { showNotification } from "@/scripts/notification";
+  import { warningMessage } from "@/scripts/warning-message";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const formParish = $id("form-parish") as HTMLFormElement;
+
+    // funcion para editar parroquia
+    function fillOutParishForm(data: {
+      id: number;
+      name: string;
+      tag: string;
+      aka: string;
+    }) {
+      ($id("id-parish") as HTMLInputElement).value = data.id.toString();
+      ($id("name-parish") as HTMLInputElement).value = data.name;
+      ($id("tag-parish") as HTMLInputElement).value = data.tag;
+      ($id("aka-parish") as HTMLInputElement).value = data.aka;
+    }
+
+    formParish.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(formParish);
+      // si idParish no exite, es nueva parroquia
+      const idParish = formData.get("id-parish");
+      const nameParish = formData.get("name-parish") as string;
+      const tagParish = formData.get("tag-parish") as string;
+      const akaParish = formData.get("aka-parish") as string;
+
+      const info = idParish
+        ? {
+            id: Number(idParish),
+            name: nameParish,
+            tag: tagParish,
+            aka: akaParish,
+          }
+        : {
+            name: nameParish,
+            tag: tagParish,
+            aka: akaParish,
+          };
+
+      try {
+        const { data, error } = await actions.postParish(info);
+        if (data?.success) {
+          showNotification(data.message, "success");
+          formParish.reset();
+          window.dispatchEvent(new CustomEvent("parish:updated"));
+        } else {
+          showNotification(
+            data?.message || error?.message || "Error desconocido",
+            "error",
+          );
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        showNotification("Error enviando el formulario", "error");
+      }
+    });
+
+    formParish.addEventListener("reset", () => {
+      // limpiamos el campo oculto de id
+      ($id("id-parish") as HTMLInputElement).value = "";
+    });
+
+    // funcion para eliminar parroquia
+    function handleDeleteParish(id: number) {
+      // mostramos modal con mensaje de confirmacion
+      const confirm = warningMessage(
+        "Eliminación de Parroquia",
+        "¿Estás seguro de que deseas eliminar esta parroquia? Esta acción no se puede deshacer.",
+      );
+      // esta funcion devuelve una promesa que se resuelve a true o false
+      confirm.then(async (result: boolean) => {
+        if (result) {
+          try {
+            const { data, error } = await actions.deleteParish({ id });
+            if (data?.success) {
+              showNotification(data.message, "success");
+              window.dispatchEvent(new CustomEvent("parish:updated"));
+            } else {
+              showNotification(
+                data?.message || error?.message || "Error desconocido",
+                "error",
+              );
+            }
+          } catch (error) {
+            console.error("Error deleting parish:", error);
+            showNotification("Error eliminando la parroquia", "error");
+          }
+        }
+      });
+    }
+    (window as any).fillOutParishForm = fillOutParishForm;
+    (window as any).deleteParish = handleDeleteParish;
+  });
+</script>

@@ -1,0 +1,28 @@
+<section class="card-section" transition:name="section-form">
+  <form action="" class="design-form">
+    <fieldset class="flex flex-col">
+      <legend>Nueva comunidad</legend>
+      <span class="text-sm text-neutral-400 leading-4 text-center w-full mb-4"
+        >Recuerda que esta comunidad será parte de la parroquia seleccionada.</span
+      >
+      <div class="content-input">
+        <label for="number-comm">Número de comunidad</label>
+        <input
+          type="number"
+          id="number-comm"
+          name="number-comm"
+          required
+          min="1"
+        />
+      </div>
+      <div class="content-input">
+        <label for="level-paso">Paso actual</label>
+        <input type="text" id="level-paso" name="level-paso" />
+      </div>
+      <div class="content-actions">
+        <button type="reset" class="btn btn-secondary w-full">Resetear</button>
+        <button type="submit" class="btn btn-primary w-full">Agregar</button>
+      </div>
+    </fieldset>
+  </form>
+</section>

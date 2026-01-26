@@ -1,0 +1,59 @@
+.notification-container.show {
+  display: block;
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification-container.hide {
+  animation: slideOut 0.3s ease-out;
+}
+
+.notification-container.success .notification-content {
+  background-color: #f9fafb;
+  border-color: #6b7280;
+}
+
+.notification-container.success .notification-message {
+  color: #1f2937;
+}
+
+.notification-container.error .notification-content {
+  background-color: #fef2f2;
+  border-color: #dc2626;
+}
+
+.notification-container.error .notification-message {
+  color: #991b1b;
+}
+
+.notification-container.info .notification-content {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.notification-container.info .notification-message {
+  color: #374151;
+}
+
+/* === ANIMACIONES === */
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
