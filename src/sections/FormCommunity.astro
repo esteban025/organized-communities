@@ -1,10 +1,25 @@
+---
+import { actions } from "astro:actions";
+import { LEVELS } from "@/utils/pasos-camino";
+
+interface Props {
+  id: number;
+  name?: string;
+}
+const { id, name } = Astro.props;
+---
+
 <section class="card-section" transition:name="section-form">
-  <form action="" class="design-form">
+  <form action={actions.postCommunity} class="design-form" id="form-community">
     <fieldset class="flex flex-col">
       <legend>Nueva comunidad</legend>
-      <span class="text-sm text-neutral-400 leading-4 text-center w-full mb-4"
-        >Recuerda que esta comunidad será parte de la parroquia seleccionada.</span
+      <span class="text-sm text-neutral-500 leading-4 text-center w-full mb-4"
+        >Recuerda que esta comunidad será parte de "{name}"</span
       >
+      <input type="hidden" name="id-comm" id="id-comm" />
+
+      <input type="hidden" name="parish-id" id="parish-id" value={id} />
+
       <div class="content-input">
         <label for="number-comm">Número de comunidad</label>
         <input
@@ -17,7 +32,17 @@
       </div>
       <div class="content-input">
         <label for="level-paso">Paso actual</label>
-        <input type="text" id="level-paso" name="level-paso" />
+        <input
+          type="text"
+          id="level-paso"
+          name="level-paso"
+          required
+          autocomplete="off"
+          list="levels"
+        />
+        <datalist id="levels">
+          {LEVELS.map((level) => <option value={level.name} />)}
+        </datalist>
       </div>
       <div class="content-actions">
         <button type="reset" class="btn btn-secondary w-full">Resetear</button>
@@ -26,3 +51,96 @@
     </fieldset>
   </form>
 </section>
+
+<script>
+  import { showNotification } from "@/scripts/notification";
+  import { warningMessage } from "@/scripts/warning-message";
+  import type { Community } from "@/types/communities";
+  import { $id } from "@/utils/getElements";
+  import { actions } from "astro:actions";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = $id("form-community") as HTMLFormElement;
+
+    function editCommunity(data: Community) {
+      ($id("id-comm") as HTMLInputElement).value = String(data.id);
+      ($id("number-comm") as HTMLInputElement).value = String(
+        data.number_community,
+      );
+      ($id("level-paso") as HTMLInputElement).value = data.level_paso;
+    }
+
+    async function deleteCommunity(id: number) {
+      const confirm = warningMessage(
+        "Eliminar Comunidad",
+        `¿Estás seguro de que deseas eliminar esta comunidad?, Esta acción no se puede deshacer. ${id}`,
+      );
+      confirm.then(async (result: boolean) => {
+        if (result) {
+          try {
+            const { data, error } = await actions.deleteCommunity({ id });
+            if (!data?.success || error) {
+              showNotification(
+                data?.message || error?.message || "Algo salio mal",
+                "error",
+              );
+              return;
+            }
+            showNotification(data.message, "success");
+            window.dispatchEvent(new Event("communities:updated"));
+          } catch (error) {
+            showNotification("Error al eliminar la comunidad", "error");
+            return;
+          }
+        }
+      });
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const idComm = formData.get("id-comm") as string;
+      const parishId = formData.get("parish-id") as string;
+      const numberComm = formData.get("number-comm") as string;
+      const levelPaso = formData.get("level-paso") as string;
+
+      const info = idComm
+        ? {
+            id: Number(idComm),
+            parish_id: Number(parishId),
+            number_community: Number(numberComm),
+            level_paso: levelPaso,
+          }
+        : {
+            parish_id: Number(parishId),
+            number_community: Number(numberComm),
+            level_paso: levelPaso,
+          };
+      try {
+        const { data, error } = await actions.postCommunity(info);
+        if (!data?.success || error) {
+          showNotification(
+            data?.message || error?.message || "Algo salio mal",
+            "error",
+          );
+          return;
+        }
+        showNotification(data.message, "success");
+        form.reset();
+        window.dispatchEvent(new Event("communities:updated"));
+      } catch (error) {
+        showNotification("Error al agregar la comunidad", "error");
+        form.reset();
+        return;
+      }
+    });
+
+    form.addEventListener("reset", () => {
+      ($id("id-comm") as HTMLInputElement).value = "";
+    });
+
+    (window as any).editCommunity = editCommunity;
+    (window as any).deleteCommunity = deleteCommunity;
+  });
+</script>

@@ -2,24 +2,71 @@
 import Layout from "@/layouts/Layout.astro";
 import FormCommunity from "@/sections/FormCommunity.astro";
 import HeaderPage from "@/sections/HeaderPage.astro";
+import { ViewCommunities } from "@/components/react/ViewCommunities";
+import { actions } from "astro:actions";
 const { id } = Astro.params;
+
+let titlePage = "Comunidades | Plataforma";
+let descriptionPage = "Gestión de comunidades";
+let infoParish = null;
+
+try {
+  const { data } = await Astro.callAction(actions.getParishById, {
+    id: Number(id),
+  });
+
+  if (data?.data) {
+    titlePage = `Comunidades de la parroquia ${data.data.name}`;
+    descriptionPage = `Gestión de comunidades para la parroquia ${data.data.name} en la plataforma de comunidades.`;
+    infoParish = data.data;
+  }
+} catch (error) {
+  console.error("Error fetching parish data:", error);
+  titlePage = "Error al cargar parroquia";
+  descriptionPage = "No se pudo cargar la información de la parroquia";
+}
 ---
 
-<Layout
-  title="Comunidades dentro de esta parroquia | Comunidad"
-  description="Gestión de comunidades dentro de la parroquia en la plataforma de comunidades."
->
+<Layout title={titlePage} description={descriptionPage}>
   <div class="flex flex-col gap-6">
-    <!-- header si llega haber en algun momento -->
     <HeaderPage />
-    <main class="grid grid-cols-[1fr_3fr] gap-6">
-      <FormCommunity />
-      <section class="card-section" transition:name="section-view">
-        <header>
-          <h2 class="text-2xl font-semibold mb-4">Comunidades</h2>
-        </header>
-        <!-- <ViewParishes client:load /> -->
-      </section>
-    </main>
+    {
+      infoParish && (
+        <main class="grid grid-cols-[1fr_3fr] gap-6">
+          <FormCommunity
+            id={Number(id)}
+            name={infoParish ? infoParish.name : undefined}
+          />
+          <section class="card-section" transition:name="section-view">
+            <header>
+              <h2 class="text-2xl font-semibold mb-4">
+                Comunidades de "{infoParish ? infoParish.name : "la parroquia"}"
+              </h2>
+            </header>
+            <ViewCommunities client:load parishId={Number(id)} />
+          </section>
+        </main>
+      )
+    }
+
+    {
+      !infoParish && (
+        <section
+          class="card-section max-w-5xl mx-auto"
+          transition:name="section-view"
+        >
+          <header>
+            <h2 class="text-2xl font-semibold mb-4">Error</h2>
+          </header>
+          <div class="text-red-500 flex flex-col gap-1 items-center text-lg">
+            <p>
+              No se pudo cargar la información de la parroquia. Por favor,
+              intenta nuevamente más tarde.
+            </p>
+            <p>Verifica que el ID de la parroquia en la URL sea correcto.</p>
+          </div>
+        </section>
+      )
+    }
   </div>
 </Layout>

@@ -1,6 +1,20 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { createParishInDB, deleteParishFromDB, getParishesFromDB, updateParishInDB } from "@/services/parishes";
+import { createParishInDB, deleteParishFromDB, getParishByIdFromDB, getParishesFromDB, updateParishInDB } from "@/services/parishes";
+
+export const getParishById = defineAction({
+  input: z.object({
+    id: z.coerce.number().int(),
+  }),
+  async handler(input) {
+    const res = await getParishByIdFromDB(input.id)
+    return {
+      success: res.success,
+      message: res.message,
+      data: res.data,
+    }
+  }
+})
 
 export const getParishes = defineAction({
   async handler() {

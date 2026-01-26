@@ -1,6 +1,22 @@
 import { db } from "@/lib/db";
 import type { Parish, ParishWithCounts } from "@/types/parishes";
 
+
+export const getParishByIdFromDB = async (id: number) => {
+  const query = `
+    SELECT id, name, tag, aka
+    FROM parishes
+    WHERE id = ?;
+  `;
+  const [rows] = await db.query(query, [id]);
+  const data = rows as Parish[];
+  return {
+    success: true,
+    message: "Parroquia obtenida correctamente",
+    data: data[0],
+  }
+}
+
 export const getParishesFromDB = async () => {
   const query = `
     SELECT 
