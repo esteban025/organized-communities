@@ -1,0 +1,25 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import HeaderPage from "@/sections/HeaderPage.astro";
+import FormBrother from "@/sections/FormBrother.astro";
+
+const { id } = Astro.params;
+---
+
+<Layout
+  title="Hermanos dentro de esta comunidad | Comunidad"
+  description="Gestión de hermanos dentro de la comunidad seleccionada."
+>
+  <div class="flex flex-col gap-6">
+    <HeaderPage />
+    <main class="main-grid">
+      <FormBrother />
+      <section class="card-section" transition:name="section-view">
+        <header>
+          <h2 class="text-2xl font-semibold mb-4">Parroquias</h2>
+        </header>
+        <!-- <ViewParishes client:load /> -->
+      </section>
+    </main>
+  </div>
+</Layout>

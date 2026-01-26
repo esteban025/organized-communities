@@ -1,0 +1,294 @@
+---
+import ArrowShortIcon from "@/icons/ArrowShortIcon.astro";
+import { IfCatechistInput } from "@/components/react/IfCatechistInput";
+const roles = [
+  "responsable",
+  "corresponsable",
+  "ostiario",
+  "didascada",
+  "catequista",
+];
+---
+
+<section class="card-section" transition:name="section-form">
+  <form action="" id="form-brother" class="design-form space-y-2">
+    <fieldset class="space-y-2">
+      <legend>Datos personales</legend>
+      <!-- estado civil -->
+      <div class="container-civil-status">
+        <h3 class="mb-1">Estado civil:</h3>
+        <div class="wrapper">
+          <div
+            class="ratios-row flex items-center rounded-full bg-neutral-100 border-2 border-neutral-300 relative"
+          >
+            <div class="ss">
+              <input
+                type="radio"
+                name="civil_status"
+                id="ratio-matrimonio"
+                value="matrimonio"
+                class="checks-btns"
+                data-index="0"
+              />
+              <label for="ratio-matrimonio" class="radio-label"
+                >Matrimonio</label
+              >
+            </div>
+            <div class="ss">
+              <input
+                type="radio"
+                name="civil_status"
+                id="ratio-soltero"
+                value="soltero"
+                class="checks-btns"
+                checked
+                data-index="1"
+              />
+              <label for="ratio-soltero" class="radio-label">Soltero</label>
+            </div>
+            <div class="ss">
+              <input
+                type="radio"
+                name="civil_status"
+                id="ratio-soltera"
+                class="checks-btns"
+                value="soltera"
+                data-index="2"
+              />
+              <label for="ratio-soltera" class="radio-label">Soltera</label>
+            </div>
+
+            <!-- indicador personalizado -->
+            <div
+              id="civil-indicator"
+              class="absolute bg-white rounded-full border border-neutral-300 inset-0 w-1/3 h-full shadow-md transition-all duration-300 pointer-events-none civil-indicator"
+            >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- nombres -->
+      <!-- si es matrimonio renderizamos uno -->
+      <div class="container-names-married mb-1 animate-entry">
+        <div class="flex flex-col gap-2">
+          <div class="content-data-husband flex items-center gap-2">
+            <div class="content-input">
+              <label for="names-husband">Nombres: (Esposo)</label>
+              <input
+                type="text"
+                name="names-husband"
+                id="names-husband"
+                autocomplete="off"
+                placeholder="Alfredo Bermeo"
+                required
+              />
+            </div>
+            <div class="content-input">
+              <label for="phone-husband">Teléfono:</label>
+              <input
+                type="tel"
+                name="phone-husband"
+                id="phone-husband"
+                autocomplete="off"
+                required
+                placeholder="099..."
+              />
+            </div>
+          </div>
+          <div class="content-data-wife flex items-center gap-2">
+            <div class="content-input">
+              <label for="names-wife">Nombres: (Esposa)</label>
+              <input
+                type="text"
+                name="names-wife"
+                id="names-wife"
+                autocomplete="off"
+                required
+                placeholder="Marcela Barros"
+              />
+            </div>
+            <div class="content-input">
+              <label for="phone-wife">Teléfono:</label>
+              <input
+                type="tel"
+                name="phone-wife"
+                id="phone-wife"
+                autocomplete="off"
+                required
+                placeholder="099..."
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- si no es matrimonio renderizamos otro -->
+      <div class="container-names-single mb-1 animate-entry">
+        <div class="flex flex-col gap-2">
+          <div class="content-input">
+            <label for="name-bro">Nombres:</label>
+            <input
+              type="text"
+              name="name-bro"
+              id="name-bro"
+              autocomplete="off"
+              required
+              placeholder="Alfredo Bermeo"
+            />
+          </div>
+          <div class="content-input">
+            <label for="phone-bro">Teléfono:</label>
+            <input
+              type="tel"
+              name="phone-bro"
+              id="phone-bro"
+              autocomplete="off"
+              required
+              placeholder="099..."
+            />
+          </div>
+        </div>
+      </div>
+      <!-- roles -->
+    </fieldset>
+
+    <!-- roles -->
+    <fieldset class="fieldset-roles">
+      <legend>Roles en Comunidad</legend>
+      <div class="content-input relative mb-1">
+        <select
+          name="roles-select"
+          id="roles-select"
+          class="select-input space-y-1"
+        >
+          <option value="" class="options-select" selected>Ninguno</option>
+          {
+            roles.map((role) => (
+              <option value={role} class="options-select">
+                {role.charAt(0).toUpperCase() + role.slice(1)}
+              </option>
+            ))
+          }
+        </select>
+        <ArrowShortIcon class="size-4 block icon-select" />
+      </div>
+    </fieldset>
+
+    <!-- si es catequista -->
+    <fieldset class="fieldset-catequistas animate-entry">
+      <legend>Catequistas</legend>
+      <IfCatechistInput client:visible />
+    </fieldset>
+
+    <div class="content-actions">
+      <button type="reset" class="btn btn-secondary w-full">Resetear</button>
+      <button type="submit" class="btn btn-primary w-full">Agregar</button>
+    </div>
+  </form>
+</section>
+
+<style>
+  .ss {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+
+    & label {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 0.4rem 0;
+      transition: font-weight 200ms ease;
+    }
+
+    & input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+    }
+
+    &:has(input:checked) label {
+      font-weight: 600;
+    }
+  }
+
+  /* dinamic input names */
+  .container-civil-status:has(input[value="matrimonio"]:checked) {
+    & ~ .container-names-married {
+      display: block;
+    }
+    & ~ .container-names-single {
+      display: none;
+    }
+  }
+
+  .container-civil-status:has(input[value="soltero"]:checked),
+  .container-civil-status:has(input[value="soltera"]:checked) {
+    & ~ .container-names-married {
+      display: none;
+    }
+    & ~ .container-names-single {
+      display: block;
+    }
+  }
+
+  /* dinamic input select roles */
+  .fieldset-catequistas {
+    display: none;
+  }
+  .fieldset-roles:has(select#roles-select option[value="catequista"]:checked) {
+    & ~ .fieldset-catequistas {
+      display: block;
+    }
+  }
+
+  /* animcion de entrada */
+  .animate-entry {
+    animation: entryAnimation 300ms ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  @keyframes entryAnimation {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<script>
+  import { $$, $id } from "@/utils/getElements";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const civilIndicators = $id("civil-indicator") as HTMLDivElement;
+    const civilStatusRadios = $$(
+      'input[name="civil_status"]',
+    ) as NodeListOf<HTMLInputElement>;
+
+    const form = $id("form-brother") as HTMLFormElement;
+
+    function updateCivilIndicator() {
+      if (!civilStatusRadios) return;
+      const radios = Array.from(civilStatusRadios);
+      const activeIndex = radios.findIndex((radio) => radio.checked);
+      if (activeIndex !== -1) {
+        civilIndicators.style.transform = `translateX(${activeIndex * 100}%)`;
+      }
+    }
+    civilStatusRadios.forEach((radio) => {
+      radio.addEventListener("change", () => {
+        updateCivilIndicator();
+      });
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      console.log(data);
+    });
+
+    updateCivilIndicator();
+  });
+</script>

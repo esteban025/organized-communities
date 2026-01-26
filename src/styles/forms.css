@@ -1,5 +1,4 @@
 .design-form {
-
   & fieldset {
     border: 2px solid var(--color-neutral-300);
     border-radius: .875rem;
@@ -22,7 +21,8 @@
     font-weight: 500;
   }
 
-  & input {
+  & input,
+  & select {
     border: 2px solid var(--color-neutral-300);
     border-radius: 33rem;
     padding: .5rem 1rem;
@@ -34,6 +34,11 @@
       border-color: var(--color-neutral-500);
       background-color: var(--color-neutral-100);
       box-shadow: 0 0 0 2px var(--color-neutral-200);
+    }
+
+    &::placeholder {
+      color: var(--color-neutral-400);
+      font-weight: 200;
     }
   }
 
@@ -49,11 +54,120 @@
     color: var(--color-success-500);
   }
 }
-
-
 .content-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-top: 1.25rem;
 }
+
+  /* Estilos para select */
+  .select-input {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: capitalize;
+  }
+
+  .select-input.no-rounded {
+    border-radius: 1rem;
+  }
+
+  .select-input::picker-icon {
+    display: none;
+  }
+
+  .select-input:hover {
+    border-color: #9ca3af;
+  }
+
+  .select-input:focus {
+    outline: none;
+    border-color: #6b7280;
+    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
+  }
+
+  .options-select {
+    text-transform: capitalize;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: #374151;
+    background-color: color-mix(
+      in oklab,
+      var(--color-gray-100),
+      transparent 60%
+    );
+    border-radius: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .options-select:hover {
+    background-color: var(--color-gray-100);
+  }
+
+  /* Opción deshabilitada (placeholder) */
+  .options-select:disabled,
+  option[disabled] {
+    color: #9ca3af;
+    font-style: italic;
+    background-color: #f9fafb;
+    cursor: not-allowed;
+  }
+
+  ::picker(select) {
+    appearance: base-select;
+    padding: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    background-color: #ffffff;
+  }
+
+  /* select - no eliminar esta instruccion */
+  .select-input,
+  ::picker(select) {
+    appearance: base-select;
+  }
+
+  .icon-select {
+    /* absolute top-1/2 right-4 transform -rotate-90 -translate-y-1/2 text-text-muted icon-select */
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%) rotate(-90deg);
+    color: var(--color-text-muted);
+    pointer-events: none;
+    transition: all 300ms ease;
+  }
+  .select-input:focus ~ .icon-select {
+    transform: translateY(-50%) rotate(90deg);
+  }
+
+  /* === FORM BROTHER - SELECCIONAR COMUNIDAD EN LA QUE ES CATEQUISTA === */
+
+  /* se debe aplicar solamente al input en checked */
+  .comm-selected:has(input:checked) {
+    background-color: var(--color-neutral-300);
+
+    & span {
+      font-weight: 600;
+    }
+    &:hover {
+      background-color: var(--color-neutral-300);
+    }
+  }
+
