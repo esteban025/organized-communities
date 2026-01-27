@@ -29,7 +29,7 @@
     font-family: 'Inter Variable', sans-serif;
     font-size: 1rem;
 
-    &:focus {
+    &[placeholder]:not(:placeholder-shown), &:focus {      
       outline: none;
       border-color: var(--color-neutral-500);
       background-color: var(--color-neutral-100);
@@ -42,13 +42,7 @@
     }
   }
 
-  &:has(input:valid) input {
-    outline: none;
-    border-color: var(--color-neutral-500);
-    background-color: var(--color-neutral-100);
-    box-shadow: 0 0 0 2px var(--color-neutral-200);
-  }
-
+  /* input search */
   &:has(input:focus) svg,
   &:has(input:valid) svg{
     color: var(--color-success-500);
@@ -160,7 +154,8 @@
   /* === FORM BROTHER - SELECCIONAR COMUNIDAD EN LA QUE ES CATEQUISTA === */
 
   /* se debe aplicar solamente al input en checked */
-  .comm-selected:has(input:checked) {
+  .comm-selected:has(input:checked),
+  .role-selected:has(input:checked) {
     background-color: var(--color-neutral-300);
 
     & span {

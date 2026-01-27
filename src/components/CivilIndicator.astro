@@ -1,0 +1,39 @@
+<div
+  id="civil-indicator"
+  class="absolute bg-white rounded-full border border-neutral-300 inset-0 w-1/3 h-full shadow-md transition-all duration-300 pointer-events-none civil-indicator"
+>
+</div>
+<script>
+  import { $$, $id, $ } from "@/utils/getElements";
+
+  document.addEventListener("astro:page-load", () => {
+    const civilIndicators = $id("civil-indicator") as HTMLDivElement;
+    const civilStatusRadios = $$(
+      'input[name="civil-status"]',
+    ) as NodeListOf<HTMLInputElement>;
+    const containerMarried = $(".container-info-married") as HTMLDivElement;
+    const containerSingle = $(".container-info-single") as HTMLDivElement;
+    const inputsMarried = containerMarried.querySelectorAll(".input-married");
+    const inputsSingle = containerSingle.querySelectorAll(".input-single");
+
+    // console.log(containerMarried, containerSingle);
+
+    function updateCivilIndicator() {
+      if (!civilStatusRadios) return;
+      const radios = Array.from(civilStatusRadios);
+      const activeIndex = radios.findIndex((radio) => radio.checked);
+      if (activeIndex !== -1) {
+        civilIndicators.style.transform = `translateX(${activeIndex * 100}%)`;
+      }
+    }
+
+    civilStatusRadios.forEach((radio) => {
+      radio.addEventListener("change", () => {
+        updateCivilIndicator();
+      });
+    });
+
+    (window as any).updateCivilIndicator = updateCivilIndicator;
+    updateCivilIndicator();
+  });
+</script>

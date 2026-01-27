@@ -1,0 +1,114 @@
+---
+const classContent =
+  "bg-neutral-100 p-2 px-5 rounded-full hover:bg-neutral-200 transition-colors relative role-selected";
+const classInput = "absolute inset-0 opacity-0 cursor-pointer";
+---
+
+<div class="grid grid-cols-2 gap-2">
+  <!-- principales no varios -->
+  <div class:list={["", classContent]}>
+    <label class="">
+      <input
+        id="role-none"
+        type="radio"
+        name="roles-principals"
+        value=""
+        class:list={["", classInput]}
+        checked
+      />
+      <span class="capitalize">Ninguno</span>
+    </label>
+  </div>
+  <div class:list={["", classContent]}>
+    <label class="">
+      <input
+        type="radio"
+        name="roles-principals"
+        value="responsable"
+        class:list={["", classInput]}
+      />
+      <span>Responsable</span>
+    </label>
+  </div>
+  <div class:list={["", classContent]}>
+    <label class="">
+      <input
+        type="radio"
+        name="roles-principals"
+        value="corresponsable"
+        class:list={["", classInput]}
+      />
+      <span>Corresponsable</span>
+    </label>
+  </div>
+
+  <!-- secundarios varios -->
+  <div class:list={["", classContent]}>
+    <label class="">
+      <input
+        type="checkbox"
+        name="roles-support"
+        value="ostiario"
+        class:list={["", classInput]}
+      />
+      <span>Ostiario</span>
+    </label>
+  </div>
+  <div class:list={["", classContent]}>
+    <label class="">
+      <input
+        type="checkbox"
+        name="roles-support"
+        value="didascada"
+        class:list={["", classInput]}
+      />
+      <span>Didascada</span>
+    </label>
+  </div>
+  <div class:list={["", classContent]}>
+    <label class="">
+      <input
+        type="checkbox"
+        name="roles-support"
+        value="catequista"
+        class:list={["", classInput]}
+      />
+      <span>Catequista</span>
+    </label>
+  </div>
+</div>
+
+<script>
+  // role-none cumplira la funcion de resetear todos los inputs
+  import { $$, $id } from "@/utils/getElements";
+  document.addEventListener("astro:page-load", () => {
+    const resetChecks = $id("role-none") as HTMLInputElement;
+    const roleCheckboxes = $$(
+      'input[name="roles-support"]',
+    ) as NodeListOf<HTMLInputElement>;
+    const roleRadios = $$(
+      'input[name="roles-principals"]',
+    ) as NodeListOf<HTMLInputElement>;
+
+    resetChecks.addEventListener("change", () => {
+      if (resetChecks.checked) {
+        roleCheckboxes.forEach((checkbox) => {
+          checkbox.checked = false;
+        });
+        roleRadios.forEach((radio) => {
+          if (radio !== resetChecks) {
+            radio.checked = false;
+          }
+        });
+      }
+    });
+
+    roleCheckboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked) {
+          resetChecks.checked = false;
+        }
+      });
+    });
+  });
+</script>

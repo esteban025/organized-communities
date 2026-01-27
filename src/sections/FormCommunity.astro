@@ -9,7 +9,7 @@ interface Props {
 const { id, name } = Astro.props;
 ---
 
-<section class="card-section" transition:name="section-form">
+<section class="card-section h-min" transition:name="section-form">
   <form action={actions.postCommunity} class="design-form" id="form-community">
     <fieldset class="flex flex-col">
       <legend>Nueva comunidad</legend>
@@ -59,7 +59,7 @@ const { id, name } = Astro.props;
   import { $id } from "@/utils/getElements";
   import { actions } from "astro:actions";
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("astro:page-load", () => {
     const form = $id("form-community") as HTMLFormElement;
 
     function editCommunity(data: Community) {

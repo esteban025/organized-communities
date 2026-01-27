@@ -19,6 +19,16 @@ main.main-grid {
   grid-template-columns: 1.3fr 3fr;
   gap: 1.5rem;
 }
+main.main-grid-in-brother {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+
+  grid-template-areas: 
+    "form leaders"
+    "form alls"
+  ;
+}
 
 .value, .title {
   font-family: 'Inter Variable', sans-serif;
@@ -30,5 +40,5 @@ main.main-grid {
   border-radius: 1rem;
   padding: 1rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  height: min-content;
+  /* height: min-content; */
 }

@@ -2,6 +2,8 @@
 import Layout from "@/layouts/Layout.astro";
 import HeaderPage from "@/sections/HeaderPage.astro";
 import FormBrother from "@/sections/FormBrother.astro";
+import { ViewBrothers } from "@/components/react/ViewBrothers";
+import { ViewLeadersCommunity } from "@/components/react/ViewLeadersCommunity";
 
 const { id } = Astro.params;
 ---
@@ -12,13 +14,25 @@ const { id } = Astro.params;
 >
   <div class="flex flex-col gap-6">
     <HeaderPage />
-    <main class="main-grid">
-      <FormBrother />
-      <section class="card-section" transition:name="section-view">
+    <main class="main-grid-in-brother">
+      <FormBrother communityId={Number(id)} />
+      <section
+        transition:name="section-view"
+        class="card-section h-full"
+        style="grid-area: leaders;"
+      >
         <header>
-          <h2 class="text-2xl font-semibold mb-4">Parroquias</h2>
+          <h2 class="text-2xl font-semibold mb-4">
+            Grupo de responsables y catequistas
+          </h2>
         </header>
-        <!-- <ViewParishes client:load /> -->
+        <ViewLeadersCommunity communityId={Number(id)} client:load />
+      </section>
+      <section class="card-section" style="grid-area: alls;">
+        <header>
+          <h2 class="text-2xl font-semibold mb-4">Hermanos de comunidad</h2>
+        </header>
+        <ViewBrothers communityId={Number(id)} client:load />
       </section>
     </main>
   </div>

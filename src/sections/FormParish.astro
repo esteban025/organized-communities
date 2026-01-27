@@ -2,7 +2,7 @@
 import { actions } from "astro:actions";
 ---
 
-<section class="card-section" transition:name="section-form">
+<section class="card-section h-min" transition:name="section-form">
   <form id="form-parish" class="design-form" action={actions.postParish}>
     <fieldset>
       <legend>Nueva parroquia</legend>
@@ -56,7 +56,7 @@ import { actions } from "astro:actions";
   import { showNotification } from "@/scripts/notification";
   import { warningMessage } from "@/scripts/warning-message";
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("astro:page-load", () => {
     const formParish = $id("form-parish") as HTMLFormElement;
 
     // funcion para editar parroquia
