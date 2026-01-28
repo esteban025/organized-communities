@@ -7,7 +7,7 @@ import { FilterParish } from "./FilterParish"
 
 export const ViewParishes = () => {
   const [parishes, setParishes] = useState<ParishWithCounts[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | undefined>(undefined)
   const [searchTerm, setSearchTerm] = useState("")
 
@@ -48,17 +48,17 @@ export const ViewParishes = () => {
 
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 h-full">
       <FilterParish
         value={searchTerm}
         onChange={setSearchTerm}
         onReset={() => setSearchTerm("")}
       />
       {loading && (
-        <p className="text-neutral-600 flex items-center gap-2">
+        <div className="message-card loading flex-1">
           <span>Cargando parroquias...</span>
           <RefreshIcon className="animate-spin size-4 block" />
-        </p>
+        </div>
       )}
       {error && <p className="error">{error}</p>}
       {!loading && !error && (

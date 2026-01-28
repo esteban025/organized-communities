@@ -8,6 +8,10 @@
 /* Supports weights 100-900 */
 @import '@fontsource-variable/inter';
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Forum', system-ui;
   background-color: var(--color-neutral-50);
@@ -18,10 +22,13 @@ main.main-grid {
   display: grid;
   grid-template-columns: 1.3fr 3fr;
   gap: 1.5rem;
+  align-items: start;
+  /* height: 100%; */
 }
 main.main-grid-in-brother {
   display: grid;
   grid-template-columns: 1fr 2fr;
+  /* grid-template-columns: 4fr 2fr; */
   gap: 1.5rem;
 
   grid-template-areas: 
@@ -41,4 +48,69 @@ main.main-grid-in-brother {
   padding: 1rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   /* height: min-content; */
+  display: flex;
+  flex-direction: column;
+
+}
+
+.message-card {
+  min-height: 8rem;
+  background-color: var(--color-neutral-100);
+  border: 2px dashed var(--color-neutral-200);
+  border-radius: 0.75rem;
+  text-align: center;
+  color: var(--color-neutral-600);
+  font-size: 1.25rem;
+  font-weight: 600;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+
+  animation: entry-card 300ms ease-in-out;
+
+  /* transition: all 300ms ease-in-out; */
+}
+.message-card.loading {
+  background-color: var(--color-neutral-50);
+  border: 2px dashed var(--color-neutral-200);
+}
+
+/* animcion de entrada */
+.animate-entry {
+  animation: entryAnimation 300ms ease forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.animate-entry-table {
+  animation: entryAnimationTable 500ms ease forwards;
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+@keyframes entryAnimation {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes entryAnimationTable {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes entry-card {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

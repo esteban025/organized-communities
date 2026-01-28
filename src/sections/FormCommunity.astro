@@ -11,27 +11,28 @@ const { id, name } = Astro.props;
 
 <section class="card-section h-min" transition:name="section-form">
   <form action={actions.postCommunity} class="design-form" id="form-community">
-    <fieldset class="flex flex-col">
+    <fieldset class="flex flex-col gap-4">
       <legend>Nueva comunidad</legend>
-      <span class="text-sm text-neutral-500 leading-4 text-center w-full mb-4"
-        >Recuerda que esta comunidad será parte de "{name}"</span
+      <span
+        class="text-sm text-neutral-500 leading-4 text-center text-balance w-11/12 mx-auto"
+        >Esta comunidad será parte de "{name}"</span
       >
       <input type="hidden" name="id-comm" id="id-comm" />
 
       <input type="hidden" name="parish-id" id="parish-id" value={id} />
 
       <div class="content-input">
-        <label for="number-comm">Número de comunidad</label>
         <input
           type="number"
           id="number-comm"
           name="number-comm"
           required
           min="1"
+          placeholder=" "
         />
+        <label for="number-comm" class="label-text">Número de comunidad</label>
       </div>
       <div class="content-input">
-        <label for="level-paso">Paso actual</label>
         <input
           type="text"
           id="level-paso"
@@ -39,7 +40,10 @@ const { id, name } = Astro.props;
           required
           autocomplete="off"
           list="levels"
+          placeholder=" "
         />
+        <label for="level-paso" class="label-text">Paso actual</label>
+
         <datalist id="levels">
           {LEVELS.map((level) => <option value={level.name} />)}
         </datalist>

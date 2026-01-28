@@ -112,7 +112,7 @@ export const IfCatechistInput = () => {
                     }
                   />
                   <span>
-                    {community.number_community} - {community.responsables}
+                    {community.number_community} - {community.responsable}
                   </span>
                 </label>
               </div>
@@ -124,14 +124,20 @@ export const IfCatechistInput = () => {
         {selectedCommunities.length > 0 && (
           <fieldset className="mt-2">
             <legend>Comunidades Selecciondas</legend>
-            <ul>
+            <ul className="space-y-1">
               {selectedCommunities.map((community) => {
                 const parishName = parishes.find(
                   (p) => p.id === community.parish_id,
                 )?.name
                 return (
                   <li key={community.id}>
-                    Comunidad {community.number_community} - {community.responsables}
+                    {/* input oculto para que el formulario principal reciba las IDs */}
+                    <input
+                      type="hidden"
+                      name="catechist-community-ids"
+                      value={community.id}
+                    />
+                    Comunidad {community.number_community} - {community.responsable}
                     {parishName ? ` (${parishName})` : ""}
                   </li>
                 )

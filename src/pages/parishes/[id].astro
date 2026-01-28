@@ -11,15 +11,17 @@ let descriptionPage = "Gestión de comunidades";
 let infoParish = null;
 
 try {
-  const { data } = await Astro.callAction(actions.getParishById, {
+  const { data, error } = await Astro.callAction(actions.getParishById, {
     id: Number(id),
   });
-
-  if (data?.data) {
-    titlePage = `Comunidades de la parroquia ${data.data.name}`;
-    descriptionPage = `Gestión de comunidades para la parroquia ${data.data.name} en la plataforma de comunidades.`;
-    infoParish = data.data;
+  if (error || !data.success) {
+    throw new Error(
+      error?.message || data?.message || "Error al obtener la parroquia",
+    );
   }
+  infoParish = data.data;
+  titlePage = `Comunidades de ${infoParish?.name} | Plataforma`;
+  descriptionPage = `Gestión de comunidades de la parroquia ${infoParish?.name}`;
 } catch (error) {
   console.error("Error fetching parish data:", error);
   titlePage = "Error al cargar parroquia";
@@ -56,7 +58,7 @@ try {
           transition:name="section-view"
         >
           <header>
-            <h2 class="text-2xl font-semibold mb-4">Error</h2>
+            <h2 class="text-center text-2xl font-semibold mb-4">Error</h2>
           </header>
           <div class="text-red-500 flex flex-col gap-1 items-center text-lg">
             <p>

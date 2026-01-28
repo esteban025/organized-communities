@@ -6,6 +6,8 @@ export interface Community {
 }
 
 export interface CommunityWithBrotherCount extends Community, Omit<Community, "parish_id"> {
-  count_brothers: number;
-  responsables: string | null
+  count_persons: number;
+  count_marriages: number;
+  count_singles: number;
+  responsable: string | null;
 }

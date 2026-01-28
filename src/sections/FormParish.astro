@@ -4,40 +4,57 @@ import { actions } from "astro:actions";
 
 <section class="card-section h-min" transition:name="section-form">
   <form id="form-parish" class="design-form" action={actions.postParish}>
-    <fieldset>
+    <fieldset class="space-y-4">
       <legend>Nueva parroquia</legend>
       <input type="hidden" name="id-parish" id="id-parish" />
       <div class="content-input">
-        <label for="name-parish">Nombre</label>
         <input
           type="text"
           name="name-parish"
           id="name-parish"
           autocomplete="off"
+          placeholder=" "
           required
         />
+        <label for="name-parish" class="label-text">Nombre</label>
       </div>
 
       <div class="content-input">
-        <label for="tag-parish">Tag</label>
+        <!-- automaticamente en mayusculas -->
         <input
           type="text"
           name="tag-parish"
           id="tag-parish"
           autocomplete="off"
           required
+          style="text-transform: uppercase;"
+          placeholder=" "
         />
+        <label for="tag-parish" class="label-text">Tag</label>
       </div>
 
       <div class="content-input">
-        <label for="aka-parish">Aka</label>
         <input
           type="text"
           name="aka-parish"
           id="aka-parish"
           autocomplete="off"
           required
+          placeholder=" "
         />
+        <label for="aka-parish" class="label-text">Aka</label>
+      </div>
+
+      <div class="content-input">
+        <input
+          type="text"
+          name="locality-parish"
+          id="locality-parish"
+          autocomplete="off"
+          minlength="2"
+          placeholder=" "
+        />
+        <label for="locality-parish" class="label-text">Localidad</label>
       </div>
 
       <div class="content-actions">
@@ -65,11 +82,13 @@ import { actions } from "astro:actions";
       name: string;
       tag: string;
       aka: string;
+      locality: string;
     }) {
       ($id("id-parish") as HTMLInputElement).value = data.id.toString();
       ($id("name-parish") as HTMLInputElement).value = data.name;
       ($id("tag-parish") as HTMLInputElement).value = data.tag;
       ($id("aka-parish") as HTMLInputElement).value = data.aka;
+      ($id("locality-parish") as HTMLInputElement).value = data.locality;
     }
 
     formParish.addEventListener("submit", async (e) => {
@@ -80,6 +99,7 @@ import { actions } from "astro:actions";
       const nameParish = formData.get("name-parish") as string;
       const tagParish = formData.get("tag-parish") as string;
       const akaParish = formData.get("aka-parish") as string;
+      const localityParish = formData.get("locality-parish") as string;
 
       const info = idParish
         ? {
@@ -87,13 +107,16 @@ import { actions } from "astro:actions";
             name: nameParish,
             tag: tagParish,
             aka: akaParish,
+            locality: localityParish ? localityParish : null,
           }
         : {
             name: nameParish,
             tag: tagParish,
             aka: akaParish,
+            locality: localityParish ? localityParish : null,
           };
 
+      console.log("Submitting parish info:", info);
       try {
         const { data, error } = await actions.postParish(info);
         if (data?.success) {

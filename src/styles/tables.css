@@ -61,6 +61,15 @@
   }
 }
 
+
+.tag-rol {
+  border: 1px solid var(--color-neutral-400);
+  color: var(--color-neutral-500);
+  text-transform: capitalize;
+  padding: .1rem .75rem;
+  border-radius: 999px;
+}
+
 table .min {
   width: 1%;
   white-space: nowrap;

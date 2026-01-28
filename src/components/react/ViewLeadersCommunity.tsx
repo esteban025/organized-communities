@@ -5,7 +5,6 @@ import type { BrotherwithRoles } from "@/types/brothers";
 export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) => {
 
   const [groupLeaders, setGroupLeaders] = useState<BrotherwithRoles[]>([]);
-  const [groupCatechists, setGroupCatechists] = useState<BrotherwithRoles[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,26 +28,7 @@ export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) =
     fetchGroupLeaders();
   }, [communityId]);
 
-  useEffect(() => {
-    const fetchGroupCatechists = async () => {
-      try {
-        const { data, error } = await actions.getGroupCatechists({ communityId });
-        if (error || !data?.success) {
-          setError(data?.message || error?.message || "Failed to fetch group catechists.");
-          setIsLoading(false);
-          return;
-        }
-        setGroupCatechists(data?.data);
-        setIsLoading(false);
-
-      } catch (err) {
-        setError("An unexpected error occurred.");
-        setIsLoading(false);
-      }
-    }
-    fetchGroupCatechists();
-  }, [communityId]);
-
+  console.log("Group Leaders:", groupLeaders);
 
   return (
     <div className="ss">
@@ -60,13 +40,6 @@ export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) =
             {groupLeaders.map((leader) => (
               <li key={leader.id}>
                 {leader.names} {leader.phone} - Roles: {leader.roles}
-              </li>
-            ))}
-          </ul>
-          <ul>
-            {groupCatechists.map((catechist) => (
-              <li key={catechist.id}>
-                {catechist.names} {catechist.phone} - Roles: {catechist.roles}
               </li>
             ))}
           </ul>

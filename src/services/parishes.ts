@@ -3,6 +3,16 @@ import type { Parish, ParishWithCounts } from "@/types/parishes";
 
 
 export const getParishByIdFromDB = async (id: number) => {
+  // checkeamos si la parroquia existe
+  const checkQuery = `SELECT * FROM parishes WHERE id = ?`;
+  const [checkRows] = await db.query(checkQuery, [id]);
+  const existingParishes = checkRows as Parish[];
+  if (existingParishes.length === 0) {
+    return {
+      success: false,
+      message: "No existe una parroquia con el ID proporcionado",
+    }
+  }
   const query = `
     SELECT id, name, tag, aka
     FROM parishes
@@ -24,10 +34,11 @@ export const getParishesFromDB = async () => {
       p.name,
       p.tag,
       p.aka,
+      p.locality,
       COUNT(c.id) as count_communities
     FROM parishes p
     LEFT JOIN communities c ON p.id = c.parish_id
-    GROUP BY p.id, p.name, p.tag, p.aka
+    GROUP BY p.id, p.name, p.tag, p.aka, p.locality
     ORDER BY p.id ASC;
   `;
   const [rows] = await db.query(query);
@@ -40,7 +51,7 @@ export const getParishesFromDB = async () => {
 }
 
 export const createParishInDB = async (data: Omit<Parish, "id">) => {
-  const { name, tag, aka } = data
+  const { name, tag, aka, locality } = data
 
   // verificar que no exista una parroquia con el mismo nombre, tag o aka
   const checkQuery = `SELECT * FROM parishes WHERE name = ? OR tag = ? OR aka = ?`;
@@ -54,8 +65,8 @@ export const createParishInDB = async (data: Omit<Parish, "id">) => {
   }
 
   // si no existe, creamos
-  const query = `INSERT INTO parishes (name, tag, aka) VALUES (?, ?, ?)`;
-  await db.query(query, [name, tag, aka]);
+  const query = `INSERT INTO parishes (name, tag, aka, locality) VALUES (?, ?, ?, ?)`;
+  await db.query(query, [name, tag, aka, locality]);
   return {
     success: true,
     message: "Parroquia creada correctamente",
@@ -64,7 +75,7 @@ export const createParishInDB = async (data: Omit<Parish, "id">) => {
 }
 
 export const updateParishInDB = async (data: Parish) => {
-  const { id, name, tag, aka } = data
+  const { id, name, tag, aka, locality } = data
 
   // verificamos que no exista otra parroquia con el mismo nombre, tag o aka
   const checkQuery = `SELECT * FROM parishes WHERE (name = ? OR tag = ? OR aka = ?) AND id != ?`;
@@ -78,8 +89,8 @@ export const updateParishInDB = async (data: Parish) => {
     }
   }
 
-  const query = `UPDATE parishes SET name = ?, tag = ?, aka = ? WHERE id = ?`;
-  await db.query(query, [name, tag, aka, id]);
+  const query = `UPDATE parishes SET name = ?, tag = ?, aka = ?, locality = ? WHERE id = ?`;
+  await db.query(query, [name, tag, aka, locality, id]);
   return {
     success: true,
     message: "Parroquia actualizada correctamente",

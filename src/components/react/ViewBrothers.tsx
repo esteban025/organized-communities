@@ -1,11 +1,12 @@
-import type { BrotherwithRoles } from "@/types/brothers";
+import type { BrotherwithRoles, BrotherwithRolesOutDB } from "@/types/brothers";
 import { actions } from "astro:actions";
 import { useEffect, useState } from "react";
 import { TableBrothers } from "./TableBrothers";
 import { FilterBrother } from "./FilterBrother";
+import { RefreshIcon } from "@/icons/iconsReact";
 
 export const ViewBrothers = ({ communityId }: { communityId: number }) => {
-  const [brothers, setBrothers] = useState<BrotherwithRoles[]>([]);
+  const [brothers, setBrothers] = useState<BrotherwithRolesOutDB[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,17 +36,25 @@ export const ViewBrothers = ({ communityId }: { communityId: number }) => {
       window.removeEventListener("brothers:updated", handleBrothersUpdated);
     };
   }, [communityId]);
-  console.log("Fetched brothers:", brothers);
   return (
-    <div>
+    <div className="h-full flex flex-col gap-4">
       <FilterBrother
         value={""}
         onChange={() => { }}
         onReset={() => { }}
       />
-      {loading && <p>Cargando hermanos...</p>}
+      {loading && (
+        <div className="message-card loading h-full">
+          <span>Cargando hermanos...</span>
+          <RefreshIcon className="animate-spin size-4 block" />
+        </div>
+      )}
       {error && <p className="text-red-500">Error: {error}</p>}
-      {!loading && !error && brothers.length === 0 && <p>No hay hermanos en esta comunidad.</p>}
+      {!loading && !error && brothers.length === 0 && (
+        <div className="message-card h-full">
+          <span>No hay hermanos registrados en esta comunidad.</span>
+        </div>
+      )}
       {!loading && !error && brothers.length > 0 && (
         <TableBrothers brothers={brothers} />
       )}

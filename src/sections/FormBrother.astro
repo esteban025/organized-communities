@@ -2,26 +2,31 @@
 import { IfCatechistInput } from "@/components/react/IfCatechistInput";
 import CivilIndicator from "@/components/CivilIndicator.astro";
 import RolesBrotherChecks from "@/components/RolesBrotherChecks.astro";
+import { actions } from "astro:actions";
 const { communityId } = Astro.props;
 ---
 
 <section
-  class="card-section h-min"
+  class="card-section h-min sticky top-6"
   transition:name="section-form"
   style="grid-area: form;"
 >
-  <form action="" id="form-brother" class="design-form space-y-2">
+  <form
+    action={actions.postBrother}
+    id="form-brother"
+    class="design-form space-y-4"
+  >
     <input type="hidden" name="community-id" value={communityId} />
+
     <fieldset class="space-y-2">
       <legend>Datos personales</legend>
       <!-- estado civil -->
-      <div class="container-civil-status">
-        <h3 class="mb-1">Estado civil:</h3>
-        <div class="wrapper">
+      <div class="container-civil-status mb-5">
+        <div class="wrapper" id="wrapper-civil-status">
           <div
             class="ratios-row flex items-center rounded-full bg-neutral-100 border-2 border-neutral-300 relative"
           >
-            <div class="ss">
+            <div class="content-c-s">
               <input
                 type="radio"
                 name="civil-status"
@@ -34,7 +39,7 @@ const { communityId } = Astro.props;
                 >Matrimonio</label
               >
             </div>
-            <div class="ss">
+            <div class="content-c-s">
               <input
                 type="radio"
                 name="civil-status"
@@ -46,7 +51,7 @@ const { communityId } = Astro.props;
               />
               <label for="ratio-soltero" class="radio-label">Soltero</label>
             </div>
-            <div class="ss">
+            <div class="content-c-s">
               <input
                 type="radio"
                 name="civil-status"
@@ -67,75 +72,78 @@ const { communityId } = Astro.props;
       <!-- nombres -->
       <!-- si es matrimonio renderizamos uno -->
       <div class="container-info-married mb-1 animate-entry">
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-4">
           <div class="content-data-husband flex items-center gap-2">
             <div class="content-input">
-              <label for="names-husband">Nombres: (Esposo)</label>
               <input
                 type="text"
                 name="names-husband"
                 id="names-husband"
                 autocomplete="off"
-                placeholder="Alfredo Bermeo"
+                placeholder=" "
               />
+              <label for="names-husband" class="label-text"
+                >Nombres - Esposo</label
+              >
             </div>
             <div class="content-input">
-              <label for="phone-husband">Teléfono:</label>
               <input
                 type="tel"
                 name="phone-husband"
                 id="phone-husband"
                 autocomplete="off"
-                placeholder="099..."
+                placeholder=" "
               />
+              <label for="phone-husband" class="label-text">Celular</label>
             </div>
           </div>
           <div class="content-data-wife flex items-center gap-2">
             <div class="content-input">
-              <label for="names-wife">Nombres: (Esposa)</label>
               <input
                 type="text"
                 name="names-wife"
                 id="names-wife"
                 autocomplete="off"
-                placeholder="Marcela Barros"
+                placeholder=" "
               />
+              <label for="names-wife" class="label-text">Nombres - Esposa</label
+              >
             </div>
             <div class="content-input">
-              <label for="phone-wife">Teléfono:</label>
               <input
                 type="tel"
                 name="phone-wife"
                 id="phone-wife"
                 autocomplete="off"
-                placeholder="099..."
+                placeholder=" "
               />
+              <label for="phone-wife" class="label-text">Celular</label>
             </div>
           </div>
         </div>
       </div>
       <!-- si no es matrimonio renderizamos otro -->
       <div class="container-info-single mb-1 animate-entry">
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-4">
           <div class="content-input">
-            <label for="name-bro">Nombres:</label>
             <input
               type="text"
               name="name-bro"
               id="name-bro"
               autocomplete="off"
-              placeholder="Alfredo Bermeo"
+              placeholder=" "
             />
+            <label for="name-bro" class="label-text">Nombre Completo</label>
           </div>
           <div class="content-input">
-            <label for="phone-bro">Teléfono:</label>
             <input
               type="tel"
               name="phone-bro"
               id="phone-bro"
               autocomplete="off"
-              placeholder="099..."
+              placeholder=" "
             />
+            <label for="phone-bro" class="label-text">Celular</label>
           </div>
         </div>
       </div>
@@ -162,12 +170,12 @@ const { communityId } = Astro.props;
 </section>
 
 <style>
-  .ss {
+  .content-c-s {
     position: relative;
     z-index: 10;
     width: 100%;
 
-    & label {
+    & .radio-label {
       width: 100%;
       display: flex;
       justify-content: center;
@@ -181,7 +189,7 @@ const { communityId } = Astro.props;
       opacity: 0;
     }
 
-    &:has(input:checked) label {
+    &:has(input:checked) .radio-label {
       font-weight: 600;
     }
   }
@@ -216,29 +224,49 @@ const { communityId } = Astro.props;
       display: block;
     }
   }
-
-  /* animcion de entrada */
-  .animate-entry {
-    animation: entryAnimation 300ms ease forwards;
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  @keyframes entryAnimation {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 </style>
 
 <script>
   import { showNotification } from "@/scripts/notification";
-  import { $$, $id } from "@/utils/getElements";
+  import { warningMessage } from "@/scripts/warning-message";
+  import { $id } from "@/utils/getElements";
   import { actions } from "astro:actions";
 
   document.addEventListener("astro:page-load", () => {
     const form = $id("form-brother") as HTMLFormElement;
+
+    async function handleDeleteBrother(id: number) {
+      const confirm = await warningMessage(
+        "Eliminar Hermano",
+        "¿Estás seguro de que deseas eliminar este hermano? Esta acción no se puede deshacer.",
+      );
+
+      if (!confirm) return;
+
+      try {
+        const { data, error } = await actions.deleteBrother({ id });
+        if (error || !data?.success) {
+          showNotification(
+            data?.message || error?.message || "Error al eliminar al hermano",
+            "error",
+          );
+          return;
+        }
+        showNotification(data.message, "success");
+        window.dispatchEvent(new Event("brothers:updated"));
+      } catch (err) {
+        console.error("Error eliminando hermano:", err);
+        showNotification("Error al eliminar al hermano", "error");
+      }
+    }
+
+    async function handleEditBrother() {
+      // lógica para editar hermano
+      showNotification(
+        "Funcionalidad de editar hermano no implementada aún",
+        "info",
+      );
+    }
 
     // form submit
     form.addEventListener("submit", async (e) => {
@@ -246,59 +274,110 @@ const { communityId } = Astro.props;
 
       const formData = new FormData(form);
       const civilStatus = formData.get("civil-status") as string;
+      const communityId = formData.get("community-id") as string;
 
-      if (civilStatus === "matrimonio") {
-        // logica para cuando trabaje con matrimonios
-        showNotification("Registro de matrimonios aún no implementado", "info");
+      const rolesPrincipales = formData.get("roles-principals") as string;
+      const rolesSupport = formData
+        .getAll("roles-support")
+        .filter(Boolean) as string[];
+      const roles: string[] = [];
+
+      if (rolesPrincipales && rolesPrincipales !== "") {
+        roles.push(rolesPrincipales);
+      }
+      rolesSupport.forEach((role) => roles.push(role));
+
+      const catechistCommunities = formData
+        .getAll("catechist-community-ids")
+        .map((id) => Number(id));
+
+      // verificar que si selecciona que es catequista y no ingresa comunidades devolvemos mensaje de que se debe ingresar al menos una
+      if (roles.includes("catequista") && catechistCommunities.length === 0) {
+        showNotification(
+          "Debes ingresar al menos una comunidad de la que eres catequista",
+          "error",
+        );
         return;
       }
 
-      // logica para solteros/as
-      const names = formData.get("name-bro") as string;
-      const phone = formData.get("phone-bro") as string;
-      const communityId = formData.get("community-id") as string;
-
-      const rolesPrinciapeles = formData.get("roles-principals");
-      const rolesSupport = formData.getAll("roles-support").filter(Boolean);
-      const roles: string[] = [];
-
-      if (rolesPrinciapeles) {
-        roles.push(rolesPrinciapeles as string);
-      }
-      rolesSupport.forEach((role) => roles.push(role as string));
-
-      const infoPost: {
-        names: string;
-        // es enum
-        civil_status: "matrimonio" | "soltero" | "soltera";
-        community_id: number;
-        phone: string | null;
-        roles: string[];
-      } = {
-        names,
-        civil_status: civilStatus as "matrimonio" | "soltero" | "soltera",
-        community_id: Number(communityId),
-        phone: phone ? phone : null,
-        roles,
-      };
-
-      // aqui hacemos el post al action
       try {
-        const { data, error } = await actions.postBrother({ ...infoPost });
-        if (error || !data.success) {
+        if (civilStatus === "matrimonio") {
+          const husbandNames = formData.get("names-husband") as string;
+          const husbandPhone = formData.get("phone-husband") as string;
+          const wifeNames = formData.get("names-wife") as string;
+          const wifePhone = formData.get("phone-wife") as string;
+
+          const payload = {
+            kind: "marriage" as const,
+            husband: {
+              names: husbandNames,
+              phone: husbandPhone || null,
+            },
+            wife: {
+              names: wifeNames,
+              phone: wifePhone || null,
+            },
+            community_id: Number(communityId),
+            roles,
+            catechist_communities: catechistCommunities,
+          };
+
+          const { data, error } = await actions.postBrother(payload);
+
+          if (error || !data?.success) {
+            showNotification(
+              data?.message ||
+                error?.message ||
+                "Error al registrar matrimonio",
+              "error",
+            );
+            return;
+          }
+
+          showNotification(data.message, "success");
+          form.reset();
+          (window as any).updateCivilIndicator();
+          window.dispatchEvent(new Event("brothers:updated"));
+          return;
+        }
+
+        // lógica para hermanos solteros/as
+        const names = formData.get("name-bro") as string;
+        const phone = formData.get("phone-bro") as string;
+
+        const payloadBase = {
+          names,
+          civil_status: civilStatus as "soltero" | "soltera",
+          community_id: Number(communityId),
+          phone: phone || null,
+          roles,
+          catechist_communities: catechistCommunities,
+        };
+
+        const { data, error } = await actions.postBrother({
+          kind: "single" as const,
+          ...payloadBase,
+        });
+
+        if (error || !data?.success) {
           showNotification(
-            data?.message || error?.message || "error en algo",
+            data?.message || error?.message || "Error al registrar hermano",
             "error",
           );
           return;
         }
+
         showNotification(data.message, "success");
         form.reset();
+        (window as any).updateCivilIndicator();
         window.dispatchEvent(new Event("brothers:updated"));
-      } catch (error) {
-        console.error("Error en la solicitud:", error);
+      } catch (err) {
+        console.error("Error en el envío del formulario de hermano:", err);
         showNotification("Error en la solicitud", "error");
       }
     });
+
+    (window as any).editBrother = handleEditBrother;
+    (window as any).deleteBrother = handleDeleteBrother;
   });
 </script>

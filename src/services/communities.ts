@@ -1,24 +1,54 @@
 import { db } from "@/lib/db"
 import type { Community, CommunityWithBrotherCount } from "@/types/communities"
 
+export const getComunityByIdFromDB = async (id: number) => {
+  const query = `
+    SELECT id, number_community, parish_id, level_paso
+    FROM communities
+    WHERE id = ?;
+  `
+  const [rows] = await db.query(query, [id])
+  const data = rows as Community[]
+  return {
+    success: true,
+    message: "Comunidad obtenida correctamente",
+    data: data[0]
+  }
+}
 export const getCommunitiesByParishIdFromDB = async (parishId: number) => {
+  // verificamos que id exista
+  const checkQuery = `SELECT id FROM parishes WHERE id = ?;`
+  const [checkRows] = await db.query(checkQuery, [parishId])
+  const existing = checkRows as any[]
+  if (existing.length === 0) {
+    return {
+      success: false,
+      message: "No existe una parroquia con el ID proporcionado",
+      data: []
+    }
+  }
   const query = `
     SELECT 
       c.id,
       c.number_community,
       c.level_paso,
-      COUNT(DISTINCT b.id) as count_brothers,
-      GROUP_CONCAT(
-        DISTINCT CASE 
-          WHEN br_roles.role = 'responsable' THEN b_resp.names 
-        END 
-        ORDER BY b_resp.id 
-        SEPARATOR ', '
-      ) as responsables
+      COUNT(DISTINCT p.id) as count_persons,
+      COUNT(DISTINCT m.id) as count_marriages,
+      COUNT(DISTINCT CASE 
+        WHEN m.id IS NULL THEN p.id 
+      END) as count_singles,
+      (
+        SELECT p_resp.names
+        FROM person_roles pr_resp
+        INNER JOIN persons p_resp ON pr_resp.person_id = p_resp.id
+        WHERE pr_resp.community_id = c.id 
+          AND pr_resp.role = 'responsable'
+        ORDER BY p_resp.id ASC
+        LIMIT 1
+      ) as responsable
     FROM communities c
-    LEFT JOIN brothers b ON b.community_id = c.id
-    LEFT JOIN brother_roles br_roles ON br_roles.community_id = c.id AND br_roles.role = 'responsable'
-    LEFT JOIN brothers b_resp ON b_resp.id = br_roles.brother_id
+    LEFT JOIN persons p ON p.community_id = c.id
+    LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id) AND m.community_id = c.id
     WHERE c.parish_id = ?
     GROUP BY c.id, c.number_community, c.level_paso
     ORDER BY c.number_community;
@@ -26,15 +56,10 @@ export const getCommunitiesByParishIdFromDB = async (parishId: number) => {
   const [rows] = await db.query(query, [parishId])
   const data = rows as CommunityWithBrotherCount[]
 
-  const formattedData = data.map((comm) => ({
-    ...comm,
-    responsables: comm.responsables ? comm.responsables.split(", ")[0] : null
-  }))
-
   return {
     success: true,
     message: "Comunidades obtenidas correctamente",
-    data: formattedData
+    data
   }
 }
 

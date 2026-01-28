@@ -32,7 +32,8 @@ export const postParish = defineAction({
     id: z.coerce.number().int().optional(),
     name: z.string().min(3).max(100),
     tag: z.string().min(2).max(20),
-    aka: z.string().min(3).max(100)
+    aka: z.string().min(3).max(100),
+    locality: z.string().nullable(),
   }),
   async handler(input) {
     // si el input contiene id, actualizamod

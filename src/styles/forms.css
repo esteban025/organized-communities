@@ -13,28 +13,26 @@
 }
 
 .content-input {
-  display: flex;
-  flex-direction: column;
-  gap: .25rem;
+  position: relative;
 
   & label {
     font-weight: 500;
+    color: var(--color-neutral-400);
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    transition: all 200ms ease;
+    pointer-events: none;
   }
 
   & input,
   & select {
     border: 2px solid var(--color-neutral-300);
-    border-radius: 33rem;
-    padding: .5rem 1rem;
-    font-family: 'Inter Variable', sans-serif;
+    border-radius: 999px;
+    padding: .45rem 1rem;
     font-size: 1rem;
-
-    &[placeholder]:not(:placeholder-shown), &:focus {      
-      outline: none;
-      border-color: var(--color-neutral-500);
-      background-color: var(--color-neutral-100);
-      box-shadow: 0 0 0 2px var(--color-neutral-200);
-    }
+    width: 100%;
 
     &::placeholder {
       color: var(--color-neutral-400);
@@ -48,11 +46,38 @@
     color: var(--color-success-500);
   }
 }
+
+input[placeholder]:not(:placeholder-shown),
+input:focus {      
+  outline: none;
+  border-color: var(--color-sky-600);
+
+  & + .label-text {
+    top: 0;
+    left: .75rem;
+    transform: translateY(-50%) scale(.95);
+    background-color: var(--color-white);
+    padding: 0 .25rem;
+    color: var(--color-sky-600);
+    font-weight: 600;
+  }
+}
+
+form:has(input[placeholder]:not(:placeholder-shown)) {
+  & .content-actions button {
+    pointer-events: auto;
+    opacity: 1;
+    cursor: pointer;
+  }
+}
+
+
+
+
 .content-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 1.25rem;
 }
 
   /* Estilos para select */
