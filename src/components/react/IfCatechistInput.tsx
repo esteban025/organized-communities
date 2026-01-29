@@ -23,6 +23,58 @@ export const IfCatechistInput = () => {
     fetchParishes()
   }, [])
 
+  // Escuchar cuando se edita un hermano para precargar comunidades catequistas
+  useEffect(() => {
+    const handleBrotherEdit = async (event: Event) => {
+      const custom = event as CustomEvent<{ catechistCommunityIds?: number[] }>
+      const ids = custom.detail?.catechistCommunityIds ?? []
+      if (!ids.length) return
+
+      try {
+        const loaded: CommunityWithBrotherCount[] = []
+
+        for (const id of ids) {
+          const { data, error } = await actions.getCommunityById({ id })
+          if (error || !data.success || !data.data) continue
+
+          const c = data.data as any
+          loaded.push({
+            id: c.id,
+            number_community: c.number_community,
+            parish_id: c.parish_id,
+            level_paso: c.level_paso,
+            count_persons: 0,
+            count_marriages: 0,
+            count_singles: 0,
+            responsable: null,
+          })
+        }
+
+        if (!loaded.length) return
+
+        setSelectedCommunities((prev) => {
+          const seen = new Set(prev.map((c) => c.id))
+          const merged = [...prev]
+          loaded.forEach((c) => {
+            if (!seen.has(c.id)) merged.push(c)
+          })
+          return merged
+        })
+
+        // Opcional: seleccionar la parroquia de la primera comunidad para facilitar la vista
+        setSelectedParishId((current) => {
+          if (current) return current
+          return loaded[0].parish_id
+        })
+      } catch (err) {
+        console.error("Error precargando comunidades de catequista:", err)
+      }
+    }
+
+    window.addEventListener("brother:edit", handleBrotherEdit)
+    return () => window.removeEventListener("brother:edit", handleBrotherEdit)
+  }, [])
+
   // recuperamos comunidades de la parroquia seleccionada
   useEffect(() => {
     if (!selectedParishId) return
@@ -98,9 +150,11 @@ export const IfCatechistInput = () => {
         {selectedParishId && communities.length > 0 && (
           <div className="mt-2 communities-view">
             {communities.map((community) => (
-              <div className="bg-neutral-100 p-2 px-5 rounded-full hover:bg-neutral-200 transition-colors relative comm-selected" key={community.id}>
-                <label className="">
+              <div key={community.id} className="bg-neutral-100 p-2 px-5 rounded-full hover:bg-neutral-200 transition-colors relative comm-selected">
+                <label className="" htmlFor={`community-${community.id}-ipt`}>
                   <input
+                    id={`community-${community.id}-ipt`}
+                    name={`community-${community.id}-ipt`}
                     type="checkbox"
                     className="absolute inset-0 opacity-0 cursor-pointer"
                     value={community.id}

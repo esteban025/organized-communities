@@ -9,6 +9,8 @@ export const ViewBrothers = ({ communityId }: { communityId: number }) => {
   const [brothers, setBrothers] = useState<BrotherwithRolesOutDB[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filterName, setFilterName] = useState("");
+  const [filterRoles, setFilterRoles] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchBrothers = async () => {
@@ -36,12 +38,32 @@ export const ViewBrothers = ({ communityId }: { communityId: number }) => {
       window.removeEventListener("brothers:updated", handleBrothersUpdated);
     };
   }, [communityId]);
+  const handleResetFilters = () => {
+    setFilterName("");
+    setFilterRoles([]);
+  };
+
+  const filteredBrothers = brothers.filter((brother) => {
+    const matchName =
+      filterName.trim() === "" ||
+      brother.names.toLowerCase().includes(filterName.toLowerCase());
+
+    const roles = brother.roles ?? [];
+    const matchRoles =
+      filterRoles.length === 0 ||
+      filterRoles.every((role) => roles.includes(role));
+
+    return matchName && matchRoles;
+  });
+
   return (
     <div className="h-full flex flex-col gap-4">
       <FilterBrother
-        value={""}
-        onChange={() => { }}
-        onReset={() => { }}
+        name={filterName}
+        onNameChange={setFilterName}
+        selectedRoles={filterRoles}
+        onRolesChange={setFilterRoles}
+        onReset={handleResetFilters}
       />
       {loading && (
         <div className="message-card loading h-full">
@@ -55,8 +77,13 @@ export const ViewBrothers = ({ communityId }: { communityId: number }) => {
           <span>No hay hermanos registrados en esta comunidad.</span>
         </div>
       )}
-      {!loading && !error && brothers.length > 0 && (
-        <TableBrothers brothers={brothers} />
+      {!loading && !error && brothers.length > 0 && filteredBrothers.length === 0 && (
+        <div className="message-card h-full">
+          <span>No hay hermanos que coincidan con los filtros.</span>
+        </div>
+      )}
+      {!loading && !error && filteredBrothers.length > 0 && (
+        <TableBrothers brothers={filteredBrothers} />
       )}
     </div>
   );

@@ -16,7 +16,14 @@ const { communityId } = Astro.props;
     id="form-brother"
     class="design-form space-y-4"
   >
-    <input type="hidden" name="community-id" value={communityId} />
+    <!-- servira para edicion de una persona -->
+    <input id="brother-id" type="hidden" name="brother-id" value="" />
+    <input
+      id="community-id"
+      type="hidden"
+      name="community-id"
+      value={communityId}
+    />
 
     <fieldset class="space-y-2">
       <legend>Datos personales</legend>
@@ -32,7 +39,7 @@ const { communityId } = Astro.props;
                 name="civil-status"
                 id="ratio-matrimonio"
                 value="matrimonio"
-                class="checks-btns"
+                class="checks-civil"
                 data-index="0"
               />
               <label for="ratio-matrimonio" class="radio-label"
@@ -45,7 +52,7 @@ const { communityId } = Astro.props;
                 name="civil-status"
                 id="ratio-soltero"
                 value="soltero"
-                class="checks-btns"
+                class="checks-civil"
                 checked
                 data-index="1"
               />
@@ -56,7 +63,7 @@ const { communityId } = Astro.props;
                 type="radio"
                 name="civil-status"
                 id="ratio-soltera"
-                class="checks-btns"
+                class="checks-civil"
                 value="soltera"
                 data-index="2"
               />
@@ -159,7 +166,7 @@ const { communityId } = Astro.props;
     <!-- si es catequista -->
     <fieldset class="fieldset-catequistas animate-entry">
       <legend>Catequistas</legend>
-      <IfCatechistInput client:visible />
+      <IfCatechistInput client:load />
     </fieldset>
 
     <div class="content-actions">
@@ -187,6 +194,7 @@ const { communityId } = Astro.props;
       position: absolute;
       inset: 0;
       opacity: 0;
+      cursor: pointer;
     }
 
     &:has(input:checked) .radio-label {
@@ -224,27 +232,121 @@ const { communityId } = Astro.props;
       display: block;
     }
   }
+
+  .only-read {
+    opacity: 0.45;
+    pointer-events: none;
+
+    & input {
+      cursor: not-allowed;
+    }
+  }
 </style>
 
 <script>
   import { showNotification } from "@/scripts/notification";
   import { warningMessage } from "@/scripts/warning-message";
-  import { $id } from "@/utils/getElements";
+  import { $, $$, $id } from "@/utils/getElements";
+  import type { BrotherOutDB } from "@/types/brothers";
   import { actions } from "astro:actions";
 
   document.addEventListener("astro:page-load", () => {
     const form = $id("form-brother") as HTMLFormElement;
+    const brotherId = $id("brother-id") as HTMLInputElement;
+    const containerCS = $(".container-civil-status") as HTMLDivElement;
+    const checkCivil = $$(".checks-civil") as NodeListOf<HTMLInputElement>;
+    const rolesPrincipals = $$(
+      ".roles-principals",
+    ) as NodeListOf<HTMLInputElement>;
+    const rolesSupport = $$(".roles-support") as NodeListOf<HTMLInputElement>;
 
-    async function handleDeleteBrother(id: number) {
-      const confirm = await warningMessage(
-        "Eliminar Hermano",
-        "¿Estás seguro de que deseas eliminar este hermano? Esta acción no se puede deshacer.",
+    // single
+    const nameBro = $id("name-bro") as HTMLInputElement;
+    const phoneBro = $id("phone-bro") as HTMLInputElement;
+
+    // married
+    const containerHusband = $(".content-data-husband") as HTMLDivElement;
+    const containerWife = $(".content-data-wife") as HTMLDivElement;
+    const husbandName = $id("names-husband") as HTMLInputElement;
+    const husbandPhone = $id("phone-husband") as HTMLInputElement;
+    const wifeName = $id("names-wife") as HTMLInputElement;
+    const wifePhone = $id("phone-wife") as HTMLInputElement;
+
+    // funcion para rellenar los roles
+    function fillRoles(listRoles: string[], listRolesSec: number[]) {
+      // Roles
+      const roles = Array.isArray(listRoles) ? [...listRoles] : [];
+      const rolesSec = Array.isArray(listRolesSec) ? [...listRolesSec] : [];
+
+      // Si tiene comunidades de catequista, marcamos también el rol "catequista"
+      if (rolesSec.length > 0 && !roles.includes("catequista")) {
+        roles.push("catequista");
+      }
+
+      const principalRole =
+        roles.find((r) => r === "responsable" || r === "corresponsable") || "";
+      const hasSecondaryRole = roles.some(
+        (r) => r !== "responsable" && r !== "corresponsable",
       );
 
-      if (!confirm) return;
+      // Regla: si tiene algún rol (principal o secundario), "Ninguno" NO puede estar seleccionado
+      rolesPrincipals.forEach((input) => {
+        const isNone = input.id === "role-none";
+
+        if (!principalRole && !hasSecondaryRole) {
+          // Sin ningún rol asignado: solo "Ninguno" marcado
+          input.checked = isNone;
+          return;
+        }
+
+        if (principalRole) {
+          // Hay rol principal: marcamos solo ese
+          input.checked = input.value === principalRole;
+          return;
+        }
+
+        // Hay roles secundarios pero ningún principal: ningún principal marcado (tampoco "Ninguno")
+        input.checked = false;
+      });
+
+      rolesSupport.forEach((input) => {
+        input.checked = false;
+      });
+
+      roles
+        .filter((r) => r !== "responsable" && r !== "corresponsable")
+        .forEach((role) => {
+          const checkbox = form.querySelector<HTMLInputElement>(
+            `input[name="roles-support"][value="${role}"]`,
+          );
+          if (checkbox) {
+            checkbox.checked = true;
+          }
+        });
+
+      if (rolesSec.length > 0) {
+        // marcar las comunidades de catequista
+        window.dispatchEvent(
+          new CustomEvent("brother:edit", {
+            detail: {
+              catechistCommunityIds: rolesSec,
+            },
+          }),
+        );
+      }
+    }
+
+    // === ELIMINAR HERMANOS ===
+    async function handleDeleteBrother(ids: number[]) {
+      const confirmAction = await warningMessage(
+        "Eliminar Hermano/as",
+        "¿Estás seguro de que deseas continuar con este paso? Recuerda en el caso de ser matrimonio se eliminarán ambos registros.",
+      );
+
+      if (!confirmAction) return;
 
       try {
-        const { data, error } = await actions.deleteBrother({ id });
+        const { data, error } = await actions.deleteBrother({ ids });
         if (error || !data?.success) {
           showNotification(
             data?.message || error?.message || "Error al eliminar al hermano",
@@ -260,12 +362,87 @@ const { communityId } = Astro.props;
       }
     }
 
-    async function handleEditBrother() {
-      // lógica para editar hermano
-      showNotification(
-        "Funcionalidad de editar hermano no implementada aún",
-        "info",
-      );
+    // === EDITAR HERMANO/A ===
+    async function handleEditBrother(id: number) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      form.reset();
+      try {
+        const { data, error } = await actions.getBrotherById({ id });
+        if (error || !data?.success || !data.data) {
+          showNotification(
+            data?.message ||
+              error?.message ||
+              "Error al obtener datos del hermano",
+            "error",
+          );
+          return;
+        }
+
+        const brother = data.data as BrotherOutDB;
+        console.log(brother);
+
+        // === ACTUALIZAR MATRIMONIO ===
+        if (brother.civil_status === "matrimonio") {
+          brotherId.value = String(brother.id);
+
+          checkCivil.forEach((input) => {
+            input.checked = input.value === "matrimonio";
+            (window as any).updateCivilIndicator();
+          });
+          containerCS.classList.add("only-read");
+
+          const { marriage_id, spouse_id, spouse_name } = brother;
+
+          if (!marriage_id || !spouse_id || !spouse_name) {
+            showNotification("Error: Datos de matrimonio incompletos", "error");
+            return;
+          }
+
+          if (brother.id < spouse_id) {
+            husbandName.value = brother.names || "";
+            husbandPhone.value = brother.phone ?? "";
+            wifeName.value = brother.spouse_name || "";
+            wifePhone.value = brother.spouse_phone ?? "";
+            containerWife.classList.add("only-read");
+            containerHusband.classList.remove("only-read");
+
+            // Esposo
+          } else {
+            // Esposa
+            husbandName.value = brother.spouse_name || "";
+            husbandPhone.value = brother.spouse_phone ?? "";
+            wifeName.value = brother.names || "";
+            wifePhone.value = brother.phone ?? "";
+            containerHusband.classList.add("only-read");
+            containerWife.classList.remove("only-read");
+          }
+
+          fillRoles(brother.roles, brother.catechist_communities);
+
+          return;
+        }
+
+        // === ACTUALIZAR SOLTERO/A ===
+        brotherId.value = String(brother.id);
+        checkCivil.forEach((input) => {
+          input.checked = input.value === brother.civil_status;
+          (window as any).updateCivilIndicator();
+        });
+        containerCS.classList.add("only-read");
+        nameBro.value = brother.names || "";
+        phoneBro.value = brother.phone ?? "";
+
+        // Roles
+        fillRoles(brother.roles, brother.catechist_communities);
+
+        showNotification(
+          "Editando hermano. Modifica los datos y guarda.",
+          "info",
+        );
+      } catch (error) {
+        console.error("Error obteniendo datos del hermano:", error);
+        showNotification("Error al obtener datos del hermano", "error");
+      }
     }
 
     // form submit
@@ -301,13 +478,15 @@ const { communityId } = Astro.props;
       }
 
       try {
+        //  === LOGICA PARA MATRIMONIO ===
         if (civilStatus === "matrimonio") {
+          const brotherId = formData.get("brother-id") as string | null;
           const husbandNames = formData.get("names-husband") as string;
           const husbandPhone = formData.get("phone-husband") as string;
           const wifeNames = formData.get("names-wife") as string;
           const wifePhone = formData.get("phone-wife") as string;
 
-          const payload = {
+          const payloadBase = {
             kind: "marriage" as const,
             husband: {
               names: husbandNames,
@@ -322,7 +501,15 @@ const { communityId } = Astro.props;
             catechist_communities: catechistCommunities,
           };
 
-          const { data, error } = await actions.postBrother(payload);
+          const payloadMarriage =
+            brotherId && brotherId !== ""
+              ? {
+                  ...payloadBase,
+                  ...(Number(brotherId) ? { id: Number(brotherId) } : {}),
+                }
+              : payloadBase;
+
+          const { data, error } = await actions.postBrother(payloadMarriage);
 
           if (error || !data?.success) {
             showNotification(
@@ -341,7 +528,8 @@ const { communityId } = Astro.props;
           return;
         }
 
-        // lógica para hermanos solteros/as
+        // === LOGICA PARA HERMANO/A SOLTERO/A ===
+        const brotherId = formData.get("brother-id") as string | null;
         const names = formData.get("name-bro") as string;
         const phone = formData.get("phone-bro") as string;
 
@@ -354,10 +542,13 @@ const { communityId } = Astro.props;
           catechist_communities: catechistCommunities,
         };
 
-        const { data, error } = await actions.postBrother({
+        const payloadSingle = {
           kind: "single" as const,
+          ...(brotherId && brotherId !== "" ? { id: Number(brotherId) } : {}),
           ...payloadBase,
-        });
+        };
+
+        const { data, error } = await actions.postBrother(payloadSingle);
 
         if (error || !data?.success) {
           showNotification(
@@ -370,10 +561,19 @@ const { communityId } = Astro.props;
         showNotification(data.message, "success");
         form.reset();
         (window as any).updateCivilIndicator();
+        containerCS.classList.remove("only-read");
         window.dispatchEvent(new Event("brothers:updated"));
       } catch (err) {
         console.error("Error en el envío del formulario de hermano:", err);
         showNotification("Error en la solicitud", "error");
+      }
+    });
+
+    form.addEventListener("reset", () => {
+      brotherId.value = "";
+      (window as any).updateCivilIndicator();
+      if (containerCS.classList.contains("only-read")) {
+        containerCS.classList.remove("only-read");
       }
     });
 

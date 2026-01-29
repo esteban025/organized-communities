@@ -1,5 +1,6 @@
 import { EditIcon, TrashIcon } from "@/icons/iconsReact";
 import type { BrotherwithRolesOutDB } from "@/types/brothers";
+import { useState } from "react";
 
 export const TableBrothers = ({ brothers }: { brothers: BrotherwithRolesOutDB[] }) => {
   const headTable = [
@@ -9,19 +10,22 @@ export const TableBrothers = ({ brothers }: { brothers: BrotherwithRolesOutDB[] 
     'Acciones',
   ];
 
-  const handleDeleteBrother = (id: number) => {
+  const handleDeleteBrother = (ids: (number | null)[]) => {
+    const cleanIds = ids.filter((id): id is number => typeof id === "number");
+    if (cleanIds.length === 0) return;
     const anyWindow = window as any;
     if (typeof anyWindow.deleteBrother === "function") {
-      anyWindow.deleteBrother(id);
+      anyWindow.deleteBrother(cleanIds);
     } else {
       console.warn("deleteBrother function is not defined on window");
     }
   };
 
-  const handleEditBrother = (id: number) => {
+  const handleEditBrother = (brotherId: number | null) => {
+    if (brotherId === null) return;
     const anyWindow = window as any;
     if (typeof anyWindow.editBrother === "function") {
-      anyWindow.editBrother(id);
+      anyWindow.editBrother(brotherId);
     } else {
       console.warn("editBrother function is not defined on window");
     }
@@ -52,8 +56,33 @@ export const TableBrothers = ({ brothers }: { brothers: BrotherwithRolesOutDB[] 
           <div className="actions flex justify-center gap-1">
             {
               brother.civil_status === "matrimonio" && (
-                // logica para poder eliminar, editar a uno de los dos
-                <span>edit / delete married</span>
+                <>
+                  <div
+                    className="atn-btn group"
+                    title="Editar hermano"
+                  >
+                    <EditIcon className="size-5 icon-btn" />
+                    <ul className="absolute top-full right-0 bg-white border border-neutral-300 shadow-lg mt-1 z-100 min-w-25 rounded-lg flex flex-col opacity-0 scale-0 origin-top-right group-hover:opacity-100 group-hover:scale-100 transition-all">
+                      <button
+                        type="button"
+                        className=" w-full text-xs cursor-pointer hover:bg-neutral-100 py-2"
+                        onClick={() => handleEditBrother(brother.person1_id)}
+                      >
+                        H
+                      </button>
+                      <button
+                        type="button"
+                        className="w-full text-xs cursor-pointer hover:bg-neutral-100 py-2"
+                        onClick={() => handleEditBrother(brother.person2_id)}
+                      >
+                        M
+                      </button>
+                    </ul>
+                  </div>
+                  <button className="atn-btn" onClick={() => handleDeleteBrother([brother.person1_id, brother.person2_id])} title="Eliminar hermano">
+                    <TrashIcon className="size-5 icon-btn" />
+                  </button>
+                </>
               )
             }
 
@@ -71,7 +100,7 @@ export const TableBrothers = ({ brothers }: { brothers: BrotherwithRolesOutDB[] 
                   type="button"
                   className="atn-btn"
                   title="Eliminar hermano"
-                  onClick={() => handleDeleteBrother(brother.person_id)}
+                  onClick={() => handleDeleteBrother([brother.person_id])}
                 >
                   <TrashIcon className="size-5 icon-btn" />
                 </button>

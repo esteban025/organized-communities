@@ -1,6 +1,24 @@
-import { getParishes, postParish, deleteParish, getParishById } from "./parishes"
-import { deleteCommunity, getCommunities, postCommunity, getCommunityById } from "./communities"
-import { getBrothers, getGroupLeaders, postBrother, deleteBrother } from "./brothers"
+import {
+  getParishes,
+  postParish,
+  deleteParish,
+  getParishById
+} from "./parishes"
+
+import {
+  deleteCommunity,
+  getCommunities,
+  postCommunity,
+  getCommunityById
+} from "./communities"
+
+import {
+  getBrotherById,
+  getBrothers,
+  getGroupLeaders,
+  postBrother,
+  deleteBrother
+} from "./brothers"
 
 export const server = {
   getParishById,
@@ -11,6 +29,7 @@ export const server = {
   getCommunities,
   postCommunity,
   deleteCommunity,
+  getBrotherById,
   getBrothers,
   getGroupLeaders,
   postBrother,

@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import type { BrotherwithRoles, BrotherwithRolesOutDB } from "@/types/brothers";
+import type { BrotherOutDB, BrotherwithRoles, BrotherwithRolesOutDB, SingleBrotherInput } from "@/types/brothers";
 
 export const getBrohterByIdFromDB = async (id: number) => {
   const query = `
@@ -11,6 +11,14 @@ export const getBrohterByIdFromDB = async (id: number) => {
       p.civil_status,
       m.id as marriage_id,
       CASE 
+        WHEN m.id IS NOT NULL THEN 
+          CASE 
+            WHEN m.person1_id = p.id THEN m.person2_id 
+            ELSE m.person1_id 
+          END
+        ELSE NULL
+      END as spouse_id,
+      CASE 
         WHEN m.id IS NOT NULL THEN (
           SELECT names FROM persons 
           WHERE id = CASE 
@@ -20,6 +28,16 @@ export const getBrohterByIdFromDB = async (id: number) => {
         )
         ELSE NULL
       END as spouse_name,
+      CASE 
+        WHEN m.id IS NOT NULL THEN (
+          SELECT phone FROM persons 
+          WHERE id = CASE 
+            WHEN m.person1_id = p.id THEN m.person2_id 
+            ELSE m.person1_id 
+          END
+        )
+        ELSE NULL
+      END as spouse_phone,
       (
         SELECT JSON_ARRAYAGG(pr.role)
         FROM person_roles pr
@@ -39,7 +57,7 @@ export const getBrohterByIdFromDB = async (id: number) => {
     WHERE p.id = ?
   `
   const [rows] = await db.query(query, [id]);
-  const raw = rows as any[];
+  const raw = rows as BrotherOutDB[];
   if (raw.length === 0) {
     return {
       success: false,
@@ -193,30 +211,38 @@ export const getGroupCatechistsByCommunityIdFromDB = async ({ community_id }: { 
   }
 }
 
-export const deleteBrotherInDB = async (id: number) => {
-  // En el nuevo esquema, "hermano" es una persona en la tabla persons
-  const query = `
-    DELETE FROM persons WHERE id = ?
+export const deleteBrotherInDB = async (ids: number[]) => {
+  if (!ids || ids.length === 0) {
+    return {
+      success: false,
+      message: "No se proporcionaron IDs para eliminar",
+      data: null,
+    };
+  }
+
+  const placeholders = ids.map(() => "?").join(", ");
+
+  const deletePersonsQuery = `
+    DELETE FROM persons
+    WHERE id IN (${placeholders})
   `;
-  await db.query(query, [id]);
+  const [result] = await db.query(deletePersonsQuery, ids);
+  const ok = result as any;
 
   return {
     success: true,
-    message: "Hermano eliminado correctamente",
-    data: { id },
+    message: "Hermano(s) eliminado(s) correctamente",
+    data: {
+      affectedRows: ok?.affectedRows ?? 0,
+    },
   };
 };
 
-type CreateSingleBrotherInput = {
-  names: string;
-  civil_status: "soltero" | "soltera";
-  community_id: number;
-  phone: string | null;
-  roles: string[];
-  catechist_communities?: number[];
-};
+
+
 
 type CreateMarriageInput = {
+  id: number
   husband: { names: string; phone: string | null };
   wife: { names: string; phone: string | null };
   community_id: number;
@@ -225,7 +251,7 @@ type CreateMarriageInput = {
 };
 
 // Crea una persona soltera en persons y sus roles en person_roles
-export const createSingleBrotherInDB = async (input: CreateSingleBrotherInput) => {
+export const createSingleBrotherInDB = async (input: Omit<SingleBrotherInput, "id">) => {
   const { community_id, names, civil_status, phone, roles, catechist_communities } = input
 
   // verificamos que no el nombre no se repita en la misma comunidad
@@ -300,8 +326,92 @@ export const createSingleBrotherInDB = async (input: CreateSingleBrotherInput) =
 
 };
 
+// Actualiza una persona soltera en persons y sus roles en person_roles
+export const updateSingleBrotherInDB = async (input: SingleBrotherInput) => {
+  const { id, names, civil_status, community_id, phone, roles, catechist_communities } = input;
+
+  // Verificar que no exista otro hermano con el mismo nombre en la misma comunidad
+  const existingQuery = `
+    SELECT id FROM persons WHERE names = ? AND community_id = ? AND id != ?
+  `;
+  const [existingRows] = await db.query(existingQuery, [names, community_id, id]);
+  const existing = existingRows as any[];
+  if (existing.length > 0) {
+    return {
+      success: false,
+      message: "Ya existe un hermano con ese nombre en la comunidad",
+      data: null,
+    };
+  }
+
+  // Verificar que no exista otro responsable distinto a este hermano
+  const queryCheckLeader = `
+    SELECT COUNT(*) as responsable_count FROM person_roles
+    WHERE community_id = ? AND role = 'responsable' AND person_id != ?
+  `;
+  const [leaderRows] = await db.query(queryCheckLeader, [community_id, id]);
+  const leaderCount = (leaderRows as any[])[0].responsable_count as number;
+  if (roles.includes("responsable") && leaderCount >= 1) {
+    return {
+      success: false,
+      message: "Ya existe un responsable en esta comunidad",
+      data: null,
+    };
+  }
+
+  // Actualizar datos básicos de la persona
+  const updatePersonQuery = `
+    UPDATE persons
+    SET names = ?, civil_status = ?, community_id = ?, phone = ?
+    WHERE id = ?
+  `;
+  await db.query(updatePersonQuery, [
+    names,
+    civil_status,
+    community_id,
+    phone || null,
+    id,
+  ]);
+
+  // Eliminar roles actuales del hermano
+  const deleteRolesQuery = `
+    DELETE FROM person_roles WHERE person_id = ?
+  `;
+  await db.query(deleteRolesQuery, [id]);
+
+  // Asignar nuevos roles
+  const roleValues: Array<[number, number, string]> = [];
+
+  roles.forEach((role) => {
+    if (!role) return;
+    if (role === "catequista") {
+      if (catechist_communities && catechist_communities.length > 0) {
+        catechist_communities.forEach((cid) => {
+          roleValues.push([id, cid, role]);
+        });
+      }
+    } else {
+      roleValues.push([id, community_id, role]);
+    }
+  });
+
+  if (roleValues.length > 0) {
+    const placeholders = roleValues.map(() => "(?, ?, ?)").join(", ");
+    const insertRolesQuery = `
+      INSERT INTO person_roles (person_id, community_id, role)
+      VALUES ${placeholders}
+    `;
+    await db.query(insertRolesQuery, roleValues.flat());
+  }
+
+  return {
+    success: true,
+    message: "Hermano actualizado correctamente",
+    data: { id, names },
+  };
+};
 // Crea dos personas en persons, un registro en marriages y roles en person_roles
-export const createMarriageInDB = async (input: CreateMarriageInput) => {
+export const createMarriageInDB = async (input: Omit<CreateMarriageInput, "id">) => {
   const { husband, wife, community_id, roles, catechist_communities } = input;
 
   // verificamos que no existn en la misma comunidad
@@ -394,3 +504,110 @@ export const createMarriageInDB = async (input: CreateMarriageInput) => {
   }
 
 };
+
+export const updateMarriageInDB = async (input: CreateMarriageInput) => {
+  // aunque sea matrimonio voy a editar solamente a uno de los dos (name, phone), es lo unico que cambiara para ese id
+  // el resto de informacion comparte para ambos, roles y catechist_communities
+
+  const { id, husband, wife, community_id, roles, catechist_communities } = input;
+
+  // perosona en cuestion
+  const [marriage] = await db.query(
+    `SELECT person1_id, person2_id FROM marriages 
+       WHERE person1_id = ? OR person2_id = ?`,
+    [id, id]
+  );
+  const marriageRows = marriage as any[];
+
+  if (marriageRows.length === 0) {
+    return {
+      success: false,
+      message: "No se encontró el matrimonio",
+      data: null,
+    };
+  }
+
+  const { person1_id, person2_id } = marriageRows[0];
+  const spouseId = person1_id === id ? person2_id : person1_id;
+
+  // Determinar qué datos usar según el ID
+  const personData = person1_id === id ? husband : wife;
+
+
+  // 1. Verficamos que no exista otro hermano con el mismo nombre en la misma comunidad segun el id, solamente del id que se esta porpocinando
+  const existingQuery = `SELECT id FROM persons WHERE names = ? AND community_id = ? AND id != ?`;
+  const [existingRowsHusband] = await db.query(existingQuery, [personData.names, community_id, id]);
+  const existingHusband = existingRowsHusband as any[];
+
+  if (existingHusband.length > 0) {
+    return {
+      success: false,
+      message: "Ya existe un hermano con ese nombre en la comunidad",
+      data: null,
+    };
+  }
+
+  // 2. Si en el input.roles le llega que es responsable verificamos que no exista un responsable para esa comunidad
+  if (roles && roles.includes('responsable')) {
+    const queryCheckLeader = `
+      SELECT person_id FROM person_roles
+      WHERE community_id = ? AND role = 'responsable' AND person_id != ? AND person_id != ?
+    `;
+    const [leaderRows] = await db.query(queryCheckLeader, [community_id, person1_id, person2_id]);
+    const leader = (leaderRows as any[]);
+    if (leader.length >= 1) {
+      return {
+        success: false,
+        message: "Ya existe un responsable en esta comunidad",
+        data: null,
+      };
+    }
+  }
+
+  // 3. Actualizamos los datos de la persona con el id proporcionado (solo uno de los dos) y los roles princiaples o de catequistas asignamos a ambos
+  const queryUpdatePerson = `
+    UPDATE persons SET names = ?, phone = ?
+    WHERE id = ?
+  `
+  await db.query(queryUpdatePerson, [personData.names, personData.phone || null, id])
+
+  // eliminamos roles actuales de ambos
+  const deleteRolesQuery = `
+    DELETE FROM person_roles WHERE person_id = ? OR person_id = ?
+  `
+  await db.query(deleteRolesQuery, [id, spouseId])
+
+  // asignar nuevos roles a ambos
+  const roleValues: Array<[number, number, string]> = [];
+  roles.forEach((role) => {
+    if (!role) return;
+    if (role === "catequista") {
+      if (catechist_communities && catechist_communities.length > 0) {
+        catechist_communities.forEach((cid) => {
+          roleValues.push([id, cid, role]);
+          roleValues.push([spouseId, cid, role]);
+        });
+      }
+    } else {
+      roleValues.push([id, community_id, role]);
+      roleValues.push([spouseId, community_id, role]);
+    }
+  });
+
+  if (roleValues.length > 0) {
+    const placeholders = roleValues.map(() => "(?, ?, ?)").join(", ");
+    const insertRolesQuery = `
+      INSERT INTO person_roles (person_id, community_id, role)
+      VALUES ${placeholders}
+    `;
+    await db.query(insertRolesQuery, roleValues.flat());
+  }
+
+  return {
+    success: true,
+    message: "Matrimonio actualizado correctamente",
+    data: null,
+  }
+}
+
+

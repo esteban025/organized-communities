@@ -14,7 +14,9 @@ export interface BrotherOutDB {
   community_id: number;
   civil_status: string;
   marriage_id: number | null;
-  spouse_name: number | null;
+  spouse_id: number | null;
+  spouse_name: string | null;
+  spouse_phone: string | null;
   roles: string[];
   catechist_communities: number[];
 }
@@ -32,3 +34,13 @@ export interface BrotherwithRolesOutDB {
   civil_status: string;
   roles: string[] | null;
 }
+
+export interface SingleBrotherInput {
+  id: number;
+  names: string;
+  civil_status: "soltero" | "soltera";
+  community_id: number;
+  phone: string | null;
+  roles: string[];
+  catechist_communities?: number[];
+};
