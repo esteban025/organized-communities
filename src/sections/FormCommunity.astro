@@ -77,7 +77,7 @@ const { id, name } = Astro.props;
     async function deleteCommunity(id: number) {
       const confirm = warningMessage(
         "Eliminar Comunidad",
-        `¿Estás seguro de que deseas eliminar esta comunidad?, Esta acción no se puede deshacer. ${id}`,
+        `¿Estás seguro de que deseas eliminar esta comunidad? Esta acción no se puede deshacer.`,
       );
       confirm.then(async (result: boolean) => {
         if (result) {

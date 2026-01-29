@@ -116,7 +116,6 @@ import { actions } from "astro:actions";
             locality: localityParish ? localityParish : null,
           };
 
-      console.log("Submitting parish info:", info);
       try {
         const { data, error } = await actions.postParish(info);
         if (data?.success) {

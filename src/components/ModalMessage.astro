@@ -7,10 +7,10 @@ const { id = "modal-message" } = Astro.props;
 
 <div
   id={id}
-  class="modal-overlay fixed inset-0 z-90 bg-black/80 items-center justify-center p-4 backdrop-blur-md hidden transition-opacity duration-300 opacity-0"
+  class="modal-overlay fixed inset-0 z-90 bg-black/60 items-center justify-center backdrop-blur-xs hidden transition-opacity duration-300 opacity-0"
 >
   <div
-    class="bg-white max-w-200 mx-auto rounded-lg shadow-lg p-4 flex flex-col items-center"
+    class="bg-white max-w-200 mx-auto rounded-lg shadow-lg p-8 flex flex-col items-center"
   >
     <h3 class="title-message text-2xl font-bold mb-3"></h3>
     <p class="text-message"></p>
