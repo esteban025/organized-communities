@@ -1,6 +1,61 @@
 import { db } from "@/lib/db";
 import type { BrotherwithRoles, BrotherwithRolesOutDB } from "@/types/brothers";
 
+export const getBrohterByIdFromDB = async (id: number) => {
+  const query = `
+    SELECT 
+      p.id,
+      p.names,
+      p.phone,
+      p.community_id,
+      p.civil_status,
+      m.id as marriage_id,
+      CASE 
+        WHEN m.id IS NOT NULL THEN (
+          SELECT names FROM persons 
+          WHERE id = CASE 
+            WHEN m.person1_id = p.id THEN m.person2_id 
+            ELSE m.person1_id 
+          END
+        )
+        ELSE NULL
+      END as spouse_name,
+      (
+        SELECT JSON_ARRAYAGG(pr.role)
+        FROM person_roles pr
+        WHERE pr.person_id = p.id 
+          AND pr.community_id = p.community_id 
+          AND pr.role != 'catequista'
+      ) as roles,
+      (
+        SELECT JSON_ARRAYAGG(pr.community_id)
+        FROM person_roles pr
+        WHERE pr.person_id = p.id 
+          AND pr.role = 'catequista' 
+          AND pr.community_id != p.community_id
+      ) as catechist_communities
+    FROM persons p
+    LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id)
+    WHERE p.id = ?
+  `
+  const [rows] = await db.query(query, [id]);
+  const raw = rows as any[];
+  if (raw.length === 0) {
+    return {
+      success: false,
+      message: "Hermano no encontrado",
+      data: null,
+    };
+  }
+  const data = raw[0];
+
+  return {
+    success: true,
+    message: "Hermano recuperado correctamente",
+    data
+  };
+}
+
 export const getBrothersByCommunityIdFromDB = async (communityId: number) => {
   const query = `
     SELECT 
