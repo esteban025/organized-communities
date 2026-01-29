@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { actions } from "astro:actions";
-import type { BrotherwithRoles } from "@/types/brothers";
+import type { BrotherLeader } from "@/types/brothers";
+import { RefreshIcon } from "@/icons/iconsReact";
+import { getInitialsName } from "@/scripts/getInitialsName";
 
 export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) => {
 
-  const [groupLeaders, setGroupLeaders] = useState<BrotherwithRoles[]>([]);
+  const [groupLeaders, setGroupLeaders] = useState<BrotherLeader[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,24 +28,92 @@ export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) =
       }
     }
     fetchGroupLeaders();
+    const handleBrothersUpdated = () => {
+      fetchGroupLeaders();
+    };
+
+    window.addEventListener("brothers:updated", handleBrothersUpdated);
+
   }, [communityId]);
 
-  console.log("Group Leaders:", groupLeaders);
-
+  const responsables = groupLeaders.filter(gl => gl.role === 'responsable');
+  const corresponsables = groupLeaders.filter(gl => gl.role === 'corresponsable');
+  const otros = groupLeaders.filter(gl => gl.role?.includes('ostiario') || gl.role?.includes('didascala'));
+  const catequistas = groupLeaders.filter(gl => gl.role?.includes('catequista'));
+  console.log(responsables)
   return (
     <div className="ss">
-      {isLoading && <p>Loading group leaders...</p>}
+      {isLoading && (
+        <div className="message-card loading h-full">
+          <span>Cargando hermanos...</span>
+          <RefreshIcon className="animate-spin size-4 block" />
+        </div>
+      )}
       {error && <p className="text-red-500">{error}</p>}
       {!isLoading && !error && (
-        <>
-          <ul>
-            {groupLeaders.map((leader) => (
-              <li key={leader.id}>
-                {leader.names} {leader.phone} - Roles: {leader.roles}
-              </li>
-            ))}
-          </ul>
-        </>
+        <div className="grid gap-4 grid-areas-group-leaders">
+          <div className="responsables">
+            <h3 className="font-semibold mb-2">Responsables</h3>
+            {responsables.length > 0 && (
+              <ul>
+                {responsables.map((leader) => (
+                  <li key={leader.group_id} className="">
+                    <div className="ss">
+                      <span className="initials">{getInitialsName(leader.names)}</span>
+                      <span className="truncate max-w-37.5">{leader.names}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="corresponsables">
+            <h3 className="font-semibold mb-2">Corresponsables</h3>
+            {corresponsables.length > 0 && (
+              <ul>
+                {corresponsables.map((leader) => (
+                  <li key={leader.group_id}>
+                    <div className="ss">
+                      <span className="initials">{getInitialsName(leader.names)}</span>
+                      <span className="truncate max-w-37.5">{leader.names}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="otros">
+            <h3 className="font-semibold mb-2">Otros Cargos</h3>
+            {otros.length > 0 && (
+              <ul>
+                {otros.map((leader) => (
+                  <li key={leader.group_id} className="flex items-center justify-between">
+                    <div className="ss">
+                      <span className="initials">{getInitialsName(leader.names)}</span>
+                      <span className="truncate max-w-37.5">{leader.names}</span>
+                    </div>
+                    <span className="capitalize text-neutral-600 text-sm">{leader.role}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="catequistas">
+            <h3 className="font-semibold mb-2">Catequistas</h3>
+            {catequistas.length > 0 && (
+              <ul>
+                {catequistas.map((leader) => (
+                  <li key={leader.group_id}>
+                    <div className="ss">
+                      <span className="initials">{getInitialsName(leader.names)}</span>
+                      <span>{leader.names}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

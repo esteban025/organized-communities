@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import type { BrotherOutDB, BrotherwithRoles, BrotherwithRolesOutDB, SingleBrotherInput } from "@/types/brothers";
+import type { BrotherOutDB, BrotherwithRoles, BrotherwithRolesOutDB, SingleBrotherInput, CreateMarriageInput, BrotherLeader } from "@/types/brothers";
 
 export const getBrohterByIdFromDB = async (id: number) => {
   const query = `
@@ -150,18 +150,32 @@ export const getBrothersByCommunityIdFromDB = async (communityId: number) => {
 export const getGroupLeadersByCommunityIdFromDB = async ({ community_id }: { community_id: number }) => {
   const query = `
     SELECT 
-      p.id,
-      p.names,
-      p.phone,
-      p.community_id as own_community_id,
-      pr.role,
+      CASE 
+        WHEN m.id IS NOT NULL THEN CONCAT('m_', m.id)
+        ELSE CONCAT('p_', pr.person_id)
+      END as group_id,
+      CASE 
+        WHEN m.id IS NOT NULL THEN CONCAT(
+          (SELECT names FROM persons WHERE id = m.person1_id),
+          ' y ',
+          (SELECT names FROM persons WHERE id = m.person2_id)
+        )
+        ELSE p.names
+      END as names,
+      CASE 
+        WHEN m.id IS NOT NULL THEN 'matrimonio'
+        ELSE p.civil_status
+      END as civil_status,
       CASE 
         WHEN pr.role = 'catequista' AND p.community_id != pr.community_id THEN 'catequista_externo'
         ELSE 'lider_interno'
-      END as person_type
-    FROM persons p
-    INNER JOIN person_roles pr ON p.id = pr.person_id
-    WHERE pr.community_id = ? -- ID de la comunidad que estamos consultando
+      END as person_type,
+      pr.role,
+      p.community_id as own_community_id
+    FROM person_roles pr
+    INNER JOIN persons p ON pr.person_id = p.id
+    LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id) AND m.community_id = p.community_id
+    WHERE pr.community_id = ?
       AND (
         -- Líderes de su propia comunidad (sin catequistas)
         (p.community_id = pr.community_id AND pr.role != 'catequista')
@@ -169,15 +183,22 @@ export const getGroupLeadersByCommunityIdFromDB = async ({ community_id }: { com
         -- Catequistas de otras comunidades
         (p.community_id != pr.community_id AND pr.role = 'catequista')
       )
+      -- Si es matrimonio, solo mostrar person1_id
+      AND (m.id IS NULL OR p.id = m.person1_id)
+    GROUP BY 
+      m.id,
+      pr.person_id,
+      p.names,
+      p.civil_status,
+      pr.role,
+      p.community_id
     ORDER BY 
-      CASE 
-        WHEN pr.role = 'catequista' THEN 2 
-        ELSE 1 
-      END,
-      p.names;
+      CASE WHEN pr.role = 'catequista' THEN 2 ELSE 1 END,
+      names;
   `
   const [rows] = await db.query(query, [community_id, community_id]);
-  const leaders = rows as BrotherwithRoles[]
+  const leaders = rows as BrotherLeader[]
+  console.log(leaders)
   return {
     success: true,
     message: "Líderes de grupo recuperados correctamente",
@@ -241,14 +262,7 @@ export const deleteBrotherInDB = async (ids: number[]) => {
 
 
 
-type CreateMarriageInput = {
-  id: number
-  husband: { names: string; phone: string | null };
-  wife: { names: string; phone: string | null };
-  community_id: number;
-  roles: string[];
-  catechist_communities?: number[];
-};
+
 
 // Crea una persona soltera en persons y sus roles en person_roles
 export const createSingleBrotherInDB = async (input: Omit<SingleBrotherInput, "id">) => {

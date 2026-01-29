@@ -1,4 +1,4 @@
-import type { BrotherwithRoles, BrotherwithRolesOutDB } from "@/types/brothers";
+import type { BrotherwithRolesOutDB } from "@/types/brothers";
 import { actions } from "astro:actions";
 import { useEffect, useState } from "react";
 import { TableBrothers } from "./TableBrothers";

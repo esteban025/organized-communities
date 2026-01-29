@@ -114,3 +114,79 @@ main.main-grid-in-brother {
     transform: scale(1);
   }
 }
+
+.grid-areas-group-leaders {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-areas: 
+    "corres res cat"
+    "corres otros cat"
+  ;
+
+  & > div {
+    /* background-color: red; */
+    padding: .875rem;
+    border-radius: .875rem;
+    border: 2px solid var(--color-neutral-200) ;
+    box-shadow: 0 5px 10px #00000010;
+    background-color: var(--color-neutral-100);
+
+    & ul {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+
+    & li {
+      padding: .5rem;
+      border-radius: 999px;
+      border: 1px solid var(--color-neutral-400);
+      background-color: var(--color-neutral-50);
+
+      & .ss {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        overflow: hidden;
+      }
+
+      & .initials {
+        background: var(--color-neutral-300);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 9999px;
+        width: 2rem;
+        aspect-ratio: 1/1;
+        border: 1px solid var(--color-neutral-400);
+        box-shadow: 0 2px 6px #00000020;
+        font-weight: 700;
+
+      }
+    }
+  }
+
+  & .responsables {
+    grid-area: res;
+    background-color: var(--color-neutral-700);
+    color: white;
+
+    & li{
+      background-color: #ffffff20;
+      border-color: #ffffff90;
+
+      & .initials {
+        background: var(--color-neutral-200);
+        color: var(--color-neutral-900);
+      }
+    }
+  }
+  & .corresponsables {
+    grid-area: corres;
+  }
+  & .otros {
+    grid-area: otros;
+  }
+  & .catequistas {
+    grid-area: cat;
+  }
+}

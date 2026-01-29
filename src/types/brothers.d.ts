@@ -44,3 +44,21 @@ export interface SingleBrotherInput {
   roles: string[];
   catechist_communities?: number[];
 };
+
+export interface CreateMarriageInput {
+  id: number
+  husband: { names: string; phone: string | null };
+  wife: { names: string; phone: string | null };
+  community_id: number;
+  roles: string[];
+  catechist_communities?: number[];
+};
+
+export interface BrotherLeader {
+  group_id: string;
+  names: string;
+  civil_status: string;
+  person_type: string;
+  role: string;
+  own_community_id: number;
+}
