@@ -7,6 +7,18 @@ export interface Brother {
   spouse_id: number | null;
 }
 
+export interface BrotherOutDB {
+  id: number;
+  names: string;
+  phone: string | null;
+  community_id: number;
+  civil_status: string;
+  marriage_id: number | null;
+  spouse_name: number | null;
+  roles: string[];
+  catechist_communities: number[];
+}
+
 export interface BrotherwithRoles extends Brother {
   roles: string[] | null;
 }
