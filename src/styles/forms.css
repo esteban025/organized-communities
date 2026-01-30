@@ -47,6 +47,19 @@
   }
 }
 
+.content-input-check {
+  /* bg-neutral-100 p-2 px-5 rounded-full hover:bg-neutral-200 transition-colors relative role-selected */
+  background-color: var(--color-neutral-100);
+  padding: .5rem 1.25rem;
+  border-radius: 999px;
+  transition: all 200ms ease-in-out;
+  position: relative;
+
+  &:hover {
+    background-color: var(--color-neutral-200);
+  }
+}
+
 input[placeholder]:not(:placeholder-shown),
 input:focus {      
   outline: none;

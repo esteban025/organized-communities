@@ -28,13 +28,6 @@ export const FilterCommunity = ({
     });
   };
 
-  // const handleParityChange = (value: ParityFilter) => {
-  //   onChange({
-  //     ...filters,
-  //     parity: value,
-  //   });
-  // };
-
   return (
     <div className="filter-card grid grid-cols-4 gap-3 items-center">
       <div className="content-input">
@@ -44,8 +37,10 @@ export const FilterCommunity = ({
           onChange={(e) => handleInputChange("responsable", e.target.value)}
           placeholder=" "
           autoComplete="off"
+          name="responsable-search"
+          id="responsable-search"
         />
-        <label className="label-text">Responsable</label>
+        <label className="label-text" htmlFor="responsable-search">Responsable</label>
       </div>
 
       <div className="content-input">
@@ -55,8 +50,10 @@ export const FilterCommunity = ({
           value={filters.number}
           onChange={(e) => handleInputChange("number", e.target.value)}
           placeholder=" "
+          name="number-search"
+          id="number-search"
         />
-        <label className="label-text">N° comunidad</label>
+        <label className="label-text" htmlFor="number-search">N° comunidad</label>
       </div>
 
       <div className="content-input">
@@ -66,8 +63,10 @@ export const FilterCommunity = ({
           onChange={(e) => handleInputChange("paso", e.target.value)}
           placeholder=" "
           autoComplete="off"
+          name="paso-search"
+          id="paso-search"
         />
-        <label className="label-text">Paso</label>
+        <label className="label-text" htmlFor="paso-search">Paso</label>
       </div>
 
       <button

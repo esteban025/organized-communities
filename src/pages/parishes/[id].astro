@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import FormCommunity from "@/sections/FormCommunity.astro";
 import HeaderPage from "@/sections/HeaderPage.astro";
+import FormFusionCommunities from "@/sections/FormFusionCommunities.astro";
 import { ViewCommunities } from "@/components/react/ViewCommunities";
 import { actions } from "astro:actions";
 const { id } = Astro.params;
@@ -35,10 +36,16 @@ try {
     {
       infoParish && (
         <main class="main-grid">
-          <FormCommunity
-            id={Number(id)}
-            name={infoParish ? infoParish.name : undefined}
-          />
+          <section class="flex flex-col gap-4">
+            <FormCommunity
+              id={Number(id)}
+              name={infoParish ? infoParish.name : undefined}
+            />
+            <FormFusionCommunities
+              parishId={Number(id)}
+              parishName={infoParish ? infoParish.name : undefined}
+            />
+          </section>
           <section class="card-section" transition:name="section-view">
             <header>
               <h2 class="text-2xl font-semibold mb-4">
