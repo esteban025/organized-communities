@@ -1,5 +1,6 @@
 ---
 import { IfCatechistInput } from "@/components/react/IfCatechistInput";
+import { CommunitySelectedList } from "@/components/react/CommunitySelectedList";
 import CivilIndicator from "@/components/CivilIndicator.astro";
 import RolesBrotherChecks from "@/components/RolesBrotherChecks.astro";
 import { actions } from "astro:actions";
@@ -169,6 +170,12 @@ const { communityId } = Astro.props;
       <IfCatechistInput client:load />
     </fieldset>
 
+    <!-- renderizamos lista de checks -->
+    <fieldset class="fieldset-communities-selected animate-entry">
+      <legend>Comunidades Seleccionadas</legend>
+      <CommunitySelectedList client:load />
+    </fieldset>
+
     <div class="content-actions">
       <button type="reset" class="btn btn-secondary w-full">Resetear</button>
       <button type="submit" class="btn btn-primary w-full">Agregar</button>
@@ -223,7 +230,8 @@ const { communityId } = Astro.props;
   }
 
   /* dinamic input select roles */
-  .fieldset-catequistas {
+  .fieldset-catequistas,
+  .fieldset-communities-selected {
     display: none;
   }
 
@@ -240,6 +248,10 @@ const { communityId } = Astro.props;
     & input {
       cursor: not-allowed;
     }
+  }
+
+  .fieldset-catequistas:has(input:checked) ~ .fieldset-communities-selected {
+    display: block;
   }
 </style>
 

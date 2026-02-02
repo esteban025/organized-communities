@@ -9,7 +9,8 @@ import {
   deleteCommunity,
   getCommunities,
   postCommunity,
-  getCommunityById
+  getCommunityById,
+  mergeCommunities
 } from "./communities"
 
 import {
@@ -29,6 +30,7 @@ export const server = {
   getCommunities,
   postCommunity,
   deleteCommunity,
+  mergeCommunities,
   getBrotherById,
   getBrothers,
   getGroupLeaders,

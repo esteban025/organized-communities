@@ -82,12 +82,8 @@ const classInput = "absolute inset-0 opacity-0 cursor-pointer";
   import { $$, $id } from "@/utils/getElements";
   document.addEventListener("astro:page-load", () => {
     const resetChecks = $id("role-none") as HTMLInputElement;
-    const roleCheckboxes = $$(
-      'input[name="roles-support"]',
-    ) as NodeListOf<HTMLInputElement>;
-    const roleRadios = $$(
-      'input[name="roles-principals"]',
-    ) as NodeListOf<HTMLInputElement>;
+    const roleCheckboxes = $$(".roles-support") as NodeListOf<HTMLInputElement>;
+    const roleRadios = $$(".roles-principals") as NodeListOf<HTMLInputElement>;
 
     resetChecks.addEventListener("change", () => {
       if (resetChecks.checked) {

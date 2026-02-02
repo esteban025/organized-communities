@@ -47,18 +47,7 @@
   }
 }
 
-.content-input-check {
-  /* bg-neutral-100 p-2 px-5 rounded-full hover:bg-neutral-200 transition-colors relative role-selected */
-  background-color: var(--color-neutral-100);
-  padding: .5rem 1.25rem;
-  border-radius: 999px;
-  transition: all 200ms ease-in-out;
-  position: relative;
 
-  &:hover {
-    background-color: var(--color-neutral-200);
-  }
-}
 
 input[placeholder]:not(:placeholder-shown),
 input:focus {      
@@ -76,131 +65,163 @@ input:focus {
   }
 }
 
-form:has(input[placeholder]:not(:placeholder-shown)) {
-  & .content-actions button {
-    pointer-events: auto;
-    opacity: 1;
-    cursor: pointer;
-  }
-}
-
-
-
-
 .content-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-  /* Estilos para select */
-  .select-input {
-    width: 100%;
-    padding: 0.75rem 2.5rem 0.75rem 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-    background-color: #ffffff;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-transform: capitalize;
-  }
+/* Estilos para select */
+.select-input {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: capitalize;
+}
 
-  .select-input.no-rounded {
-    border-radius: 1rem;
-  }
+.select-input.no-rounded {
+  border-radius: 1rem;
+}
 
-  .select-input::picker-icon {
-    display: none;
-  }
+.select-input::picker-icon {
+  display: none;
+}
 
-  .select-input:hover {
-    border-color: #9ca3af;
-  }
+.select-input:hover {
+  border-color: #9ca3af;
+}
 
-  .select-input:focus {
-    outline: none;
-    border-color: #6b7280;
-    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
-  }
+.select-input:focus {
+  outline: none;
+  border-color: #6b7280;
+  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
+}
 
-  .options-select {
-    text-transform: capitalize;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    color: #374151;
-    background-color: color-mix(
-      in oklab,
-      var(--color-gray-100),
-      transparent 60%
-    );
-    border-radius: 1rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.options-select {
+  text-transform: capitalize;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: #374151;
+  background-color: color-mix(
+    in oklab,
+    var(--color-gray-100),
+    transparent 60%
+  );
+  border-radius: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  .options-select:hover {
-    background-color: var(--color-gray-100);
-  }
+.options-select:hover {
+  background-color: var(--color-gray-100);
+}
 
-  /* Opción deshabilitada (placeholder) */
-  .options-select:disabled,
-  option[disabled] {
-    color: #9ca3af;
-    font-style: italic;
-    background-color: #f9fafb;
-    cursor: not-allowed;
-  }
+/* Opción deshabilitada (placeholder) */
+.options-select:disabled,
+option[disabled] {
+  color: #9ca3af;
+  font-style: italic;
+  background-color: #f9fafb;
+  cursor: not-allowed;
+}
 
-  ::picker(select) {
-    appearance: base-select;
-    padding: 0.75rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-    background-color: #ffffff;
-  }
+::picker(select) {
+  appearance: base-select;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  background-color: #ffffff;
+}
 
-  /* select - no eliminar esta instruccion */
-  .select-input,
-  ::picker(select) {
-    appearance: base-select;
-  }
+/* select - no eliminar esta instruccion */
+.select-input,
+::picker(select) {
+  appearance: base-select;
+}
 
-  .icon-select {
-    /* absolute top-1/2 right-4 transform -rotate-90 -translate-y-1/2 text-text-muted icon-select */
-    position: absolute;
-    top: 50%;
-    right: 1rem;
-    transform: translateY(-50%) rotate(-90deg);
-    color: var(--color-text-muted);
-    pointer-events: none;
-    transition: all 300ms ease;
-  }
-  .select-input:focus ~ .icon-select {
-    transform: translateY(-50%) rotate(90deg);
-  }
+.icon-select {
+  /* absolute top-1/2 right-4 transform -rotate-90 -translate-y-1/2 text-text-muted icon-select */
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%) rotate(-90deg);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  transition: all 300ms ease;
+}
+.select-input:focus ~ .icon-select {
+  transform: translateY(-50%) rotate(90deg);
+}
 
-  /* === FORM BROTHER - SELECCIONAR COMUNIDAD EN LA QUE ES CATEQUISTA === */
+/* === FORM BROTHER - ROLES === */
+.content-input-check {
+  background-color: var(--color-neutral-100);
+  padding: .35rem .75rem;
+  border-radius: 999px;
+  transition: all 200ms ease-in-out;
+  position: relative;
+  border: 2px solid transparent;
 
-  /* se debe aplicar solamente al input en checked */
-  .comm-selected:has(input:checked),
-  .role-selected:has(input:checked) {
+  &:hover {
+    background-color: var(--color-neutral-200);
+  }
+}
+
+/* === FORM BROTHER - CATEQUISTAS === */
+
+
+/* se debe aplicar solamente al input en checked */
+.comm-selected:has(input:checked),
+.role-selected:has(input:checked) {
+  background-color: var(--color-neutral-300);
+  /* color: red; */
+
+  /* numero */
+
+  & span {
+    font-weight: 600;
+  }
+  &:hover {
     background-color: var(--color-neutral-300);
-
-    & span {
-      font-weight: 600;
-    }
-    &:hover {
-      background-color: var(--color-neutral-300);
-    }
   }
+}
+
+/* role de ninguno */
+.content-input-check:has(input#role-none:checked) {
+  border-color: var(--color-sky-700);
+}
+
+
+/* === FUSION DE COMUNDIADES */
+.selected-in-fusion:has(input:checked) {
+  border-color: var(--color-red-500);
+
+  & p > span:last-child {
+    font-weight: 700;
+    background-color: var(--color-red-500);
+  }
+
+  &.first-check {
+    border-color: var(--color-sky-700);
+
+    & p > span:last-child {
+    font-weight: 700;
+    background-color: var(--color-sky-700);
+  }
+  }
+}
 

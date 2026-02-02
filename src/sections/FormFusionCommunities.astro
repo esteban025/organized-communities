@@ -50,10 +50,13 @@ try {
       e.preventDefault();
       const formData = new FormData(form);
       // obtener todos los check seleccionados
+      const parishId = formData.get("parish-id-in-fusion") as string;
       const selectedCommunities = formData.getAll(
         "fusion-communities",
       ) as string[];
-      const parishId = formData.get("parish-id-in-fusion") as string;
+      const firstCommunityId = formData.get("first-community-id") as
+        | string
+        | null;
       if (selectedCommunities.length < 2) {
         showNotification(
           "Selecciona al menos dos comunidades para fusionar.",
@@ -61,12 +64,44 @@ try {
         );
         return;
       }
+      if (selectedCommunities.length > 2) {
+        showNotification(
+          "Solo se pueden fusionar dos comunidades a la vez.",
+          "error",
+        );
+        return;
+      }
+      let comunitiesIds: number[];
+
+      if (firstCommunityId && selectedCommunities.includes(firstCommunityId)) {
+        comunitiesIds = [
+          Number(firstCommunityId),
+          ...selectedCommunities
+            .filter((id) => id !== firstCommunityId)
+            .map((id) => Number(id)),
+        ];
+      } else {
+        // Fallback por si no se pudo determinar el primero
+        comunitiesIds = selectedCommunities.map((id) => Number(id));
+      }
+      console.log("Fusionar comunidades:", parishId, comunitiesIds);
 
       try {
-        // const { data, error } = await actions.fusionCommunities({
-        //   parishId: Number(parishId),
-        //   communityIds: selectedCommunities.map((id) => Number(id)),
-        // });
+        const { data, error } = await actions.mergeCommunities({
+          parishId: Number(parishId),
+          communityIds: comunitiesIds,
+        });
+
+        if (!data?.success || error) {
+          showNotification(
+            data?.message || error?.message || "Algo salio mal",
+            "error",
+          );
+          return;
+        }
+        showNotification(data.message, "success");
+        window.dispatchEvent(new Event("communities:updated"));
+        form.reset();
       } catch (error) {
         showNotification("Error al fusionar comunidades.", "error");
         return;

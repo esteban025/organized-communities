@@ -106,7 +106,7 @@ export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) =
                   <li key={leader.group_id}>
                     <div className="ss">
                       <span className="initials">{getInitialsName(leader.names)}</span>
-                      <span>{leader.names}</span>
+                      <span className="truncate max-w-37.5">{leader.names}</span>
                     </div>
                   </li>
                 ))}

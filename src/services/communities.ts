@@ -137,3 +137,104 @@ export const deleteCommunityInDB = async (id: number) => {
     data: { id }
   }
 }
+
+export const mergeCommunitiesInDB = async (parishId: number, communityIds: number[]) => {
+
+  const [keepCommunityId, deleteCommunityId] = communityIds;
+
+  try {
+    // 1. Verificar que ambas comunidades pertenezcan a la misma parroquia
+    const [communitiesFromDB] = await db.query(
+      `SELECT id FROM communities 
+       WHERE id IN (?, ?) AND parish_id = ?`,
+      [keepCommunityId, deleteCommunityId, parishId]
+    );
+    const communities = communitiesFromDB as any[];
+
+    if (communities.length !== 2) {
+      return {
+        success: false,
+        message: "Las comunidades no pertenecen a la misma parroquia o no existen",
+        data: null,
+      };
+    }
+
+    // 2. Mover todas las personas de la comunidad a eliminar a la comunidad que permanece
+    await db.execute(
+      `UPDATE persons 
+       SET community_id = ? 
+       WHERE community_id = ?`,
+      [keepCommunityId, deleteCommunityId]
+    );
+
+    // 3. Mover todos los matrimonios a la comunidad que permanece
+    await db.execute(
+      `UPDATE marriages 
+       SET community_id = ? 
+       WHERE community_id = ?`,
+      [keepCommunityId, deleteCommunityId]
+    );
+
+    // 4. Eliminar TODOS los roles de la comunidad que se elimina, EXCEPTO catequistas
+    await db.execute(
+      `DELETE FROM person_roles 
+       WHERE community_id = ? AND role != 'catequista'`,
+      [deleteCommunityId]
+    );
+
+    // 5. Mover los roles de catequista a la comunidad que permanece
+    await db.execute(
+      `UPDATE person_roles 
+       SET community_id = ? 
+       WHERE community_id = ? AND role = 'catequista'`,
+      [keepCommunityId, deleteCommunityId]
+    );
+
+    // 6. Eliminar la comunidad
+    await db.execute(
+      `DELETE FROM communities WHERE id = ?`,
+      [deleteCommunityId]
+    );
+
+    // 7. Obtener estadísticas de la comunidad fusionada
+    const [statsFromDB] = await db.query(
+      `SELECT 
+        COUNT(DISTINCT p.id) as total_personas,
+        COUNT(DISTINCT m.id) as total_matrimonios,
+        COUNT(DISTINCT CASE WHEN m.id IS NULL THEN p.id END) as total_solteros
+       FROM persons p
+       LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id) AND m.community_id = p.community_id
+       WHERE p.community_id = ?`,
+      [keepCommunityId]
+    );
+    const stats = statsFromDB as any[];
+
+    return {
+      success: true,
+      message: `Comunidades fusionadas exitosamente. ${stats[0].total_personas} personas ahora pertenecen a la comunidad ${keepCommunityId}`,
+      data: {
+        community_id: keepCommunityId,
+        total_personas: stats[0].total_personas,
+        total_matrimonios: stats[0].total_matrimonios,
+        total_solteros: stats[0].total_solteros,
+      },
+    };
+
+  } catch (error: any) {
+    console.error("Error merging communities:", error);
+
+    if (error.code === 'ER_DUP_ENTRY') {
+      return {
+        success: false,
+        message: "Error: Ya existen personas con los mismos nombres en la comunidad destino",
+        data: null,
+      };
+    }
+
+    return {
+      success: false,
+      message: "Error al fusionar comunidades",
+      data: null,
+    };
+  }
+}

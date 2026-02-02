@@ -1,4 +1,4 @@
-import { createCommunityInDB, deleteCommunityInDB, getCommunitiesByParishIdFromDB, updateCommunityInDB, getComunityByIdFromDB } from "@/services/communities";
+import { createCommunityInDB, deleteCommunityInDB, getCommunitiesByParishIdFromDB, updateCommunityInDB, getComunityByIdFromDB, mergeCommunitiesInDB } from "@/services/communities";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -72,6 +72,20 @@ export const deleteCommunity = defineAction({
   }),
   async handler({ id }) {
     const res = await deleteCommunityInDB(id);
+    return {
+      success: res.success,
+      message: res.message,
+      data: res.data,
+    }
+  }
+})
+export const mergeCommunities = defineAction({
+  input: z.object({
+    parishId: z.coerce.number().int(),
+    communityIds: z.array(z.coerce.number().int()).min(2),
+  }),
+  async handler({ parishId, communityIds }) {
+    const res = await mergeCommunitiesInDB(parishId, communityIds);
     return {
       success: res.success,
       message: res.message,

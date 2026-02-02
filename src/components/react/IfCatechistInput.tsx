@@ -1,9 +1,13 @@
-import { actions } from "astro:actions"
-import type { ParishWithCounts } from "@/types/parishes"
-import { useEffect, useState } from "react"
-import type { ChangeEvent } from "react"
-import { ArrowShortIcon } from "@/icons/iconsReact"
-import type { CommunityWithBrotherCount } from "@/types/communities"
+import { actions } from "astro:actions";
+import type { ParishWithCounts } from "@/types/parishes";
+import { useEffect, useState } from "react";
+import type { ChangeEvent } from "react";
+import { ArrowShortIcon } from "@/icons/iconsReact";
+import type { CommunityWithBrotherCount } from "@/types/communities";
+
+type CatechistCommunitiesEventDetail = {
+  communities: CommunityWithBrotherCount[];
+};
 
 export const IfCatechistInput = () => {
   const [parishes, setParishes] = useState<ParishWithCounts[]>([])
@@ -58,6 +62,14 @@ export const IfCatechistInput = () => {
           loaded.forEach((c) => {
             if (!seen.has(c.id)) merged.push(c)
           })
+
+          window.dispatchEvent(
+            new CustomEvent<CatechistCommunitiesEventDetail>(
+              "catechist:communities-changed",
+              { detail: { communities: merged } },
+            ),
+          )
+
           return merged
         })
 
@@ -107,13 +119,25 @@ export const IfCatechistInput = () => {
   ) => {
     const { checked } = event.target
     setSelectedCommunities((prev) => {
+      let next: CommunityWithBrotherCount[]
       if (checked) {
-        // agregar si no está ya seleccionada
-        if (prev.some((c) => c.id === community.id)) return prev
-        return [...prev, community]
+        if (prev.some((c) => c.id === community.id)) {
+          next = prev
+        } else {
+          next = [...prev, community]
+        }
+      } else {
+        next = prev.filter((c) => c.id !== community.id)
       }
-      // quitar si se desmarca
-      return prev.filter((c) => c.id !== community.id)
+
+      window.dispatchEvent(
+        new CustomEvent<CatechistCommunitiesEventDetail>(
+          "catechist:communities-changed",
+          { detail: { communities: next } },
+        ),
+      )
+
+      return next
     })
   }
   return (
@@ -148,58 +172,51 @@ export const IfCatechistInput = () => {
         )}
 
         {selectedParishId && communities.length > 0 && (
-          <div className="mt-2 communities-view">
-            {communities.map((community) => (
-              <div key={community.id} className="bg-neutral-100 p-2 px-5 rounded-full hover:bg-neutral-200 transition-colors relative comm-selected">
-                <label className="" htmlFor={`community-${community.id}-ipt`}>
-                  <input
-                    id={`community-${community.id}-ipt`}
-                    name={`community-${community.id}-ipt`}
-                    type="checkbox"
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                    value={community.id}
-                    checked={selectedCommunities.some(
-                      (c) => c.id === community.id,
-                    )}
-                    onChange={(event) =>
-                      handleCommunityToggle(event, community)
-                    }
-                  />
-                  <span>
-                    {community.number_community} - {community.responsable}
-                  </span>
-                </label>
-              </div>
-
-            ))}
+          <div className="mt-4 communities-view space-y-1">
+            {communities.map((community) => {
+              const isSelected = selectedCommunities.some(
+                (c) => c.id === community.id,
+              )
+              return (
+                <div
+                  key={community.id}
+                  className="bg-neutral-100 p-2 px-5 rounded-full hover:bg-neutral-200 transition-colors relative comm-selected"
+                >
+                  <label
+                    className=""
+                    htmlFor={`community-${community.id}-ipt`}
+                  >
+                    <input
+                      id={`community-${community.id}-ipt`}
+                      name={`community-${community.id}-ipt`}
+                      type="checkbox"
+                      className="absolute inset-0 opacity-0 cursor-pointer comm-input-select"
+                      value={community.id}
+                      checked={isSelected}
+                      onChange={(event) =>
+                        handleCommunityToggle(event, community)
+                      }
+                    />
+                    <span>
+                      {community.number_community} - {community.responsable}
+                    </span>
+                  </label>
+                </div>
+              )
+            })}
           </div>
         )}
-
-        {selectedCommunities.length > 0 && (
-          <fieldset className="mt-2">
-            <legend>Comunidades Selecciondas</legend>
-            <ul className="space-y-1">
-              {selectedCommunities.map((community) => {
-                const parishName = parishes.find(
-                  (p) => p.id === community.parish_id,
-                )?.name
-                return (
-                  <li key={community.id}>
-                    {/* input oculto para que el formulario principal reciba las IDs */}
-                    <input
-                      type="hidden"
-                      name="catechist-community-ids"
-                      value={community.id}
-                    />
-                    Comunidad {community.number_community} - {community.responsable}
-                    {parishName ? ` (${parishName})` : ""}
-                  </li>
-                )
-              })}
-            </ul>
-          </fieldset>
-        )}
       </div>
+
+      {/* Inputs ocultos para enviar los IDs de comunidades catequistas */}
+      {selectedCommunities.map((community) => (
+        <input
+          key={community.id}
+          type="hidden"
+          name="catechist-community-ids"
+          value={community.id}
+        />
+      ))}
     </div>
   )
 }
