@@ -76,7 +76,7 @@ export const FusionCommunity = ({ parishId }: { parishId: number }) => {
                       <span className="font-semibold">
                         {comm.responsable ? comm.responsable : "Sin responsable"}
                       </span>
-                      <span className="bg-neutral-700 text-white flex justify-center items-center w-10 aspect-square rounded-full transition-colors duration-300 num-comm">{comm.number_community}</span>
+                      <span className="num-comm">{comm.number_community}</span>
                     </p>
                   </label>
                 </div>

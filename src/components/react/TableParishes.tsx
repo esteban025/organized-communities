@@ -28,7 +28,6 @@ export const TableParishes = ({ parishes }: { parishes: ParishWithCounts[] }) =>
       console.warn("deleteParish function is not defined on window")
     }
   }
-  console.log(parishes)
 
   return (
     <>

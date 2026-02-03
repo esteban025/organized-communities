@@ -1,0 +1,163 @@
+---
+import { actions } from "astro:actions";
+import { SelectCommunitiesMultiple } from "@/components/react/SelectCommunitiesMultiple";
+import { ViewSelectedCommunities } from "@/components/react/ViewSelectedCommunities";
+---
+
+<section class="card-section h-min" transition:name="section-form">
+  <form
+    action={actions.postRetreat}
+    id="form-retreat"
+    class="design-form space-y-4"
+  >
+    <input type="hidden" name="id-retreat" value="" />
+    <fieldset class="space-y-4 fieldset-retreat-data">
+      <legend>Nueva Convivencia</legend>
+      <!-- title -->
+      <div class="content-input">
+        <input
+          type="text"
+          name="title-retreat"
+          id="title-retreat"
+          autocomplete="off"
+          placeholder=" "
+          required
+        />
+        <label for="title-retreat" class="label-text">Título</label>
+      </div>
+      <!-- description -->
+      <div class="content-input">
+        <textarea
+          name="description-retreat"
+          id="description-retreat"
+          rows="4"
+          placeholder=" "
+          required></textarea>
+        <label for="description-retreat" class="label-text">Descripción</label>
+      </div>
+      <!-- fechas -->
+      <div class="flex items-center gap-4">
+        <!-- fecha de inicio -->
+        <div class="content-input">
+          <input
+            type="date"
+            name="start-date-retreat"
+            id="start-date-retreat"
+            placeholder=" "
+            required
+          />
+          <label for="start-date-retreat" class="label-text"
+            >Fecha de inicio</label
+          >
+        </div>
+        <!-- fecha de final -->
+        <div class="content-input">
+          <input
+            type="date"
+            name="end-date-retreat"
+            id="end-date-retreat"
+            placeholder=" "
+            required
+          />
+          <label for="end-date-retreat" class="label-text">Fecha de final</label
+          >
+        </div>
+        <!-- costo por persona -->
+        <!-- status -->
+        <!-- is solo de reponsables -->
+      </div>
+      <!-- costo de convivencia -->
+      <div class="content-input">
+        <input
+          type="number"
+          name="cost-per-person-retreat"
+          id="cost-per-person-retreat"
+          placeholder=" "
+          required
+        />
+        <label for="cost-per-person-retreat" class="label-text"
+          >Costo/persona
+        </label>
+      </div>
+
+      <h3 class="text-lg font-semibold text-center">Comunidades que asisten</h3>
+
+      <SelectCommunitiesMultiple client:load />
+    </fieldset>
+
+    <fieldset class="fieldset-selected-communities animate-entry">
+      <legend>Comunidades Seleccionadas</legend>
+      <ViewSelectedCommunities client:load />
+    </fieldset>
+    <div class="content-actions">
+      <button type="reset" class="btn btn-secondary w-full">Limpiar</button>
+      <button type="submit" class="btn btn-primary w-full">Crear</button>
+    </div>
+  </form>
+</section>
+
+<style>
+  .fieldset-selected-communities {
+    display: none;
+  }
+  .fieldset-retreat-data:has(input:checked) ~ .fieldset-selected-communities {
+    display: block;
+  }
+</style>
+
+<script>
+  import { showNotification } from "@/scripts/notification";
+  import { $id } from "@/utils/getElements";
+  import { actions } from "astro:actions";
+
+  document.addEventListener("astro:page-load", () => {
+    const formRetreat = $id("form-retreat") as HTMLFormElement;
+
+    formRetreat.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(formRetreat);
+
+      const idRetreat = formData.get("id-retreat") as string;
+      const titleRetreat = formData.get("title-retreat") as string;
+      const descripRetreat = formData.get("description-retreat") as string;
+      const startDateRetreat = formData.get("start-date-retreat") as string;
+      const endDateRetreat = formData.get("end-date-retreat") as string;
+      const costRetreat = formData.get("cost-per-person-retreat") as string;
+      const idsComm = formData.getAll("communities_ids") as string[];
+      const idsCommunities = idsComm.map((id) => Number(id));
+
+      const info = idRetreat
+        ? {
+            id: Number(idRetreat),
+            title: titleRetreat,
+            description: descripRetreat,
+            start_date: startDateRetreat,
+            end_date: endDateRetreat,
+            cost_per_person: Number(costRetreat),
+            communities_ids: idsCommunities,
+          }
+        : {
+            title: titleRetreat,
+            description: descripRetreat,
+            start_date: startDateRetreat,
+            end_date: endDateRetreat,
+            cost_per_person: Number(costRetreat),
+            communities_ids: idsCommunities,
+          };
+      try {
+        const { data, error } = await actions.postRetreat(info);
+        if (!data?.success || error) {
+          showNotification("Error al guardar la convivencia.", "error");
+          return;
+        }
+        showNotification("Convivencia guardada correctamente.", "success");
+        formRetreat.reset();
+        window.dispatchEvent(new CustomEvent("retreats:updated"));
+      } catch (error) {}
+    });
+
+    formRetreat.addEventListener("reset", () => {
+      window.dispatchEvent(new CustomEvent("communities:clear-selection"));
+    });
+  });
+</script>

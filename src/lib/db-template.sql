@@ -55,3 +55,38 @@ CREATE TABLE person_roles (
   FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
   UNIQUE KEY unique_person_role_per_community (person_id, community_id, role)
 );
+
+-- TABLA CASAS DE CONVIVENCIA
+CREATE TABLE retreat_houses (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(200) NOT NULL,
+  address VARCHAR(300) NOT NULL,
+  max_capacity INT NOT NULL,
+  description TEXT DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_house_name (name)
+);
+
+-- TABLA CONVIVENCIAS
+CREATE TABLE retreats (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  title VARCHAR(200) NOT NULL,
+  description TEXT DEFAULT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  cost_per_person DECIMAL(10,2) NOT NULL,
+  status ENUM('planificacion', 'en_curso', 'finalizada') DEFAULT 'planificacion',
+  is_leaders_only BOOLEAN DEFAULT FALSE, -- TRUE si es solo para responsables/corresponsables
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- TABLA COMUNIDADES INVITADAS A LA CONVIVENCIA
+CREATE TABLE retreat_communities (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  retreat_id INT NOT NULL,
+  community_id INT NOT NULL,
+  FOREIGN KEY (retreat_id) REFERENCES retreats(id) ON DELETE CASCADE,
+  FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_retreat_community (retreat_id, community_id)
+);

@@ -36,11 +36,25 @@ main.main-grid-in-brother {
     "form alls"
   ;
 }
+main.main-grid-in-retreats {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 1.5rem;
+
+  grid-template-areas: 
+    "form retreats"
+    "details details"
+  ;
+}
 
 .value, .title {
   font-family: 'Inter Variable', sans-serif;
 }
 
+.card-selected {
+  border-color: var(--color-sky-600);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
 .card-section {
   background-color: var(--color-white);
   border: 2px solid var(--color-neutral-200);

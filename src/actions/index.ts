@@ -23,6 +23,8 @@ import {
 
 import { getRetreatHouses, postRetreatHouses } from "./retreatHouses"
 
+import { getRetreats, postRetreat } from "./retreats"
+
 export const server = {
   getParishById,
   getParishes,
@@ -39,5 +41,7 @@ export const server = {
   postBrother,
   deleteBrother,
   getRetreatHouses,
-  postRetreatHouses
+  postRetreatHouses,
+  getRetreats,
+  postRetreat
 }

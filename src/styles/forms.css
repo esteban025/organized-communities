@@ -205,6 +205,18 @@ option[disabled] {
   }
 }
 
+.num-comm {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 2.5rem;
+  aspect-ratio: 1 / 1;
+  border-radius: 9999px;
+  background-color: var(--color-neutral-700);
+  color: var(--color-white);
+  transition: background-color 300ms ease;
+}
+
 /* role de ninguno */
 .content-input-check:has(input#role-none:checked) {
   border-color: var(--color-sky-700);
