@@ -2,6 +2,8 @@
 import "../styles/global.css";
 import NotificationMessage from "@/components/NotificationMessage.astro";
 import ModalMessage from "@/components/ModalMessage.astro";
+import HeaderPage from "@/sections/HeaderPage.astro";
+import { NavbarPage } from "@/sections/react/NavbarPage";
 import { ClientRouter } from "astro:transitions";
 
 interface Props {
@@ -26,6 +28,14 @@ const { title = "Astro", description = "Welcome to Astro!" }: Props =
   <body>
     <NotificationMessage />
     <ModalMessage />
-    <slot />
+    <div class="flex flex-col gap-6">
+      <HeaderPage />
+      <NavbarPage
+        client:load
+        transition:name="navbar-page"
+        transition:persist
+      />
+      <slot />
+    </div>
   </body>
 </html>

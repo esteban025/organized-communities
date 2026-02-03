@@ -1,6 +1,5 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import HeaderPage from "@/sections/HeaderPage.astro";
 import FormBrother from "@/sections/FormBrother.astro";
 import { ViewBrothers } from "@/components/react/ViewBrothers";
 import { ViewLeadersCommunity } from "@/components/react/ViewLeadersCommunity";
@@ -31,51 +30,48 @@ try {
 ---
 
 <Layout title={titlePage} description={descriptionPage}>
-  <div class="flex flex-col gap-6">
-    <HeaderPage />
-    {
-      !infoCommunity && (
+  {
+    !infoCommunity && (
+      <section
+        class="card-section max-w-5xl mx-auto"
+        transition:name="section-view"
+      >
+        <header>
+          <h2 class="text-center text-2xl font-semibold mb-4">Error</h2>
+        </header>
+        <div class="text-red-500 flex flex-col gap-1 items-center text-lg">
+          <p>
+            No se pudo cargar la información de la Comunidad. Por favor, intenta
+            nuevamente más tarde.
+          </p>
+          <p>Verifica que el ID de la Comunidad en la URL sea correcto.</p>
+        </div>
+      </section>
+    )
+  }
+  {
+    infoCommunity && (
+      <main class="main-grid-in-brother">
+        <FormBrother communityId={Number(id)} />
         <section
-          class="card-section max-w-5xl mx-auto"
           transition:name="section-view"
+          class="card-section h-full"
+          style="grid-area: leaders;"
         >
           <header>
-            <h2 class="text-center text-2xl font-semibold mb-4">Error</h2>
+            <h2 class="text-2xl font-semibold mb-4">
+              Grupo de responsables y catequistas
+            </h2>
           </header>
-          <div class="text-red-500 flex flex-col gap-1 items-center text-lg">
-            <p>
-              No se pudo cargar la información de la Comunidad. Por favor,
-              intenta nuevamente más tarde.
-            </p>
-            <p>Verifica que el ID de la Comunidad en la URL sea correcto.</p>
-          </div>
+          <ViewLeadersCommunity communityId={Number(id)} client:load />
         </section>
-      )
-    }
-    {
-      infoCommunity && (
-        <main class="main-grid-in-brother">
-          <FormBrother communityId={Number(id)} />
-          <section
-            transition:name="section-view"
-            class="card-section h-full"
-            style="grid-area: leaders;"
-          >
-            <header>
-              <h2 class="text-2xl font-semibold mb-4">
-                Grupo de responsables y catequistas
-              </h2>
-            </header>
-            <ViewLeadersCommunity communityId={Number(id)} client:load />
-          </section>
-          <section class="card-section" style="grid-area: alls;">
-            <header>
-              <h2 class="text-2xl font-semibold mb-4">Hermanos de comunidad</h2>
-            </header>
-            <ViewBrothers communityId={Number(id)} client:load />
-          </section>
-        </main>
-      )
-    }
-  </div>
+        <section class="card-section" style="grid-area: alls;">
+          <header>
+            <h2 class="text-2xl font-semibold mb-4">Hermanos de comunidad</h2>
+          </header>
+          <ViewBrothers communityId={Number(id)} client:load />
+        </section>
+      </main>
+    )
+  }
 </Layout>

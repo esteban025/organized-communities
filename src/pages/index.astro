@@ -2,23 +2,19 @@
 import Layout from "@/layouts/Layout.astro";
 import { ViewParishes } from "@/components/react/ViewParishes";
 import FormParish from "@/sections/FormParish.astro";
-import HeaderPage from "@/sections/HeaderPage.astro";
 ---
 
 <Layout
 	title="Parroquias | Comunidad"
 	description="Gestión de parroquias en la plataforma de comunidades."
 >
-	<div class="flex flex-col gap-6">
-		<HeaderPage />
-		<main class="main-grid">
-			<FormParish />
-			<section class="card-section" transition:name="section-view">
-				<header>
-					<h2 class="text-2xl font-semibold mb-4">Parroquias</h2>
-				</header>
-				<ViewParishes client:load />
-			</section>
-		</main>
-	</div>
+	<main class="main-grid">
+		<FormParish />
+		<section class="card-section" transition:name="section-view">
+			<header>
+				<h2 class="text-2xl font-semibold mb-4">Parroquias</h2>
+			</header>
+			<ViewParishes client:load />
+		</section>
+	</main>
 </Layout>

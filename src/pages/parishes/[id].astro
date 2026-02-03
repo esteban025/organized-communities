@@ -1,7 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import FormCommunity from "@/sections/FormCommunity.astro";
-import HeaderPage from "@/sections/HeaderPage.astro";
 import FormFusionCommunities from "@/sections/FormFusionCommunities.astro";
 import { ViewCommunities } from "@/components/react/ViewCommunities";
 import { actions } from "astro:actions";
@@ -31,51 +30,48 @@ try {
 ---
 
 <Layout title={titlePage} description={descriptionPage}>
-  <div class="flex flex-col gap-6">
-    <HeaderPage />
-    {
-      infoParish && (
-        <main class="main-grid">
-          <section class="flex flex-col gap-4">
-            <FormCommunity
-              id={Number(id)}
-              name={infoParish ? infoParish.name : undefined}
-            />
-            <FormFusionCommunities
-              parishId={Number(id)}
-              parishName={infoParish ? infoParish.name : undefined}
-            />
-          </section>
-          <section class="card-section" transition:name="section-view">
-            <header>
-              <h2 class="text-2xl font-semibold mb-4">
-                Comunidades de "{infoParish ? infoParish.name : "la parroquia"}"
-              </h2>
-            </header>
-            <ViewCommunities client:load parishId={Number(id)} />
-          </section>
-        </main>
-      )
-    }
-
-    {
-      !infoParish && (
-        <section
-          class="card-section max-w-5xl mx-auto"
-          transition:name="section-view"
-        >
-          <header>
-            <h2 class="text-center text-2xl font-semibold mb-4">Error</h2>
-          </header>
-          <div class="text-red-500 flex flex-col gap-1 items-center text-lg">
-            <p>
-              No se pudo cargar la información de la parroquia. Por favor,
-              intenta nuevamente más tarde.
-            </p>
-            <p>Verifica que el ID de la parroquia en la URL sea correcto.</p>
-          </div>
+  {
+    infoParish && (
+      <main class="main-grid">
+        <section class="flex flex-col gap-4">
+          <FormCommunity
+            id={Number(id)}
+            name={infoParish ? infoParish.name : undefined}
+          />
+          <FormFusionCommunities
+            parishId={Number(id)}
+            parishName={infoParish ? infoParish.name : undefined}
+          />
         </section>
-      )
-    }
-  </div>
+        <section class="card-section" transition:name="section-view">
+          <header>
+            <h2 class="text-2xl font-semibold mb-4">
+              Comunidades de "{infoParish ? infoParish.name : "la parroquia"}"
+            </h2>
+          </header>
+          <ViewCommunities client:load parishId={Number(id)} />
+        </section>
+      </main>
+    )
+  }
+
+  {
+    !infoParish && (
+      <section
+        class="card-section max-w-5xl mx-auto"
+        transition:name="section-view"
+      >
+        <header>
+          <h2 class="text-center text-2xl font-semibold mb-4">Error</h2>
+        </header>
+        <div class="text-red-500 flex flex-col gap-1 items-center text-lg">
+          <p>
+            No se pudo cargar la información de la parroquia. Por favor, intenta
+            nuevamente más tarde.
+          </p>
+          <p>Verifica que el ID de la parroquia en la URL sea correcto.</p>
+        </div>
+      </section>
+    )
+  }
 </Layout>

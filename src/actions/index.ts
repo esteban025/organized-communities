@@ -21,6 +21,8 @@ import {
   deleteBrother
 } from "./brothers"
 
+import { getRetreatHouses, postRetreatHouses } from "./retreatHouses"
+
 export const server = {
   getParishById,
   getParishes,
@@ -36,4 +38,6 @@ export const server = {
   getGroupLeaders,
   postBrother,
   deleteBrother,
+  getRetreatHouses,
+  postRetreatHouses
 }

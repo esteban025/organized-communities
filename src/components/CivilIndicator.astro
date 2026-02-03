@@ -4,17 +4,13 @@
 >
 </div>
 <script>
-  import { $$, $id, $ } from "@/utils/getElements";
+  import { $$, $id } from "@/utils/getElements";
 
   document.addEventListener("astro:page-load", () => {
     const civilIndicators = $id("civil-indicator") as HTMLDivElement;
     const civilStatusRadios = $$(
       'input[name="civil-status"]',
     ) as NodeListOf<HTMLInputElement>;
-    const containerMarried = $(".container-info-married") as HTMLDivElement;
-    const containerSingle = $(".container-info-single") as HTMLDivElement;
-    const inputsMarried = containerMarried.querySelectorAll(".input-married");
-    const inputsSingle = containerSingle.querySelectorAll(".input-single");
 
     // console.log(containerMarried, containerSingle);
 

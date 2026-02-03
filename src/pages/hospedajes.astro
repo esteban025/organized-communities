@@ -1,0 +1,20 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import FormHospedajes from "@/sections/FormHospedajes.astro";
+import { ViewHospedajes } from "@/components/react/ViewHospedajes";
+---
+
+<Layout
+  title="Convivencias | Comunidad"
+  description="Gestión de convivencias en la plataforma de comunidades."
+>
+  <main class="main-grid">
+    <FormHospedajes />
+    <section class="card-section" transition:name="section-view">
+      <header>
+        <h2 class="text-2xl font-semibold mb-4">Casa de Convivencias</h2>
+      </header>
+      <ViewHospedajes client:load />
+    </section>
+  </main>
+</Layout>

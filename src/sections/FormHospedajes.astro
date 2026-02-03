@@ -1,0 +1,109 @@
+---
+import { actions } from "astro:actions";
+---
+
+<section class="card-section h-min" transition:name="section-form">
+  <form
+    id="form-hospedajes"
+    action={actions.postRetreatHouses}
+    class="design-form"
+  >
+    <fieldset class="space-y-4">
+      <legend>Nuevo Hospedaje</legend>
+      <input type="hidden" name="id-hosp" id="id-hosp" />
+      <div class="content-input">
+        <input
+          type="text"
+          name="name-hosp"
+          id="name-hosp"
+          autocomplete="off"
+          placeholder=" "
+        />
+        <label for="name-hosp" class="label-text">Nombre</label>
+      </div>
+      <div class="content-input">
+        <input
+          type="text"
+          name="address-hosp"
+          id="address-hosp"
+          autocomplete="off"
+          placeholder=" "
+        />
+        <label for="address-hosp" class="label-text">Dirección</label>
+      </div>
+      <div class="content-input">
+        <input
+          type="number"
+          name="max-capacidad"
+          id="max-capacidad"
+          autocomplete="off"
+          placeholder=" "
+          min="1"
+        />
+        <label for="max-capacidad" class="label-text">Capacidad Máxima</label>
+      </div>
+      <div class="content-input">
+        <textarea name="description-hosp" id="description-hosp" placeholder=" "
+        ></textarea>
+        <label for="description-hosp" class="label-text">Descripción </label>
+      </div>
+      <div class="content-actions">
+        <button type="reset" class="btn btn-secondary w-full">Cancelar</button>
+        <button type="submit" class="btn btn-primary w-full">Guardar</button>
+      </div>
+    </fieldset>
+  </form>
+</section>
+
+<script>
+  import { showNotification } from "@/scripts/notification";
+  import type { RetreatHouse } from "@/types/retreatHouses";
+  import { $id } from "@/utils/getElements";
+  import { actions } from "astro:actions";
+  document.addEventListener("astro:page-load", () => {
+    const formHosp = $id("form-hospedajes") as HTMLFormElement;
+
+    formHosp.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(formHosp);
+
+      const idHosp = formData.get("id-hosp");
+      const nameHosp = formData.get("name-hosp") as string;
+      const addressHosp = formData.get("address-hosp") as string;
+      const capacityHosp = formData.get("max-capacidad") as string;
+      const descriptionHosp = formData.get("description-hosp") as string;
+
+      const info: RetreatHouse | Omit<RetreatHouse, "id"> = idHosp
+        ? {
+            id: Number(idHosp),
+            name: nameHosp,
+            address: addressHosp,
+            max_capacity: Number(capacityHosp),
+            description: descriptionHosp,
+          }
+        : {
+            name: nameHosp,
+            address: addressHosp,
+            max_capacity: Number(capacityHosp),
+            description: descriptionHosp,
+          };
+
+      try {
+        const { data, error } = await actions.postRetreatHouses(info);
+        if (data?.success) {
+          showNotification(data.message, "success");
+          formHosp.reset();
+          window.dispatchEvent(new CustomEvent("hospedaje:updated"));
+        } else {
+          showNotification(
+            data?.message || error?.message || "Error desconocido",
+            "error",
+          );
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        showNotification("Error enviando el formulario", "error");
+      }
+    });
+  });
+</script>
