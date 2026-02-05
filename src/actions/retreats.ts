@@ -1,10 +1,38 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { getRetreatsFromDB, createRetreatInDB } from "@/services/retreats"
+import { getRetreatsFromDB, createRetreatInDB, getRetreatByIdFromDB, getBrotherOfRetreatByIdFromDB } from "@/services/retreats"
 
 export const getRetreats = defineAction({
   async handler() {
     const res = await getRetreatsFromDB()
+    return {
+      success: res.success,
+      message: res.message,
+      data: res.data
+    }
+  }
+})
+
+export const getRetreatById = defineAction({
+  input: z.object({
+    id: z.coerce.number()
+  }),
+  async handler(input) {
+    const res = await getRetreatByIdFromDB({ id: input.id })
+    return {
+      success: res.success,
+      message: res.message,
+      data: res.data
+    }
+  }
+})
+
+export const getBrotherOfRetreatById = defineAction({
+  input: z.object({
+    id: z.coerce.number()
+  }),
+  async handler(input) {
+    const res = await getBrotherOfRetreatByIdFromDB({ id: input.id })
     return {
       success: res.success,
       message: res.message,

@@ -217,11 +217,6 @@ option[disabled] {
   transition: background-color 300ms ease;
 }
 
-/* role de ninguno */
-.content-input-check:has(input#role-none:checked) {
-  border-color: var(--color-sky-700);
-}
-
 
 /* === FUSION DE COMUNDIADES */
 .selected-in-fusion:has(input:checked) {

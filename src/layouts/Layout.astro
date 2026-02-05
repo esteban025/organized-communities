@@ -9,9 +9,13 @@ import { ClientRouter } from "astro:transitions";
 interface Props {
   title?: string;
   description?: string;
+  print?: boolean;
 }
-const { title = "Astro", description = "Welcome to Astro!" }: Props =
-  Astro.props;
+const {
+  title = "Astro",
+  description = "Welcome to Astro!",
+  print = false,
+}: Props = Astro.props;
 ---
 
 <html lang="es">
@@ -25,7 +29,7 @@ const { title = "Astro", description = "Welcome to Astro!" }: Props =
     <meta name="description" content={description} />
     <ClientRouter />
   </head>
-  <body>
+  <body class={print ? "print" : ""}>
     <NotificationMessage />
     <ModalMessage />
     <div class="flex flex-col gap-6">
@@ -39,3 +43,13 @@ const { title = "Astro", description = "Welcome to Astro!" }: Props =
     </div>
   </body>
 </html>
+<style>
+  @media print {
+    body.print {
+      margin: 0;
+      padding: 0;
+      box-shadow: none;
+      background-color: white;
+    }
+  }
+</style>

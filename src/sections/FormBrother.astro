@@ -284,6 +284,12 @@ const { communityId } = Astro.props;
     const wifeName = $id("names-wife") as HTMLInputElement;
     const wifePhone = $id("phone-wife") as HTMLInputElement;
 
+    function clearOnlyReadClasses() {
+      containerCS.classList.remove("only-read");
+      containerHusband.classList.remove("only-read");
+      containerWife.classList.remove("only-read");
+    }
+
     // funcion para rellenar los roles
     function fillRoles(listRoles: string[], listRolesSec: number[]) {
       // Roles
@@ -391,7 +397,6 @@ const { communityId } = Astro.props;
         }
 
         const brother = data.data as BrotherOutDB;
-        console.log(brother);
 
         // === ACTUALIZAR MATRIMONIO ===
         if (brother.civil_status === "matrimonio") {
@@ -534,6 +539,7 @@ const { communityId } = Astro.props;
           }
 
           showNotification(data.message, "success");
+          clearOnlyReadClasses();
           form.reset();
           (window as any).updateCivilIndicator();
           window.dispatchEvent(new Event("brothers:updated"));
@@ -571,9 +577,9 @@ const { communityId } = Astro.props;
         }
 
         showNotification(data.message, "success");
+        clearOnlyReadClasses();
         form.reset();
         (window as any).updateCivilIndicator();
-        containerCS.classList.remove("only-read");
         window.dispatchEvent(new Event("brothers:updated"));
       } catch (err) {
         console.error("Error en el envío del formulario de hermano:", err);
@@ -584,9 +590,7 @@ const { communityId } = Astro.props;
     form.addEventListener("reset", () => {
       brotherId.value = "";
       (window as any).updateCivilIndicator();
-      if (containerCS.classList.contains("only-read")) {
-        containerCS.classList.remove("only-read");
-      }
+      clearOnlyReadClasses();
     });
 
     (window as any).editBrother = handleEditBrother;

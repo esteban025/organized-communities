@@ -49,7 +49,7 @@ export const TableParishes = ({ parishes }: { parishes: ParishWithCounts[] }) =>
               className="grid grid-cols-5 gap-4 p-2 hover:bg-neutral-200 odd:bg-white even:bg-neutral-100 animate-entry-table"
               style={{ animationDelay: `${parish.id * 100}ms` }}
             >
-              <div className="font-semibold">{parish.name}</div>
+              <div className="font-semibold truncate">{parish.name}</div>
               <div className="text-center text-neutral-500">({parish.tag})</div>
               <div className="location">{parish.locality ? parish.locality : "N/A"}</div>
               <div className="text-center">{parish.count_communities}</div>

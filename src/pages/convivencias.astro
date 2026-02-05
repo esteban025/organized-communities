@@ -2,14 +2,13 @@
 import Layout from "@/layouts/Layout.astro";
 import FormRetreat from "@/sections/FormRetreat.astro";
 import { ViewConvivencias } from "@/components/react/ViewConvivencias";
-import InvitedAndConfirmated from "@/sections/InvitedAndConfirmed.astro";
 ---
 
 <Layout
   title="Convivencias | Comunidad"
   description="Gestión de convivencias en la plataforma de comunidades."
 >
-  <main class="main-grid-in-retreats">
+  <main class="main-grid">
     <FormRetreat />
     <section class="card-section" transition:name="section-view">
       <header>
@@ -17,6 +16,5 @@ import InvitedAndConfirmated from "@/sections/InvitedAndConfirmed.astro";
       </header>
       <ViewConvivencias client:load />
     </section>
-    <InvitedAndConfirmated />
   </main>
 </Layout>

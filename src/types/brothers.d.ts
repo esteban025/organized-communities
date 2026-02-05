@@ -7,6 +7,10 @@ export interface Brother {
   spouse_id: number | null;
 }
 
+export interface BrotherInvited extends Omit<Brother, 'phone' | 'spouse_id'> {
+  number_community: number;
+}
+
 export interface BrotherOutDB {
   id: number;
   names: string;

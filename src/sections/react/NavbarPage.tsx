@@ -50,7 +50,7 @@ export const NavbarPage = () => {
   return (
     <nav
       ref={navRef}
-      className="flex justify-center relative w-max items-center mx-auto"
+      className="flex justify-center relative w-max items-center mx-auto no-print"
     >
       <ul className="navbar-page flex items-center bg-neutral-100 rounded-full">
         {listNav.map((navItem, index) => (

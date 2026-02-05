@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import type { CreateRetreatInput, RetreatsGet } from "@/types/retreats";
+import type { BrotherInvited } from "@/types/brothers";
 
 export const getRetreatsFromDB = async () => {
   const query = `
@@ -48,10 +49,68 @@ export const getRetreatsFromDB = async () => {
   `;
   const [rows] = await db.query(query);
   const data = rows as RetreatsGet[];
-  console.log(data)
   return {
     success: true,
     message: "Convivencias obtenidas con éxito",
+    data
+  };
+}
+
+export const getRetreatByIdFromDB = async ({ id }: { id: number }) => {
+  const query = `
+    SELECT 
+      p.id,
+      p.names,
+      p.civil_status,
+      p.community_id,
+      c.number_community,
+      CASE 
+        WHEN m.id IS NOT NULL THEN 'matrimonio'
+        ELSE p.civil_status
+      END as tipo,
+      CASE 
+        WHEN ra.id IS NOT NULL THEN TRUE
+        ELSE FALSE
+      END as is_confirmed
+    FROM persons p
+    INNER JOIN retreat_communities rc ON p.community_id = rc.community_id
+    INNER JOIN communities c ON p.community_id = c.id
+    LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id) AND m.community_id = p.community_id
+    LEFT JOIN retreat_attendees ra ON ra.retreat_id = rc.retreat_id AND ra.person_id = p.id
+    WHERE rc.retreat_id = ?
+      AND ra.id IS NULL -- Solo los que NO están confirmados
+      AND (m.id IS NULL OR p.id = m.person1_id) -- Si es matrimonio, solo mostrar una vez
+    ORDER BY c.number_community, p.names;
+  `
+  const [rows] = await db.query(query, [id]);
+  const data = rows as RetreatsGet[];
+  return {
+    success: true,
+    message: "Convivencia obtenida con éxito",
+    data
+  };
+}
+
+export const getBrotherOfRetreatByIdFromDB = async ({ id }: { id: number }) => {
+  const query = `
+    SELECT DISTINCT
+      p.id,
+      p.names,
+      p.civil_status,
+      p.community_id,
+      c.number_community
+    FROM persons p
+    INNER JOIN retreat_communities rc ON p.community_id = rc.community_id
+    INNER JOIN communities c ON p.community_id = c.id
+    WHERE rc.retreat_id = ?
+    ORDER BY p.community_id, p.names;
+  `
+  const [rows] = await db.query(query, [id]);
+  const data = rows as BrotherInvited[];
+  console.log(data);
+  return {
+    success: true,
+    message: "Hermanos de la convivencia obtenidos con éxito",
     data
   };
 }

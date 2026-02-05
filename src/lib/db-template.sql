@@ -90,3 +90,51 @@ CREATE TABLE retreat_communities (
   FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
   UNIQUE KEY unique_retreat_community (retreat_id, community_id)
 );
+
+-- TABLA HERMANOS CONFIRMADOS EN LA CONVIVENCIA
+CREATE TABLE retreat_attendees (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  retreat_id INT NOT NULL,
+  person_id INT NOT NULL,
+  observation TEXT DEFAULT NULL,
+  retreat_house_id INT DEFAULT NULL, -- Casa asignada al finalizar
+  attended BOOLEAN DEFAULT NULL, -- NULL: no finalizado, TRUE: asistió, FALSE: no asistió
+  confirmed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (retreat_id) REFERENCES retreats(id) ON DELETE CASCADE,
+  FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE,
+  FOREIGN KEY (retreat_house_id) REFERENCES retreat_houses(id) ON DELETE SET NULL,
+  UNIQUE KEY unique_retreat_person (retreat_id, person_id)
+);
+
+-- TABLA COBRANZAS POR COMUNIDAD
+CREATE TABLE retreat_charges (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  retreat_id INT NOT NULL,
+  community_id INT NOT NULL,
+  total_attendees INT NOT NULL, -- Total de hermanos que asistieron de esta comunidad
+  total_cost DECIMAL(10,2) NOT NULL, -- Costo total (attendees * cost_per_person)
+  total_debt DECIMAL(10,2) NOT NULL, -- Deuda pendiente de la comunidad
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (retreat_id) REFERENCES retreats(id) ON DELETE CASCADE,
+  FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_retreat_community_charge (retreat_id, community_id)
+);
+
+-- TABLA PAGOS DE DEUDA (OPCIONAL - Para uso interno secreto)
+CREATE TABLE retreat_payments (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  retreat_charge_id INT NOT NULL,
+  amount_paid DECIMAL(10,2) NOT NULL,
+  payment_date DATE NOT NULL,
+  notes TEXT DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (retreat_charge_id) REFERENCES retreat_charges(id) ON DELETE CASCADE
+);
+
+-- Índices para mejorar rendimiento
+CREATE INDEX idx_retreats_status ON retreats(status);
+CREATE INDEX idx_retreat_attendees_retreat ON retreat_attendees(retreat_id);
+CREATE INDEX idx_retreat_attendees_attended ON retreat_attendees(retreat_id, attended);
+
+
+DELETE FROM retreats WHERE id = 3;

@@ -34,47 +34,28 @@ export const ViewConvivencias = () => {
       window.removeEventListener("retreats:updated", handleRetreatsUpdated)
     }
   }, [])
-
-  const handleRetreatClick = (retreat: RetreatsGet) => {
-    if (typeof window === "undefined") return;
-
-    const communityIds = retreat.communities.map((c) => c.id);
-
-    window.dispatchEvent(
-      new CustomEvent("retreat:selected", {
-        detail: {
-          retreatId: retreat.id,
-          title: retreat.title,
-          communityIds,
-        },
-      })
-    );
-  }
   return (
     <div className="ss">
       {loading && <p>Cargando convivencias...</p>}
       {error && <p className="text-red-500">{error}</p>}
-      {!loading && !error && retreats.length === 0 && (<p>No hay convivencias disponibles.</p>)}
+      {!loading && !error && retreats.length === 0 && (<p className="message-card">No hay convivencias disponibles.</p>)}
       {!loading && !error && retreats.length > 0 && (
         <ul className="grid grid-cols-2 gap-4">
           {retreats.map((retreat) => (
-            <button
+            <a
               key={retreat.id}
               className={`rounded-2xl relative p-2 px-4 bg-neutral-50/50 hover:bg-neutral-100 transition-colors duration-300 space-y-2 flex justify-between border-2 border-neutral-200 hover:border-neutral-300 group cursor-pointer ${isActive === retreat.id ? "card-selected" : ""}`}
-              onClick={() => {
-                handleRetreatClick(retreat);
-                setIsActive(retreat.id);
-              }}
+              href={`/retreat/${retreat.id}`}
             >
 
               <div className="">
 
-                <h3 className="text-lg font-semibold">{retreat.title}</h3>
-                <div className="flex items-center gap-2 text-neutral-700 ">
+                <h3 className="text-lg font-semibold text-start">{retreat.title}</h3>
+                <div className="flex items-center gap-2 text-neutral-700">
                   <CalendaryIcon className="size-5 text-neutral-400" />
                   <p>{transformDate(retreat.start_date)} - {transformDate(retreat.end_date)}</p>
                 </div>
-                <p className="font-medium capitalize mt-5 flex">
+                <p className="font-medium capitalize mt-5 ">
                   {retreat.status === "planificacion" && (
                     <span className="text-sky-600/80 border border-sky-600/40 group-hover:border-sky-600/90 px-3 py-1 rounded-full">Planificada</span>
                   )}
@@ -87,12 +68,12 @@ export const ViewConvivencias = () => {
                 </p>
               </div>
 
-              <div className="comunidades">
+              <div className="comunidades self-start">
                 {retreat.communities.map(comm => (
-                  <p key={comm.id}>- {comm.responsable || "--"}</p>
+                  <p key={comm.id} className="text-start">- {comm.responsable || "--"}</p>
                 ))}
               </div>
-            </button>
+            </a>
           ))}
         </ul>
       )}

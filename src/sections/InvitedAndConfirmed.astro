@@ -1,6 +1,7 @@
 ---
 import { ListInvited } from "@/components/react/ListInvited";
 import { ListConfirmed } from "@/components/react/ListConfirmed";
+import PrintIcon from "@/icons/PrintIcon.astro";
 ---
 
 <section class="card-section" style="grid-area: details;">
@@ -10,13 +11,18 @@ import { ListConfirmed } from "@/components/react/ListConfirmed";
         Gestión de Hermanos para la convivencia
       </h2>
     </header>
-    <article>
-      <h3>Invitados</h3>
-      <ListInvited client:load />
+    <article class="flex flex-col gap-4">
+      <!-- <InvitedBrother /> -->
     </article>
-    <article>
+    <article class="flex flex-col gap-4">
       <h3>Confirmados</h3>
       <ListConfirmed client:load />
+      <div class="btns inline-block">
+        <button class="btn btn-primary flex items-center zgap-2">
+          <PrintIcon class="size-4 block" />
+          <span>Imprimir</span>
+        </button>
+      </div>
     </article>
   </div>
 </section>

@@ -1,105 +1,96 @@
+import { SendIcon, PlusIcon } from "@/icons/iconsReact";
 import { actions } from "astro:actions";
 import { useEffect, useState } from "react";
-import type { BrotherwithRolesOutDB } from "@/types/brothers";
+import { FilterInvited } from "./FilterInvited";
+import type { BrotherInvited } from "@/types/brothers";
 
 const headTable = [
-  'Nombres',
-  // 'Roles',
-  'Estado Civil',
-  'Observaciones',
-  // 'Acciones',
+  "Asis.",
+  "N° Com",
+  "Nombres",
+  "Estado Civil",
 ];
-export const ListInvited = () => {
 
-  const [communityIds, setCommunityIds] = useState<number[]>([]);
-  const [persons, setPersons] = useState<BrotherwithRolesOutDB[]>([]);
-  const [loading, setLoading] = useState(false);
+export const ListInvited = ({ retreatId }: { retreatId: number }) => {
+  const [retreat, setRetreat] = useState<BrotherInvited[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handler = (event: Event) => {
-      const customEvent = event as CustomEvent<{
-        retreatId: number;
-        title: string;
-        communityIds: number[];
-      }>;
-
-      setCommunityIds(customEvent.detail.communityIds || []);
-    };
-
-    window.addEventListener("retreat:selected", handler);
-    return () => {
-      window.removeEventListener("retreat:selected", handler);
-    };
-  }, []);
-
-  useEffect(() => {
-    const fetchingCommunities = async () => {
-      setLoading(true);
-      setError(null);
-
+    const fetchRetreat = async () => {
       try {
-        const results = await Promise.all(
-          communityIds.map(async (communityId) => {
-            const { data, error } = await actions.getBrothers({
-              communityId,
-            });
-            if (error || !data?.success) {
-              throw new Error(error?.message || data?.message || "Error al obtener hermanos");
-            }
-            return data.data as BrotherwithRolesOutDB[];
-          })
-        );
-
-        // results es un array de arrays (una por comunidad). Las unimos.
-        const merged = results.flat();
-        setPersons(merged);
+        const { data, error } = await actions.getBrotherOfRetreatById({ id: retreatId });
+        if (error) {
+          setError("Error al cargar los invitados.");
+        } else {
+          setRetreat(data.data);
+        }
         setLoading(false);
+        console.log(retreat);
       } catch (error) {
-        setError("Error fetching communities");
+        setError("Error al cargar los invitados.");
         setLoading(false);
       }
     }
-    if (communityIds.length === 0) {
-      setPersons([]);
-      return;
-    }
-
-    fetchingCommunities();
-  }, [communityIds]);
-
-
-  if (communityIds.length === 0) {
-    return (
-      <p className="message-card">
-        Selecciona una convivencia para ver sus comunidades invitadas.
-      </p>
-    );
-  }
+    fetchRetreat();
+  }, [retreatId])
 
   return (
-    <div className="ss">
-      {loading && <p>Cargando invitados...</p>}
+    <div className="flex flex-col gap-4">
+      <header className="flex items-center justify-between">
+        {retreat && (
+          <>
+            <button className="btn btn-secondary flex items-center gap-2">
+              <PlusIcon className="size-4 block" />
+              <span>Invitar</span>
+            </button>
+            <div className="flex gap-4">
+              <button className="hover:underline cursor-pointer">Marcar todos</button>
+              <button className="btn btn-primary flex items-center gap-2">
+                <SendIcon className="size-4 block" />
+                <span>Confirmar</span>
+              </button>
+            </div>
+          </>
+        )}
+
+      </header>
+
+      {loading && <p className="message-card loading">Cargando invitados...</p>}
       {error && <p className="text-red-500">{error}</p>}
-      {!loading && !error && persons.length === 0 && (<p>No hay invitados disponibles.</p>)}
-      {!loading && !error && persons.length > 0 && (
+
+      {!loading && !error && retreat.length === 0 && (
+        <p className="message-card ">
+          No hay hermanos invitados para esta convivencia.
+        </p>
+      )}
+
+      {!loading && !error && retreat.length > 0 && (
         <div className="flex flex-col">
-          <div className="grid grid-cols-3 gap-4 p-2 border-b-2 border-neutral-300">
+          <FilterInvited />
+          <div className="grid grid-cols-[auto_1fr_1fr_1fr] gap-4 p-2 border-b-2 border-neutral-300">
             {headTable.map((head) => (
-              <div key={head} className="font-semibold text-neutral-700 text-center">
+              <div
+                key={head}
+                className="font-semibold text-neutral-700 text-center"
+              >
                 {head}
               </div>
             ))}
           </div>
-          {persons.map((brotherList) => (
-            <div key={brotherList.group_id} className="grid grid-cols-3 gap-2 p-2 hover:bg-neutral-200 odd:bg-white even:bg-neutral-100">
-              <div className="truncate">{brotherList.names}</div>
-              <div className="text-center">{brotherList.civil_status}</div>
-              <div className="ss">
-                <input type="text" />
+          {retreat.map((person) => (
+            <div
+              key={person.id}
+              className="grid grid-cols-[auto_1fr_1fr_1fr] gap-4 p-2 hover:bg-neutral-200 odd:bg-white even:bg-neutral-100 animate-entry-table"
+            >
+              <div className="min-w-10 text-center">
+                <input type="checkbox" />
               </div>
+              <div className="text-center">{person.number_community}</div>
+              <div className="truncate">
+                {person.names}
+              </div>
+              <div className="text-center">{person.civil_status}</div>
             </div>
           ))}
         </div>

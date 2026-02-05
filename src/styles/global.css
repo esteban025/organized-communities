@@ -204,3 +204,10 @@ main.main-grid-in-retreats {
     grid-area: cat;
   }
 }
+
+
+@media print {
+  .no-print {
+    display: none;
+  }
+}

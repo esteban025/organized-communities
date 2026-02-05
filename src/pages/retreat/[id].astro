@@ -1,0 +1,59 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { db } from "@/lib/db";
+import type { Retreats } from "@/types/retreats";
+import ReplaceUserIcon from "@/icons/ReplaceUserIcon.astro";
+import { ListInvited } from "@/components/react/ListInvited";
+import { ListConfirmed } from "@/components/react/ListConfirmed";
+
+const { id } = Astro.params;
+let retreat;
+let error = false;
+
+if (!id) {
+  throw new Error("ID de convivencia no encontrado");
+}
+
+try {
+  const query = `SELECT * FROM retreats WHERE id = ?`;
+  const [rows] = await db.query(query, [id]);
+  const data = rows as Retreats[];
+
+  if (data.length === 0) {
+    error = true;
+    throw new Error("Convivencia no encontrada");
+  }
+
+  retreat = data[0];
+} catch (error) {
+  console.error(error);
+}
+---
+
+<Layout
+  title="Planificación y gestión de convivencias"
+  description="Detalles de la convivencia inicializada"
+>
+  {error && <p class="message-card ">Error: ID de convivencia no encontrado</p>}
+  {!error && retreat && (
+    <header>
+      <h2 class="flex items-center gap-2 text-4xl font-semibold">
+        <span class="block size-4 bg-neutral-500 rounded-full"></span>
+        {retreat?.title}
+      </h2>
+      <p class="text-neutral-500 text-lg">{retreat?.description}</p>
+    </header>
+    <main>
+      <section class="grid grid-cols-[1fr_auto_1fr] items-center gap-6">
+        <section class="card-section">
+          <ListInvited client:load retreatId={retreat.id} />
+        </section>
+        <ReplaceUserIcon class="size-8 text-neutral-500" />
+        <section class="card-section">
+          <ListConfirmed client:load />
+        </section>
+      </section>
+    </main>
+  )}
+
+</Layout>
