@@ -1,0 +1,135 @@
+---
+import ModalDesign from "./ModalDesign.astro";
+import { SelectRetreatHouse } from "./react/SelectRetreatHouse";
+---
+
+<ModalDesign id={"modal-observation"}>
+  <header>
+    <h3 class="title-message text-2xl font-bold mb-3">Agregar Observación</h3>
+  </header>
+  <div class="w-full max-w-md text-center mb-4">
+    <span class="text-sm text-neutral-500 text-center text-balance"
+      >La observación escrita en este campo será agregada para todos los
+      hermanos seleccionados.
+    </span>
+  </div>
+  <form action="" class="w-full" id="form-confirmate">
+    <input type="hidden" name="retreat_id" id="retreat_id" />
+    <div class="content-input mb-4">
+      <input
+        type="text"
+        name="observation"
+        id="observation"
+        class="w-full"
+        placeholder=" "
+      />
+      <label for="observation" class="label-text">Observación</label>
+    </div>
+    <SelectRetreatHouse client:load />
+    <footer class="flex items-center gap-2 w-full mt-6">
+      <button type="reset" class="btn btn-secondary w-full">Cancelar</button>
+      <button type="submit" class="btn btn-primary w-full">Aceptar</button>
+    </footer>
+  </form>
+</ModalDesign>
+
+<script>
+  import { showNotification } from "@/scripts/notification";
+  import { $id } from "@/utils/getElements";
+  import { actions } from "astro:actions";
+
+  document.addEventListener("astro:page-load", () => {
+    const modalObservation = $id("modal-observation") as HTMLDivElement;
+    const form = $id("form-confirmate") as HTMLFormElement;
+    const retreatIdInput = $id("retreat_id") as HTMLInputElement;
+    const observationInput = $id("observation") as HTMLInputElement;
+    const selectHouse = $id("select-house") as HTMLSelectElement | null;
+
+    let ids: number[];
+    let isEditMode = false;
+
+    function openModal(
+      retreat_id: number,
+      person_ids: number[],
+      options?: {
+        observation?: string | null;
+        retreat_house_id?: number | null;
+        isEdit?: boolean;
+      },
+    ) {
+      modalObservation.classList.add("show");
+      retreatIdInput.value = retreat_id.toString();
+      ids = person_ids;
+      isEditMode = Boolean(options?.isEdit);
+
+      observationInput.value = options?.observation ?? "";
+
+      if (selectHouse) {
+        const value =
+          options && options.retreat_house_id != null
+            ? String(options.retreat_house_id)
+            : "";
+        selectHouse.value = value;
+      }
+    }
+
+    function closeModal() {
+      modalObservation.classList.remove("show");
+      observationInput.value = "";
+      if (selectHouse) {
+        selectHouse.value = "";
+      }
+      ids = [];
+      isEditMode = false;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        const formData = new FormData(form);
+        const retreat_id = Number(formData.get("retreat_id"));
+        const observation = String(formData.get("observation"));
+        const retreat_house_raw = formData.get("select-house");
+        const retreat_house_id = retreat_house_raw
+          ? Number(retreat_house_raw)
+          : null;
+
+        const action = isEditMode
+          ? actions.updateRetreatAttendanceGroup
+          : actions.confirmRetreatAttendance;
+
+        const { data, error } = await action({
+          retreat_id,
+          person_ids: ids,
+          observation,
+          retreat_house_id,
+        });
+        if (!data?.success || error) {
+          showNotification(
+            data?.message || error?.message || "Error al confirmar asistencia",
+            "error",
+          );
+          return;
+        }
+        showNotification("Asistencia confirmada correctamente", "success");
+        closeModal();
+        // Notificar a los componentes React que deben refrescar listas
+        window.dispatchEvent(
+          new CustomEvent("retreat:attendance-updated", {
+            detail: { retreat_id },
+          }),
+        );
+      } catch (error) {
+        showNotification("Error al confirmar asistencia", "error");
+      }
+    });
+
+    form.addEventListener("reset", (e) => {
+      e.preventDefault();
+      closeModal();
+    });
+
+    (window as any).openModalObservation = openModal;
+    // (window as any).closeModalObservation = closeModal;
+  });
+</script>

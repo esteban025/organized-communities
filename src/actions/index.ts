@@ -21,9 +21,18 @@ import {
   deleteBrother
 } from "./brothers"
 
-import { getRetreatHouses, postRetreatHouses } from "./retreatHouses"
+import { getRetreatHouses, postRetreatHouses, deleteRetreatHouse } from "./retreatHouses"
 
-import { getRetreats, postRetreat, getRetreatById, getBrotherOfRetreatById } from "./retreats"
+import {
+  getRetreats,
+  postRetreat,
+  getRetreatById,
+  getBrotherOfRetreatById,
+  getRetreatConfirmedAttendees,
+  confirmRetreatAttendance,
+  updateRetreatAttendanceGroup,
+  deleteRetreatAttendanceGroup,
+} from "./retreats"
 
 export const server = {
   getParishById,
@@ -42,8 +51,13 @@ export const server = {
   deleteBrother,
   getRetreatHouses,
   postRetreatHouses,
+  deleteRetreatHouse,
   getRetreats,
   getRetreatById,
   getBrotherOfRetreatById,
+  getRetreatConfirmedAttendees,
+  confirmRetreatAttendance,
+  updateRetreatAttendanceGroup,
+  deleteRetreatAttendanceGroup,
   postRetreat
 }

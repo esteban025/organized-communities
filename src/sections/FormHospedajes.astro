@@ -57,11 +57,51 @@ import { actions } from "astro:actions";
 
 <script>
   import { showNotification } from "@/scripts/notification";
+  import { warningMessage } from "@/scripts/warning-message";
   import type { RetreatHouse } from "@/types/retreatHouses";
   import { $id } from "@/utils/getElements";
   import { actions } from "astro:actions";
+
   document.addEventListener("astro:page-load", () => {
     const formHosp = $id("form-hospedajes") as HTMLFormElement;
+
+    function fillOutHospedajesForm(data: RetreatHouse) {
+      ($id("id-hosp") as HTMLInputElement).value = data.id.toString();
+      ($id("name-hosp") as HTMLInputElement).value = data.name;
+      ($id("address-hosp") as HTMLInputElement).value = data.address;
+      ($id("max-capacidad") as HTMLInputElement).value =
+        data.max_capacity.toString();
+      ($id("description-hosp") as HTMLTextAreaElement).value =
+        data.description || "";
+    }
+
+    function deleteHospedaje(id: number) {
+      // implementar eliminacion
+      const confirmed = warningMessage(
+        "Eliminar Casa de Convivencia",
+        "Se eliminará permanentemente y no se podrá recuperar. ¿Estás seguro de que deseas eliminar este hospedaje?",
+      );
+
+      confirmed.then(async (result: boolean) => {
+        if (result) {
+          try {
+            const { data, error } = await actions.deleteRetreatHouse({ id });
+            if (data?.success) {
+              showNotification(data.message, "success");
+              window.dispatchEvent(new CustomEvent("hospedaje:updated"));
+            } else {
+              showNotification(
+                data?.message || error?.message || "Error desconocido",
+                "error",
+              );
+            }
+          } catch (error) {
+            console.error("Error deleting hospedaje:", error);
+            showNotification("Error eliminando el hospedaje", "error");
+          }
+        }
+      });
+    }
 
     formHosp.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -105,5 +145,12 @@ import { actions } from "astro:actions";
         showNotification("Error enviando el formulario", "error");
       }
     });
+
+    formHosp.addEventListener("reset", () => {
+      ($id("id-hosp") as HTMLInputElement).value = "";
+    });
+
+    (window as any).fillOutHospedajesForm = fillOutHospedajesForm;
+    (window as any).deleteHospedaje = deleteHospedaje;
   });
 </script>

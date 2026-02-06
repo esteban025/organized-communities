@@ -5,16 +5,19 @@ import ModalMessage from "@/components/ModalMessage.astro";
 import HeaderPage from "@/sections/HeaderPage.astro";
 import { NavbarPage } from "@/sections/react/NavbarPage";
 import { ClientRouter } from "astro:transitions";
+import ModalObservation from "@/components/ModalObservation.astro";
 
 interface Props {
   title?: string;
   description?: string;
   print?: boolean;
+  inRetreatPage?: boolean;
 }
 const {
   title = "Astro",
   description = "Welcome to Astro!",
   print = false,
+  inRetreatPage = false,
 }: Props = Astro.props;
 ---
 
@@ -24,7 +27,6 @@ const {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
     <ClientRouter />
@@ -32,24 +34,19 @@ const {
   <body class={print ? "print" : ""}>
     <NotificationMessage />
     <ModalMessage />
+    <ModalObservation />
     <div class="flex flex-col gap-6">
       <HeaderPage />
-      <NavbarPage
-        client:load
-        transition:name="navbar-page"
-        transition:persist
-      />
+      {
+        !inRetreatPage && (
+          <NavbarPage
+            client:load
+            transition:name="navbar-page"
+            transition:persist
+          />
+        )
+      }
       <slot />
     </div>
   </body>
 </html>
-<style>
-  @media print {
-    body.print {
-      margin: 0;
-      padding: 0;
-      box-shadow: none;
-      background-color: white;
-    }
-  }
-</style>

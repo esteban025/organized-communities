@@ -10,6 +10,18 @@ export interface Brother {
 export interface BrotherInvited extends Omit<Brother, 'phone' | 'spouse_id'> {
   number_community: number;
 }
+export interface BrotherConfirmated {
+  group_key: string;
+  parroquia: string;
+  nombres_confirmados: string
+  observaciones_combinadas: string | null;
+  retreat_house_id: number | null;
+  retreat_house_name: string | null;
+  person_ids: number[];
+  number_community: number;
+  marriage_id: number | null;
+  ultima_confirmacion: string;
+}
 
 export interface BrotherOutDB {
   id: number;

@@ -51,7 +51,15 @@
   }
 }
 
+.btn-clean-filter {
+  display: none;
+}
 
+.content-input:has(#filter-parish:not(:placeholder-shown)) .btn-clean-filter,
+.content-input:has(#filter-brother-name:not(:placeholder-shown)) .btn-clean-filter,
+.content-input:has(#filter-brother-name-invited:not(:placeholder-shown)) .btn-clean-filter {
+  display: flex;
+}
 
 input[placeholder]:not(:placeholder-shown),
 textarea[placeholder]:not(:placeholder-shown),
@@ -98,8 +106,10 @@ input:focus, textarea:focus {
   border-radius: 1rem;
 }
 
-.select-input::picker-icon {
-  display: none;
+.select-input,  .select-input-table{
+  &::picker-icon {
+    display: none;
+  }
 }
 
 .select-input:hover {
@@ -237,3 +247,12 @@ option[disabled] {
   }
 }
 
+.span-icon {
+  display: none;
+}
+
+.content-asist:has(input:checked) {
+  .span-icon {
+    display: block;
+  }
+}

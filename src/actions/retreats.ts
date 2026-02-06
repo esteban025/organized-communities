@@ -1,6 +1,15 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { getRetreatsFromDB, createRetreatInDB, getRetreatByIdFromDB, getBrotherOfRetreatByIdFromDB } from "@/services/retreats"
+import {
+  getRetreatsFromDB,
+  createRetreatInDB,
+  getRetreatByIdFromDB,
+  getBrotherOfRetreatByIdFromDB,
+  confirmRetreatAttendanceInDB,
+  getRetreatConfirmedAttendeesFromDB,
+  updateRetreatAttendanceGroupInDB,
+  deleteRetreatAttendanceGroupInDB,
+} from "@/services/retreats"
 
 export const getRetreats = defineAction({
   async handler() {
@@ -39,6 +48,66 @@ export const getBrotherOfRetreatById = defineAction({
       data: res.data
     }
   }
+})
+
+export const confirmRetreatAttendance = defineAction({
+  input: z.object({
+    retreat_id: z.coerce.number(),
+    person_ids: z.array(z.number()),
+    observation: z.string().optional(),
+    retreat_house_id: z.coerce.number().nullable()
+  }),
+  async handler(input) {
+    const res = await confirmRetreatAttendanceInDB(input)
+    return {
+      success: res.success,
+      message: res.message,
+    }
+  }
+})
+
+export const getRetreatConfirmedAttendees = defineAction({
+  input: z.object({
+    retreat_id: z.coerce.number()
+  }),
+  async handler(input) {
+    const res = await getRetreatConfirmedAttendeesFromDB(input.retreat_id)
+    return {
+      success: res.success,
+      message: res.message,
+      data: res.data
+    }
+  }
+})
+
+export const updateRetreatAttendanceGroup = defineAction({
+  input: z.object({
+    retreat_id: z.coerce.number(),
+    person_ids: z.array(z.number()),
+    observation: z.string().optional(),
+    retreat_house_id: z.coerce.number().nullable(),
+  }),
+  async handler(input) {
+    const res = await updateRetreatAttendanceGroupInDB(input);
+    return {
+      success: res.success,
+      message: res.message,
+    };
+  },
+})
+
+export const deleteRetreatAttendanceGroup = defineAction({
+  input: z.object({
+    retreat_id: z.coerce.number(),
+    person_ids: z.array(z.number()),
+  }),
+  async handler(input) {
+    const res = await deleteRetreatAttendanceGroupInDB(input);
+    return {
+      success: res.success,
+      message: res.message,
+    };
+  },
 })
 
 export const postRetreat = defineAction({

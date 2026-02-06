@@ -1,0 +1,90 @@
+---
+import PrintListConfirmated from "@/layouts/PrintListConfirmated.astro";
+import type { BrotherConfirmated } from "@/types/brothers";
+import { getRetreatConfirmedAttendeesFromDB } from "@/services/retreats";
+
+const { id } = Astro.params;
+const retreatId = Number(id);
+
+const headTable = ["Nombres", "Estado Civil", "Observaciones", "Hospedaje"];
+
+let grouped: {
+  parroquia: string;
+  comunidades: { numero: number; confirmados: BrotherConfirmated[] }[];
+}[] = [];
+let fetchError: string | null = null;
+
+if (!Number.isNaN(retreatId)) {
+  const res = await getRetreatConfirmedAttendeesFromDB(retreatId);
+  res.success
+    ? (grouped = res.data)
+    : (fetchError = res.message || "Error al obtener los confirmados");
+} else {
+  fetchError = "ID de convivencia no válido";
+}
+---
+
+<PrintListConfirmated
+  title="Camino Neocatecumenal | Imprimir lista de confirmados"
+  description="Imprime la lista de hermanos confirmados para un retiro específico."
+>
+  {fetchError && <p class="message-card error">{fetchError}</p>}
+
+  {
+    !fetchError && grouped.length === 0 && (
+      <p class="message-card">
+        No hay hermanos confirmados para esta convivencia.
+      </p>
+    )
+  }
+
+  {
+    !fetchError && grouped.length > 0 && (
+      <div class="flex flex-col gap-9 w-full max-w-3xl mx-auto">
+        {grouped.map((parish) => (
+          <section>
+            <header>
+              <h2 class="font-semibold text-2xl p-1 border-b-2 border-neutral-500">
+                {parish.parroquia}
+              </h2>
+            </header>
+            <div class="main space-y-8 mt-4">
+              {parish.comunidades.map((comm) => (
+                <article>
+                  <h3 class="font-semibold text-lg mb-2 text-neutral-500">
+                    Comunidad N° {comm.numero}
+                  </h3>
+                  <div class="container-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          {headTable.map((item) => (
+                            <th>{item}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody class="text-xl">
+                        {comm.confirmados.map((bro) => (
+                          <tr>
+                            <td class="font-medium truncate">
+                              {bro.nombres_confirmados}
+                            </td>
+                            <td>
+                              {bro.marriage_id ? "Matrimonio" : "Soltero"}
+                            </td>
+                            <td>{bro.observaciones_combinadas}</td>
+                            <td>{bro.retreat_house_name}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    )
+  }
+</PrintListConfirmated>

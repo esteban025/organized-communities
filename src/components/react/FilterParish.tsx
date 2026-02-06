@@ -1,4 +1,4 @@
-import { RefreshIcon, SearchIcon } from "@/icons/iconsReact";
+import { PlusIcon, SearchIcon } from "@/icons/iconsReact";
 
 interface FilterParishProps {
   value: string;
@@ -7,8 +7,6 @@ interface FilterParishProps {
 }
 
 export const FilterParish = ({ value, onChange, onReset }: FilterParishProps) => {
-  // filtrar por nombre o por localidad
-  // localidad aun no implementada por el momento solo por nombre
   return (
     <div className="grid grid-cols-2 items-center">
       <div className="content-input relative">
@@ -17,21 +15,15 @@ export const FilterParish = ({ value, onChange, onReset }: FilterParishProps) =>
           type="text"
           id="filter-parish"
           name="filter-parish"
-          placeholder="Buscar por nombre de parroquia..."
+          placeholder=" "
           value={value}
           onChange={(event) => onChange(event.target.value)}
           required
         />
+        <label htmlFor="filter-parish" className="label-text">Buscar por nombre</label>
         <SearchIcon className="size-5 absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 transition-colors duration-300" />
-      </div>
-      <div className="content-actions self-end justify-end flex gap-2">
-        <button
-          type="button"
-          className="btn btn-primary flex items-center gap-2"
-          onClick={onReset}
-        >
-          <RefreshIcon className="size-5" />
-          <span>Limpiar filtros</span>
+        <button className=" size-6 absolute right-3 top-1/2 -translate-y-1/2 transition-colors duration-300 p-1 bg-neutral-500 rounded-full justify-center items-center text-white cursor-pointer btn-clean-filter" onClick={onReset}>
+          <PlusIcon className="size-5 block transform rotate-45 " />
         </button>
       </div>
     </div>

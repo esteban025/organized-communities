@@ -35,37 +35,39 @@ export const TableParishes = ({ parishes }: { parishes: ParishWithCounts[] }) =>
         <div className="message-card flex-1">No hay parroquias disponibles.</div>
       )}
       {parishes.length > 0 && (
-        <div className="flex flex-col">
-          <div className="grid grid-cols-5 gap-4 p-2 border-b-2 border-neutral-300">
-            {headTable.map((head) => (
-              <div key={head} className="font-semibold text-neutral-700 text-center">
-                {head}
-              </div>
-            ))}
-          </div>
-          {parishes.map((parish) => (
-            <div
-              key={parish.id}
-              className="grid grid-cols-5 gap-4 p-2 hover:bg-neutral-200 odd:bg-white even:bg-neutral-100 animate-entry-table"
-              style={{ animationDelay: `${parish.id * 100}ms` }}
-            >
-              <div className="font-semibold truncate">{parish.name}</div>
-              <div className="text-center text-neutral-500">({parish.tag})</div>
-              <div className="location">{parish.locality ? parish.locality : "N/A"}</div>
-              <div className="text-center">{parish.count_communities}</div>
-              <div className="actions flex justify-center gap-2">
-                <a href={`/parishes/${parish.id}`} title="Ver Parroquia" className="atn-btn">
-                  <EyeIcon className="size-5 block stroke-1" />
-                </a>
-                <button className="atn-btn" title="Editar Parroquia" onClick={(e) => handleEditParish(e, parish)}>
-                  <EditIcon className="size-5 block stroke-1" />
-                </button>
-                <button className="atn-btn" title="Eliminar Parroquia" onClick={() => handleDeleteParish(parish.id)}>
-                  <TrashIcon className="size-5 block stroke-1" />
-                </button>
-              </div>
-            </div>
-          ))}
+        <div className="container-table">
+          <table>
+            <thead>
+              <tr>
+                {headTable.map(item => (
+                  <th key={item}>{item}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {parishes.map((parish, idx) => (
+                <tr key={parish.id} className="animate-entry-table" style={{ animationDelay: `${idx * 120}ms` }}>
+                  <td>{parish.name}</td>
+                  <td className="">{parish.tag}</td>
+                  <td>{parish.locality}</td>
+                  <td className="min">{parish.count_communities}</td>
+                  <td className="min">
+                    <div className="flex items-center gap-1">
+                      <a href={`/parishes/${parish.id}`} title="Ver Parroquia" className="atn-btn">
+                        <EyeIcon className="size-5 block stroke-1" />
+                      </a>
+                      <button className="atn-btn" title="Editar Parroquia" onClick={(e) => handleEditParish(e, parish)}>
+                        <EditIcon className="size-5 block stroke-1" />
+                      </button>
+                      <button className="atn-btn" title="Eliminar Parroquia" onClick={() => handleDeleteParish(parish.id)}>
+                        <TrashIcon className="size-5 block stroke-1" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </>

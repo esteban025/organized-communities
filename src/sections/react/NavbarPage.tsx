@@ -7,7 +7,7 @@ export const NavbarPage = () => {
       href: "/",
     }, {
       name: "convivencias",
-      href: "/convivencias"
+      href: "/retreats"
     },
     {
       name: "Hospedajes",

@@ -382,7 +382,6 @@ const { communityId } = Astro.props;
 
     // === EDITAR HERMANO/A ===
     async function handleEditBrother(id: number) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
       form.reset();
       try {
         const { data, error } = await actions.getBrotherById({ id });
@@ -589,8 +588,13 @@ const { communityId } = Astro.props;
 
     form.addEventListener("reset", () => {
       brotherId.value = "";
-      (window as any).updateCivilIndicator();
       clearOnlyReadClasses();
+      // El evento reset se dispara ANTES de que el navegador
+      // restablezca los valores de los inputs, por eso
+      // actualizamos el indicador en el siguiente tick.
+      setTimeout(() => {
+        (window as any).updateCivilIndicator();
+      });
     });
 
     (window as any).editBrother = handleEditBrother;

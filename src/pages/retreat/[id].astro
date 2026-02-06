@@ -33,24 +33,32 @@ try {
 <Layout
   title="Planificación y gestión de convivencias"
   description="Detalles de la convivencia inicializada"
+  inRetreatPage
 >
   {error && <p class="message-card ">Error: ID de convivencia no encontrado</p>}
   {!error && retreat && (
     <header>
       <h2 class="flex items-center gap-2 text-4xl font-semibold">
-        <span class="block size-4 bg-neutral-500 rounded-full"></span>
+        {/* <span class="block size-4 bg-neutral-500 rounded-full"></span> */}
         {retreat?.title}
       </h2>
       <p class="text-neutral-500 text-lg">{retreat?.description}</p>
     </header>
     <main>
-      <section class="grid grid-cols-[1fr_auto_1fr] items-center gap-6">
+      <section class="grid grid-cols-[1fr_1.5fr] gap-6">
         <section class="card-section">
+          <h2 class="font-semibold text-xl mb-4">Invitados</h2>
           <ListInvited client:load retreatId={retreat.id} />
         </section>
+        {/* <span class="block mt-10">
         <ReplaceUserIcon class="size-8 text-neutral-500" />
-        <section class="card-section">
-          <ListConfirmed client:load />
+        </span> */}
+        <section class="card-section h-min">
+          <h2 class="font-semibold text-xl mb-4 text-sky-600 flex items-center gap-2">
+            <span class="size-3 rounded-full bg-sky-600 flex animate-pulse"></span>
+            <span>Confirmados</span>
+          </h2>
+          <ListConfirmed client:load retreatId={retreat.id} />
         </section>
       </section>
     </main>

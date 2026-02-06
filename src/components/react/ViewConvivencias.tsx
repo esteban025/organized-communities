@@ -8,7 +8,7 @@ export const ViewConvivencias = () => {
   const [retreats, setRetreats] = useState<RetreatsGet[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isActive, setIsActive] = useState<number | null>(null)
+  // const [isActive, setIsActive] = useState<number | null>(null)
 
   useEffect(() => {
     const fetchRetreats = async () => {
@@ -44,7 +44,7 @@ export const ViewConvivencias = () => {
           {retreats.map((retreat) => (
             <a
               key={retreat.id}
-              className={`rounded-2xl relative p-2 px-4 bg-neutral-50/50 hover:bg-neutral-100 transition-colors duration-300 space-y-2 flex justify-between border-2 border-neutral-200 hover:border-neutral-300 group cursor-pointer ${isActive === retreat.id ? "card-selected" : ""}`}
+              className="rounded-2xl relative p-2 px-4 bg-neutral-50/50 hover:bg-neutral-100 transition-colors duration-300 space-y-2 flex justify-between border-2 border-neutral-200 hover:border-neutral-300 group cursor-pointer"
               href={`/retreat/${retreat.id}`}
             >
 

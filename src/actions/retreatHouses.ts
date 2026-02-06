@@ -1,4 +1,4 @@
-import { createRetreatHouseInDB, getRetreatHousesFromDB } from "@/services/retreatHouses"
+import { createRetreatHouseInDB, deleteRetreatHouseInDB, getRetreatHousesFromDB, updateRetreatHouseInDB } from "@/services/retreatHouses"
 import { defineAction } from "astro:actions"
 import { z } from "astro:schema"
 
@@ -23,10 +23,12 @@ export const postRetreatHouses = defineAction({
   }),
   async handler(input) {
     if (input.id) {
-      // actualizamos
+      const id = input.id
+      const res = await updateRetreatHouseInDB({ id, ...input })
       return {
-        success: false,
-        message: "Actualizar casa de retiro no implementado",
+        success: res.success,
+        message: res.message,
+        data: res.data,
       }
     }
 
@@ -38,5 +40,18 @@ export const postRetreatHouses = defineAction({
       data: res.data,
     }
 
+  }
+})
+
+export const deleteRetreatHouse = defineAction({
+  input: z.object({
+    id: z.coerce.number().int(),
+  }),
+  async handler(input) {
+    const res = await deleteRetreatHouseInDB(input.id)
+    return {
+      success: res.success,
+      message: res.message,
+    }
   }
 })
