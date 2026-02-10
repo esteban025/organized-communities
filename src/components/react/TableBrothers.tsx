@@ -1,4 +1,4 @@
-import { EditIcon, TrashIcon, UserEditIcon, UserIcon } from "@/icons/iconsReact";
+import { EditIcon, TrashIcon, UserIcon } from "@/icons/iconsReact";
 import type { BrotherwithRolesOutDB } from "@/types/brothers";
 
 export const TableBrothers = ({ brothers }: { brothers: BrotherwithRolesOutDB[] }) => {
@@ -6,6 +6,7 @@ export const TableBrothers = ({ brothers }: { brothers: BrotherwithRolesOutDB[] 
   const headTable = [
     'Nombres',
     'Roles',
+    // 'Teléfono',
     'Estado Civil',
     'Acciones',
   ];
@@ -45,9 +46,14 @@ export const TableBrothers = ({ brothers }: { brothers: BrotherwithRolesOutDB[] 
           {brothers.map((bro, idx) => (
             <tr key={bro.group_id} className="animate-entry-table" style={{ animationDelay: `${idx * 100}ms` }}>
               <td>{bro.names}</td>
-              <td className="flex items-center gap-1">{bro.roles?.map((rol) => (
-                <p className="tag-rol">{rol}</p>
-              ))}</td>
+              <td className="">
+                <div className="flex items-center gap-1 ">
+                  {bro.roles?.map((rol) => (
+                    <p className="tag-rol">{rol}</p>
+                  ))}
+                </div>
+              </td>
+              {/* <td>Telefono</td> */}
               <td>{bro.civil_status}</td>
               <td className="min overflow-visible">
                 <div className="flex items-center justify-center gap-1 relative">
@@ -103,6 +109,15 @@ export const TableBrothers = ({ brothers }: { brothers: BrotherwithRolesOutDB[] 
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          <tr>
+            <th colSpan={4}>
+              <div className="flex">
+                Total de Hermanos: {brothers.length}
+              </div>
+            </th>
+          </tr>
+        </tfoot>
       </table>
     </div>
   )

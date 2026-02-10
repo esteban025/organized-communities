@@ -7,9 +7,8 @@
   cursor: pointer;
   transition: all 0.3s ease;
   outline: none;
-  border: 2px solid;
   overflow: hidden;
-
+  
   &:hover {
     transform: translateY(-3px);
   }
@@ -20,6 +19,7 @@
 
 /* primario */
 .btn-primary {
+  border: 2px solid;
   background: linear-gradient(
     to right bottom,
     var(--color-neutral-800),
@@ -36,7 +36,7 @@
   &:active {
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   }
-
+  
   &:focus {
     box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.3);
   }
@@ -45,7 +45,7 @@
     opacity: .5;
     cursor: no-drop;
     transform: translateY(0);
-
+    
     &:hover {
       background-color: var(--color-gray-800);
     }
@@ -59,8 +59,9 @@
     var(--color-neutral-100),
     var(--color-neutral-50),
     var(--color-neutral-100)
-  );
+    );
   color: var(--color-neutral-600);
+  border: 2px solid;
   border-color: var(--color-neutral-200);
   
   &:hover {

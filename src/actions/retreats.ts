@@ -9,6 +9,8 @@ import {
   getRetreatConfirmedAttendeesFromDB,
   updateRetreatAttendanceGroupInDB,
   deleteRetreatAttendanceGroupInDB,
+  updateRetreatAttendeesStatusInDB,
+  updateRetreatStatusInDB,
 } from "@/services/retreats"
 
 export const getRetreats = defineAction({
@@ -103,6 +105,35 @@ export const deleteRetreatAttendanceGroup = defineAction({
   }),
   async handler(input) {
     const res = await deleteRetreatAttendanceGroupInDB(input);
+    return {
+      success: res.success,
+      message: res.message,
+    };
+  },
+})
+
+export const updateRetreatAttendeesStatus = defineAction({
+  input: z.object({
+    retreat_id: z.coerce.number(),
+    attended_person_ids: z.array(z.number()),
+    not_attended_person_ids: z.array(z.number()),
+  }),
+  async handler(input) {
+    const res = await updateRetreatAttendeesStatusInDB(input);
+    return {
+      success: res.success,
+      message: res.message,
+    };
+  },
+})
+
+export const updateRetreatStatus = defineAction({
+  input: z.object({
+    retreat_id: z.coerce.number(),
+    status: z.enum(["planificacion", "en_curso", "finalizada"]),
+  }),
+  async handler(input) {
+    const res = await updateRetreatStatusInDB(input);
     return {
       success: res.success,
       message: res.message,

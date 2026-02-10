@@ -1,5 +1,8 @@
 ---
 import Logo from "@/assets/Logo.astro";
+const {
+  description = "En este sitio puedes gestionar las parroquias y sus comunidades.",
+} = Astro.props;
 ---
 
 <header
@@ -11,8 +14,6 @@ import Logo from "@/assets/Logo.astro";
   </div>
   <div class="ss">
     <h1 class="text-5xl font-bold">Camino Neocatecumenal</h1>
-    <p class="text-neutral-500">
-      En este sitio puedes gestionar las parroquias y sus comunidades.
-    </p>
+    <p class="text-neutral-500">{description}</p>
   </div>
 </header>

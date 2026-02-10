@@ -32,6 +32,8 @@ import {
   confirmRetreatAttendance,
   updateRetreatAttendanceGroup,
   deleteRetreatAttendanceGroup,
+  updateRetreatAttendeesStatus,
+  updateRetreatStatus,
 } from "./retreats"
 
 export const server = {
@@ -58,6 +60,8 @@ export const server = {
   getRetreatConfirmedAttendees,
   confirmRetreatAttendance,
   updateRetreatAttendanceGroup,
+  updateRetreatAttendeesStatus,
   deleteRetreatAttendanceGroup,
-  postRetreat
+  postRetreat,
+  updateRetreatStatus,
 }

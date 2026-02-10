@@ -5,8 +5,14 @@ import type { ParishWithCounts } from "@/types/parishes"
 import { RefreshIcon } from "@/icons/iconsReact"
 import { FilterParish } from "./FilterParish"
 
+interface ParishData {
+  parishes: ParishWithCounts[]
+  total_parishes: number
+  total_communities: number
+}
+
 export const ViewParishes = () => {
-  const [parishes, setParishes] = useState<ParishWithCounts[]>([])
+  const [parishes, setParishes] = useState<ParishData>({ parishes: [], total_parishes: 0, total_communities: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | undefined>(undefined)
   const [searchTerm, setSearchTerm] = useState("")
@@ -20,7 +26,7 @@ export const ViewParishes = () => {
           setLoading(false)
           setError(error?.message || "Failed to fetch parishes")
         }
-        setParishes(data?.data || [])
+        setParishes(data?.data || { parishes: [], total_parishes: 0, total_communities: 0 })
         setLoading(false)
       } catch (error) {
         setError(error instanceof Error ? error.message : "An unexpected error occurred")
@@ -37,11 +43,11 @@ export const ViewParishes = () => {
     };
   }, [])
 
-  const filteredParishes = useMemo(() => {
+  const filteredParishes = useMemo<ParishWithCounts[]>(() => {
     const term = searchTerm.trim().toLowerCase()
-    if (!term) return parishes
+    if (!term) return parishes.parishes
 
-    return parishes.filter((parish) =>
+    return parishes.parishes.filter((parish) =>
       parish.name.toLowerCase().includes(term)
     )
   }, [parishes, searchTerm])
@@ -61,8 +67,17 @@ export const ViewParishes = () => {
         </div>
       )}
       {error && <p className="error">{error}</p>}
-      {!loading && !error && (
-        <TableParishes parishes={filteredParishes} />
+      {!loading && !error && filteredParishes.length === 0 && (
+        <div className="message-card flex-1">No hay parroquias disponibles.</div>
+      )}
+      {!loading && !error && filteredParishes.length > 0 && (
+        <TableParishes
+          parishes={filteredParishes}
+          total={{
+            total_parishes: parishes.total_parishes,
+            total_communities: parishes.total_communities,
+          }}
+        />
       )}
     </div>
   )

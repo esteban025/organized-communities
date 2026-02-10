@@ -32,11 +32,9 @@ export const getCommunitiesByParishIdFromDB = async (parishId: number) => {
       c.id,
       c.number_community,
       c.level_paso,
+      c.parish_id,
       COUNT(DISTINCT p.id) as count_persons,
-      COUNT(DISTINCT m.id) as count_marriages,
-      COUNT(DISTINCT CASE 
-        WHEN m.id IS NULL THEN p.id 
-      END) as count_singles,
+      (SELECT COUNT(*) FROM communities WHERE parish_id = ?) as total_communities,
       (
         SELECT p_resp.names
         FROM person_roles pr_resp
@@ -53,8 +51,9 @@ export const getCommunitiesByParishIdFromDB = async (parishId: number) => {
     GROUP BY c.id, c.number_community, c.level_paso
     ORDER BY c.number_community;
   `
-  const [rows] = await db.query(query, [parishId])
+  const [rows] = await db.query(query, [parishId, parishId])
   const data = rows as CommunityWithBrotherCount[]
+  console.log("Communities with counts:", data)
 
   return {
     success: true,

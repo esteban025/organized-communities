@@ -1,0 +1,83 @@
+interface FiltersProps {
+  parishes: string[]
+  communities: string[]
+  retreatHouses: string[]
+  selectedParish: string
+  selectedCommunity: string
+  selectedRetreatHouse: string
+  onChangeParish: (value: string) => void
+  onChangeCommunity: (value: string) => void
+  onChangeRetreatHouse: (value: string) => void
+  onClearFilters: () => void
+}
+
+export const PrintConfirmatedFilters = ({
+  parishes,
+  communities,
+  retreatHouses,
+  selectedParish,
+  selectedCommunity,
+  selectedRetreatHouse,
+  onChangeParish,
+  onChangeCommunity,
+  onChangeRetreatHouse,
+  onClearFilters,
+}: FiltersProps) => {
+  return (
+    <form className="card-section flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+      <header>
+        <h2 className="text-xl font-semibold mb-2">Filtros</h2>
+      </header>
+      <div className="grid gap-4 grid-cols-4">
+        <label className="flex flex-col gap-1">
+          <select
+            className="input select-input space-y-1"
+            value={selectedParish}
+            onChange={(e) => onChangeParish(e.target.value)}
+          >
+            <option value="" className="options-select">Todas las parroquias</option>
+            {parishes.map((parish) => (
+              <option key={parish} value={parish} className="options-select">
+                {parish}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <select
+            className="input select-input space-y-1"
+            value={selectedCommunity}
+            onChange={(e) => onChangeCommunity(e.target.value)}
+          >
+            <option value="" className="options-select">Todas las comunidades</option>
+            {communities.map((num) => (
+              <option key={num} value={num} className="options-select">
+                Comunidad N° {num}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <select
+            className="input select-input space-y-1"
+            value={selectedRetreatHouse}
+            onChange={(e) => onChangeRetreatHouse(e.target.value)}
+          >
+            <option value="" className="options-select">Todos los hospedajes</option>
+            {retreatHouses.map((house) => (
+              <option key={house} value={house} className="options-select">
+                {house}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <button type="button" className="btn btn-secondary" onClick={onClearFilters}>
+          Limpiar filtros
+        </button>
+      </div>
+    </form>
+  )
+}

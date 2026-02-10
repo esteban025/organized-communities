@@ -58,6 +58,15 @@ export const TableCommunities = ({ communities }: { communities: CommunityWithBr
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          <tr>
+            <th colSpan={5}>
+              <div className="flex">
+                Total de Comunidades: {communities.length}
+              </div>
+            </th>
+          </tr>
+        </tfoot>
       </table>
     </div>
   )

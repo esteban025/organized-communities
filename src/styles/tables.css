@@ -17,12 +17,12 @@
 
       & th {
         padding: 0.5rem 1rem;
-        font-weight: 300;
+        font-weight: 600;
         font-size: 0.875rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         /* text-align: left; */
-        border: 1px solid var(--color-border-medium);
+        border: 1px solid var(--color-neutral-400);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -49,14 +49,20 @@
 
       & td {
         padding: .15rem .55rem;
-        border: 1px solid var(--color-border-medium);
+        border: 1px solid var(--color-neutral-200);
         vertical-align: middle;
       }
     }
     & tfoot {
       & th {
-        padding: 0.5rem 1rem;
-        background-color: var(--color-gray-100);
+        padding: 0.2rem 1rem;
+        background-color: var(--color-neutral-200);
+        /* text-transform: uppercase; */
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        background-color: var(--color-neutral-200);
+        border: 1px solid var(--color-neutral-200);
+        border-top: 2px solid var(--color-neutral-400);
       }
     }
   }
@@ -81,17 +87,44 @@ table .col-full {
 }
 
 @media print {
-  .container-table {
-    box-shadow: none;
-    border-radius: 1rem;
-    overflow: hidden;
-
-    & table {
-      font-size: 12px;
-
-      & thead {
-        font-size: 10px;
-      }
-    }
+  table {
+    page-break-inside: auto;
+    break-inside: auto;
+    font-size: 15px;
   }
+  
+  thead {
+    font-size: 10px;
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  /* .container-table {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  } */
+
+  /* .print-keep-with-table {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  } */
+
+  /* .print-keep-with-table-comm {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  } */
+
+  /* .print-keep-with-table > header {
+    break-after: avoid;
+    page-break-after: avoid;
+  } */
 }

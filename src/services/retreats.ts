@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import type { CreateRetreatInput, RetreatsGet } from "@/types/retreats";
+import type { CreateRetreatInput, RetreatsGet, RetreatConf, StatsConf, ParishesConf, AttendeesConf, CommunityInfo } from "@/types/retreats";
 import type { BrotherInvited, BrotherConfirmated } from "@/types/brothers";
 
 export const getRetreatsFromDB = async () => {
@@ -341,76 +341,395 @@ export const updateRetreatAttendanceGroupInDB = async (input: {
   }
 };
 
-interface GroupedData {
-  parroquia: string;
-  comunidades: {
-    numero: number;
-    confirmados: BrotherConfirmated[];
-  }[];
-}
+export const updateRetreatAttendeesStatusInDB = async (input: {
+  retreat_id: number;
+  attended_person_ids: number[];
+  not_attended_person_ids: number[];
+}) => {
+  const { retreat_id, attended_person_ids, not_attended_person_ids } = input;
+
+  if (!retreat_id) {
+    return {
+      success: false,
+      message: "Debes proporcionar un ID de convivencia válido",
+    };
+  }
+
+  if (
+    (!attended_person_ids || attended_person_ids.length === 0) &&
+    (!not_attended_person_ids || not_attended_person_ids.length === 0)
+  ) {
+    return {
+      success: false,
+      message: "Debes proporcionar al menos una persona para actualizar asistencia",
+    };
+  }
+
+  try {
+    if (attended_person_ids.length > 0) {
+      const attendedPlaceholders = attended_person_ids.map(() => "?").join(",");
+      await db.execute(
+        `UPDATE retreat_attendees
+         SET attended = TRUE
+         WHERE retreat_id = ? AND person_id IN (${attendedPlaceholders})`,
+        [retreat_id, ...attended_person_ids],
+      );
+    }
+
+    if (not_attended_person_ids.length > 0) {
+      const notAttendedPlaceholders = not_attended_person_ids
+        .map(() => "?")
+        .join(",");
+      await db.execute(
+        `UPDATE retreat_attendees
+         SET attended = FALSE
+         WHERE retreat_id = ? AND person_id IN (${notAttendedPlaceholders})`,
+        [retreat_id, ...not_attended_person_ids],
+      );
+    }
+
+    return {
+      success: true,
+      message: "Asistencia de hermanos actualizada correctamente",
+    };
+  } catch (error) {
+    console.error("Error updating attendees 'attended' status:", error);
+    return {
+      success: false,
+      message: "Error al actualizar asistencia de hermanos",
+    };
+  }
+};
+
+export const updateRetreatStatusInDB = async (input: {
+  retreat_id: number;
+  status: "planificacion" | "en_curso" | "finalizada";
+}) => {
+  const { retreat_id, status } = input;
+
+  if (!retreat_id) {
+    return {
+      success: false,
+      message: "Debes proporcionar un ID de convivencia válido",
+    };
+  }
+
+  try {
+    const [result] = await db.execute(
+      `UPDATE retreats SET status = ? WHERE id = ?`,
+      [status, retreat_id],
+    );
+
+    const affectedRows = (result as any).affectedRows ?? 0;
+
+    if (affectedRows === 0) {
+      return {
+        success: false,
+        message: "Convivencia no encontrada",
+      };
+    }
+
+    return {
+      success: true,
+      message: "Estado de la convivencia actualizado correctamente",
+    };
+  } catch (error) {
+    console.error("Error updating retreat status:", error);
+    return {
+      success: false,
+      message: "Error al actualizar el estado de la convivencia",
+    };
+  }
+};
 
 export const getRetreatConfirmedAttendeesFromDB = async (retreat_id: number) => {
-  const query = `
-    SELECT 
-        p_parent.name AS parroquia, -- Nombre de la parroquia
+  try {
+    // 1. QUERY: Datos de la convivencia
+    const [retreatData] = await db.query(
+      `SELECT 
+        title,
+        start_date,
+        end_date,
+        cost_per_person,
+        status
+       FROM retreats 
+       WHERE id = ?`,
+      [retreat_id]
+    );
+    const retreatInfo = retreatData as RetreatConf[];
+
+    if (!retreatInfo || retreatInfo.length === 0) {
+      return {
+        success: false,
+        message: "Convivencia no encontrada",
+        data: null
+      };
+    }
+
+    const retreat = retreatInfo[0];
+
+    // 2. QUERY: Estadísticas generales
+    const [statsData] = await db.query(
+      `SELECT 
+        COUNT(DISTINCT p.id) AS total_personas,
+        COUNT(DISTINCT m.id) AS total_matrimonios,
+        COUNT(DISTINCT CASE WHEN m.id IS NULL AND p.civil_status = 'soltero' THEN p.id END) AS total_solteros,
+        COUNT(DISTINCT CASE WHEN m.id IS NULL AND p.civil_status = 'soltera' THEN p.id END) AS total_solteras
+       FROM retreat_attendees ra
+       JOIN persons p ON ra.person_id = p.id
+       LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id)
+       WHERE ra.retreat_id = ?`,
+      [retreat_id]
+    );
+    const stats = statsData as StatsConf[];
+
+    const estadisticas = stats[0];
+
+    // 2b. QUERY: Personas marcadas como que asistieron (attended = TRUE)
+    const [attendedRows] = await db.query(
+      `SELECT person_id FROM retreat_attendees WHERE retreat_id = ? AND attended = TRUE`,
+      [retreat_id],
+    );
+    const attendedPersonIds = (attendedRows as { person_id: number }[]).map(
+      (row) => row.person_id,
+    );
+
+    // 3. QUERY: Parroquias y comunidades participantes con sus estadísticas
+    const [parishesData] = await db.query(
+      `SELECT DISTINCT
+        pa.id AS parish_id,
+        pa.name AS parish_name,
+        c.id AS community_id,
+        c.number_community,
+        (
+          SELECT COUNT(DISTINCT p2.id)
+          FROM retreat_attendees ra2
+          JOIN persons p2 ON ra2.person_id = p2.id
+          WHERE ra2.retreat_id = ? AND p2.community_id = c.id
+        ) AS community_total_personas,
+        (
+          SELECT COUNT(DISTINCT m2.id)
+          FROM retreat_attendees ra2
+          JOIN persons p2 ON ra2.person_id = p2.id
+          LEFT JOIN marriages m2 ON (p2.id = m2.person1_id OR p2.id = m2.person2_id)
+          WHERE ra2.retreat_id = ? AND p2.community_id = c.id AND m2.id IS NOT NULL
+        ) AS community_total_matrimonios,
+        (
+          SELECT COUNT(DISTINCT p2.id)
+          FROM retreat_attendees ra2
+          JOIN persons p2 ON ra2.person_id = p2.id
+          LEFT JOIN marriages m2 ON (p2.id = m2.person1_id OR p2.id = m2.person2_id)
+          WHERE ra2.retreat_id = ? AND p2.community_id = c.id AND m2.id IS NULL AND p2.civil_status = 'soltero'
+        ) AS community_total_solteros,
+        (
+          SELECT COUNT(DISTINCT p2.id)
+          FROM retreat_attendees ra2
+          JOIN persons p2 ON ra2.person_id = p2.id
+          LEFT JOIN marriages m2 ON (p2.id = m2.person1_id OR p2.id = m2.person2_id)
+          WHERE ra2.retreat_id = ? AND p2.community_id = c.id AND m2.id IS NULL AND p2.civil_status = 'soltera'
+        ) AS community_total_solteras
+       FROM retreat_attendees ra
+       JOIN persons p ON ra.person_id = p.id
+       JOIN communities c ON p.community_id = c.id
+       JOIN parishes pa ON c.parish_id = pa.id
+       WHERE ra.retreat_id = ?
+       ORDER BY pa.name, c.number_community`,
+      [retreat_id, retreat_id, retreat_id, retreat_id, retreat_id]
+    );
+    const parishesInfo = parishesData as ParishesConf[];
+
+    // 4. QUERY: Hermanos confirmados agrupados
+    const [attendeesData] = await db.query(
+      `SELECT 
+        p.community_id,
         IFNULL(m.id, CONCAT('p', p.id)) AS group_key,
         GROUP_CONCAT(p.names ORDER BY p.id SEPARATOR ' y ') AS nombres_confirmados,
         GROUP_CONCAT(DISTINCT ra.observation SEPARATOR ' / ') AS observaciones_combinadas,
         MAX(ra.retreat_house_id) AS retreat_house_id,
         MAX(rh.name) AS retreat_house_name,
         GROUP_CONCAT(p.id ORDER BY p.id) AS person_ids,
-        c.number_community,
-        m.id AS marriage_id
-    FROM retreat_attendees ra
-    JOIN persons p ON ra.person_id = p.id
-    JOIN communities c ON p.community_id = c.id
-    JOIN parishes p_parent ON c.parish_id = p_parent.id -- Unimos con parroquias
-    LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id)
-    LEFT JOIN retreat_houses rh ON ra.retreat_house_id = rh.id
-    WHERE ra.retreat_id = ?
-    GROUP BY 
-        group_key, 
-        p_parent.name,
-        c.number_community, 
-        m.id
-    ORDER BY p_parent.name, c.number_community;
-  `;
+        m.id AS marriage_id,
+        CASE 
+          WHEN m.id IS NOT NULL THEN 'matrimonio'
+          ELSE MAX(p.civil_status)
+        END AS civil_status
+       FROM retreat_attendees ra
+       JOIN persons p ON ra.person_id = p.id
+       LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id)
+       LEFT JOIN retreat_houses rh ON ra.retreat_house_id = rh.id
+       WHERE ra.retreat_id = ?
+       GROUP BY 
+         p.community_id,
+         group_key,
+         m.id
+       ORDER BY p.community_id`,
+      [retreat_id]
+    );
+    const attendeesInfo = attendeesData as AttendeesConf[];
 
-  const [rows] = await db.query(query, [retreat_id]);
-  const attendees = (rows as any[]).map((row) => ({
-    ...row,
-    person_ids: String(row.person_ids)
-      .split(",")
-      .map((v) => Number(v))
-      .filter((n) => !Number.isNaN(n)),
-  })) as BrotherConfirmated[];
-
-  const structuredData = attendees.reduce((acc: GroupedData[], curr) => {
-    // 1. Buscar si ya existe la parroquia en el acumulador
-    let parish = acc.find(p => p.parroquia === curr.parroquia);
-
-    if (!parish) {
-      parish = { parroquia: curr.parroquia, comunidades: [] };
-      acc.push(parish);
+    // 5. ESTRUCTURAR DATOS
+    interface ParishMapValue {
+      parroquia: string;
+      comunidades: (CommunityInfo & { community_id: number })[];
     }
 
-    // 2. Buscar si ya existe la comunidad dentro de esa parroquia
-    let community = parish.comunidades.find(c => c.numero === curr.number_community);
+    const parishesMap = new Map<number, ParishMapValue>();
 
-    if (!community) {
-      community = { numero: curr.number_community, confirmados: [] };
-      parish.comunidades.push(community);
+    // Agrupar parroquias y comunidades
+    parishesInfo.forEach((row) => {
+      if (!parishesMap.has(row.parish_id)) {
+        parishesMap.set(row.parish_id, {
+          parroquia: row.parish_name,
+          comunidades: [],
+        });
+      }
+
+      const parish = parishesMap.get(row.parish_id)!;
+      parish.comunidades.push({
+        numero: row.number_community,
+        community_id: row.community_id,
+        estadisticas: {
+          total_personas: row.community_total_personas,
+          total_matrimonios: row.community_total_matrimonios,
+          total_solteros: row.community_total_solteros,
+          total_solteras: row.community_total_solteras,
+        },
+        confirmados: [],
+      });
+    });
+
+    // Asignar hermanos confirmados a sus comunidades
+    attendeesInfo.forEach((attendee) => {
+      for (const parish of parishesMap.values()) {
+        const community = parish.comunidades.find(
+          (c) => c.community_id === attendee.community_id,
+        );
+
+        if (community) {
+          community.confirmados.push({
+            group_key: attendee.group_key,
+            nombres_confirmados: attendee.nombres_confirmados,
+            observaciones_combinadas: attendee.observaciones_combinadas,
+            retreat_house_id: attendee.retreat_house_id,
+            retreat_house_name: attendee.retreat_house_name,
+            person_ids: attendee.person_ids.split(",").map(Number),
+            marriage_id: attendee.marriage_id,
+            civil_status: attendee.civil_status,
+          });
+          break;
+        }
+      }
+    });
+
+    // 6. RETORNAR ESTRUCTURA FINAL
+    return {
+      success: true,
+      message: "Asistentes confirmados obtenidos con éxito",
+      data: {
+        convivencia: {
+          titulo: retreat.title,
+          fecha_inicio: retreat.start_date,
+          fecha_fin: retreat.end_date,
+          costo_por_persona: retreat.cost_per_person,
+          status: retreat.status
+        },
+        estadisticas: {
+          total_personas: estadisticas.total_personas,
+          total_matrimonios: estadisticas.total_matrimonios,
+          total_solteros: estadisticas.total_solteros,
+          total_solteras: estadisticas.total_solteras
+        },
+        attended_person_ids: attendedPersonIds,
+        parroquias: Array.from(parishesMap.values()).map((parish) => ({
+          parroquia: parish.parroquia,
+          comunidades: parish.comunidades.map(({ community_id, ...rest }) => rest),
+        })),
+      }
+    };
+
+  } catch (error) {
+    console.error("Error al obtener asistentes confirmados:", error);
+    return {
+      success: false,
+      message: "Error al obtener asistentes confirmados",
+      data: null
+    };
+  }
+};
+
+export const getRetreatCommunityChargesFromDB = async (retreat_id: number) => {
+  try {
+    // Datos básicos de la convivencia (para costo por persona y título)
+    const [retreatRows] = await db.query(
+      `SELECT id, title, cost_per_person FROM retreats WHERE id = ?`,
+      [retreat_id],
+    );
+
+    const retreatData = retreatRows as { id: number; title: string; cost_per_person: any }[];
+
+    if (!retreatData || retreatData.length === 0) {
+      return {
+        success: false,
+        message: "Convivencia no encontrada",
+        data: null,
+      };
     }
 
-    // 3. Insertar el hermano/pareja en la comunidad correspondiente
-    community.confirmados.push(curr);
+    const retreatRow = retreatData[0];
+    const costPerPerson = Number(retreatRow.cost_per_person ?? 0);
 
-    return acc;
-  }, []);
+    // Comunidades con asistentes que realmente participaron (attended = TRUE)
+    const [communityRows] = await db.query(
+      `SELECT
+         pa.name AS parish_name,
+         c.id AS community_id,
+         c.number_community,
+         COUNT(DISTINCT CASE WHEN ra.attended = TRUE THEN p.id END) AS total_attendees
+       FROM retreat_attendees ra
+       JOIN persons p ON ra.person_id = p.id
+       JOIN communities c ON p.community_id = c.id
+       JOIN parishes pa ON c.parish_id = pa.id
+       WHERE ra.retreat_id = ?
+       GROUP BY pa.name, c.id, c.number_community
+       HAVING total_attendees > 0
+       ORDER BY pa.name, c.number_community`,
+      [retreat_id],
+    );
 
-  return {
-    success: true,
-    message: "Asistentes confirmados obtenidos con éxito",
-    data: structuredData
-  };
+    const communities = (communityRows as {
+      parish_name: string;
+      community_id: number;
+      number_community: number;
+      total_attendees: number;
+    }[]).map((row) => {
+      const total_cost = row.total_attendees * costPerPerson;
+      return {
+        parish_name: row.parish_name,
+        community_id: row.community_id,
+        number_community: row.number_community,
+        total_attendees: row.total_attendees,
+        total_cost,
+      };
+    });
+
+    return {
+      success: true,
+      message: "Cargos por comunidad obtenidos con éxito",
+      data: {
+        retreat: {
+          id: retreatRow.id,
+          title: retreatRow.title,
+          cost_per_person: costPerPerson,
+        },
+        communities,
+      },
+    };
+  } catch (error) {
+    console.error("Error al obtener cargos por comunidad:", error);
+    return {
+      success: false,
+      message: "Error al obtener cargos por comunidad",
+      data: null,
+    };
+  }
 };

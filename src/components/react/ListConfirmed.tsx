@@ -1,4 +1,3 @@
-import type { BrotherConfirmated } from "@/types/brothers";
 import { actions } from "astro:actions";
 import { useEffect, useState } from "react";
 import { EditIcon, PrintIcon, SaveIcon, TrashIcon } from "@/icons/iconsReact";
@@ -13,18 +12,56 @@ const headTable = [
   "Acciones",
 ]
 
+interface ConfirmedGroup {
+  group_key: string;
+  nombres_confirmados: string;
+  observaciones_combinadas: string | null;
+  retreat_house_id: number | null;
+  retreat_house_name: string | null;
+  person_ids: number[];
+  marriage_id: number | null;
+  civil_status: string;
+}
+
+interface CommunityData {
+  numero: string;
+  estadisticas: {
+    total_personas: number;
+    total_matrimonios: number;
+    total_solteros: number;
+    total_solteras: number;
+  };
+  confirmados: ConfirmedGroup[];
+}
+
 interface GroupedData {
   parroquia: string;
-  comunidades: {
-    numero: number;
-    confirmados: BrotherConfirmated[];
-  }[];
+  comunidades: CommunityData[];
+}
+
+interface ConfirmedResponseData {
+  convivencia: {
+    titulo: string;
+    fecha_inicio: string;
+    fecha_fin: string;
+    costo_por_persona: number;
+    status: string;
+  };
+  estadisticas: {
+    total_personas: number;
+    total_matrimonios: number;
+    total_solteros: number;
+    total_solteras: number;
+  };
+  attended_person_ids: number[];
+  parroquias: GroupedData[];
 }
 
 export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
   const [listConfirmed, setListConfirmed] = useState<GroupedData[]>([]);
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [starting, setStarting] = useState(false)
 
   useEffect(() => {
     const fetchListConfirmed = async () => {
@@ -34,7 +71,11 @@ export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
           setError("Error fetching confirmed attendees");
           return;
         }
-        setListConfirmed(data?.data);
+        // La acción ahora devuelve un objeto con { convivencia, estadisticas, parroquias }
+        // Solo necesitamos el arreglo de parroquias para esta vista.
+        const payload = data.data as ConfirmedResponseData | null;
+        setListConfirmed(payload?.parroquias ?? []);
+
         setLoading(false);
       } catch (error) {
         setError("Error fetching confirmed attendees");
@@ -61,7 +102,7 @@ export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
     };
   }, [retreatId]);
 
-  const handleEdit = (brother: BrotherConfirmated) => {
+  const handleEdit = (brother: ConfirmedGroup) => {
     (window as any).openModalObservation?.(
       retreatId,
       brother.person_ids,
@@ -73,7 +114,7 @@ export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
     );
   }
 
-  const handleDelete = async (brother: BrotherConfirmated) => {
+  const handleDelete = async (brother: ConfirmedGroup) => {
     const isMarriage = Boolean(brother.marriage_id);
 
     const confirmed = await warningMessage(
@@ -111,6 +152,33 @@ export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
     }
   };
 
+  const handleStartRetreat = async () => {
+    if (starting) return;
+
+    try {
+      setStarting(true);
+      const { data, error } = await actions.updateRetreatStatus({
+        retreat_id: retreatId,
+        status: "en_curso",
+      });
+
+      if (!data?.success || error) {
+        showNotification(
+          data?.message || error?.message || "Error al iniciar la convivencia",
+          "error",
+        );
+        return;
+      }
+
+      showNotification("La convivencia ha iniciado", "success");
+    } catch (err) {
+      console.error("Error al iniciar la convivencia:", err);
+      showNotification("Error al iniciar la convivencia", "error");
+    } finally {
+      setStarting(false);
+    }
+  };
+
 
   return (
     <div className="ss">
@@ -142,7 +210,7 @@ export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
                         <tbody>
                           {comm.confirmados.map((bro) => (
                             <tr key={bro.group_key}>
-                              <td>{bro.nombres_confirmados}</td>
+                              <td className="truncate max-w-60">{bro.nombres_confirmados}</td>
                               <td>{bro.marriage_id ? "Matrimonio" : "Soltero"}</td>
                               <td>{bro.observaciones_combinadas}</td>
                               <td>{bro.retreat_house_name}</td>
@@ -168,6 +236,18 @@ export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
                             </tr>
                           ))}
                         </tbody>
+                        <tfoot>
+                          <tr>
+                            <th colSpan={5}>
+                              <div className="flex items-center justify-around">
+                                <span>Total Personas: {comm.estadisticas.total_personas}</span>
+                                <span>Total Matrimonios: {comm.estadisticas.total_matrimonios}</span>
+                                <span>Total Solteros: {comm.estadisticas.total_solteros}</span>
+                                <span>Total Solteras: {comm.estadisticas.total_solteras}</span>
+                              </div>
+                            </th>
+                          </tr>
+                        </tfoot>
                       </table>
                     </div>
                   </div>
@@ -176,13 +256,17 @@ export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
             </div>
           ))}
           <div className="content-btns flex items-center gap-4">
-            <a href={`/print-confirmated/${retreatId}`} className="btn btn-secondary w-full flex items-center justify-center gap-2" target="_blank">
+            <a href={`/print-confirmated/${retreatId}`} className="btn btn-secondary w-full flex items-center justify-center gap-2">
               <PrintIcon className="size-5 block" />
               <span>Imprimir</span>
             </a>
-            <button className="flex items-center justify-center gap-2 btn btn-primary w-full">
-              <SaveIcon className="size-5 block" />
-              <span>Guardar</span>
+            <button
+              type="button"
+              className="flex items-center justify-center gap-2 btn btn-primary w-full"
+              onClick={handleStartRetreat}
+              disabled={starting}
+            >
+              <span>{starting ? "Iniciando..." : "Comenzar"}</span>
             </button>
           </div>
         </div>

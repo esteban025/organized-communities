@@ -143,7 +143,7 @@ export const ListInvited = ({ retreatId }: { retreatId: number }) => {
                             )
                           }
                         />
-                        <span className="span-icon animate-entry-checks">
+                        <span className="span-icon animate-entry-checks pointer-events-none">
                           <CheckIcon className="size-6 block text-sky-500" />
                         </span>
                       </div>

@@ -1,0 +1,61 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getRetreatCommunityChargesFromDB } from "@/services/retreats";
+import { ViewCollectMoney } from "@/components/react/ViewCollectMoney";
+
+const { id } = Astro.params;
+const retreatId = Number(id);
+
+let fetchError: string | null = null;
+let data: {
+  retreat: { id: number; title: string; cost_per_person: number };
+  communities: {
+    parish_name: string;
+    community_id: number;
+    number_community: number;
+    total_attendees: number;
+    total_cost: number;
+  }[];
+} | null = null;
+
+if (!Number.isNaN(retreatId)) {
+  const res = await getRetreatCommunityChargesFromDB(retreatId);
+  if (res.success && res.data) {
+    data = res.data;
+  } else {
+    fetchError = res.message || "Error al obtener los cargos de la convivencia";
+  }
+} else {
+  fetchError = "ID de convivencia no válido";
+}
+---
+
+<Layout
+  title="Cobros | Cobros de convivencia"
+  description="Seccion en la que se puede visualizar un resumen del cobro que le pertence a cada parroquia"
+  noneNav
+>
+  <div class="space-y-6">
+    {fetchError && <p class="message-card error">{fetchError}</p>}
+
+    {
+      !fetchError && !data && (
+        <p class="message-card">
+          No hay datos de cargos para esta convivencia.
+        </p>
+      )
+    }
+
+    {
+      !fetchError && data && (
+        <ViewCollectMoney
+          client:load
+          retreatId={data.retreat.id}
+          title={data.retreat.title}
+          costPerPerson={data.retreat.cost_per_person}
+          communities={data.communities}
+        />
+      )
+    }
+  </div>
+</Layout>

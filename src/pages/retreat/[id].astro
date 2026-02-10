@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { db } from "@/lib/db";
-import type { Retreats } from "@/types/retreats";
+import type { Retreat } from "@/types/retreats";
 import ReplaceUserIcon from "@/icons/ReplaceUserIcon.astro";
 import { ListInvited } from "@/components/react/ListInvited";
 import { ListConfirmed } from "@/components/react/ListConfirmed";
@@ -17,7 +17,7 @@ if (!id) {
 try {
   const query = `SELECT * FROM retreats WHERE id = ?`;
   const [rows] = await db.query(query, [id]);
-  const data = rows as Retreats[];
+  const data = rows as Retreat[];
 
   if (data.length === 0) {
     error = true;
@@ -33,7 +33,7 @@ try {
 <Layout
   title="Planificación y gestión de convivencias"
   description="Detalles de la convivencia inicializada"
-  inRetreatPage
+  noneNav
 >
   {error && <p class="message-card ">Error: ID de convivencia no encontrado</p>}
   {!error && retreat && (

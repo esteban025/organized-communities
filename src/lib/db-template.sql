@@ -135,6 +135,3 @@ CREATE TABLE retreat_payments (
 CREATE INDEX idx_retreats_status ON retreats(status);
 CREATE INDEX idx_retreat_attendees_retreat ON retreat_attendees(retreat_id);
 CREATE INDEX idx_retreat_attendees_attended ON retreat_attendees(retreat_id, attended);
-
-
-DELETE FROM retreats WHERE id = 3;

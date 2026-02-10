@@ -57,10 +57,10 @@ export const ViewConvivencias = () => {
                 </div>
                 <p className="font-medium capitalize mt-5 ">
                   {retreat.status === "planificacion" && (
-                    <span className="text-sky-600/80 border border-sky-600/40 group-hover:border-sky-600/90 px-3 py-1 rounded-full">Planificada</span>
+                    <span className="text-sky-600/80 bg-sky-100/40 border border-sky-600/40 group-hover:border-sky-600/90 px-3 py-1 rounded-full">Planificada</span>
                   )}
                   {retreat.status === "en_curso" && (
-                    <span className="text-green-600 bg-green-100 px-3 py-1 rounded-full">Activa</span>
+                    <span className="text-green-600 border border-green-600 bg-green-100/40 px-3 py-1 rounded-full">Activa</span>
                   )}
                   {retreat.status === "finalizada" && (
                     <span className="text-neutral-600 bg-neutral-300 px-3 py-1 rounded-full">Completada</span>

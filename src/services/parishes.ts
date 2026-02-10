@@ -41,12 +41,27 @@ export const getParishesFromDB = async () => {
     GROUP BY p.id, p.name, p.tag, p.aka, p.locality
     ORDER BY p.id ASC;
   `;
+  const queryTotals = `
+    SELECT 
+      (SELECT COUNT(*) FROM parishes) as total_parishes,
+      (SELECT COUNT(*) FROM communities) as total_communities;
+  `;
+  const [totalsRows] = await db.query(queryTotals);
+  const totalsData = totalsRows as { total_parishes: number; total_communities: number }[];
+  const total_parishes = totalsData[0]?.total_parishes ?? 0;
+  const total_communities = totalsData[0]?.total_communities ?? 0;
+
   const [rows] = await db.query(query);
-  const data = rows as ParishWithCounts[];
+
+
   return {
     success: true,
     message: "Parroquias obtenidas correctamente",
-    data,
+    data: {
+      parishes: rows as ParishWithCounts[],
+      total_parishes,
+      total_communities,
+    },
   }
 }
 
