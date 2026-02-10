@@ -104,3 +104,13 @@ export interface CommunityInfo {
     civil_status: string;
   }[];
 }
+
+export interface RetreatHistory {
+  id: number;
+  title: string;
+  start_date: string;
+  end_date: string;
+  total_communities: number;
+  total_personas: number;
+  total_debt: number;
+}

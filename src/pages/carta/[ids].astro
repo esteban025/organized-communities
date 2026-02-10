@@ -1,0 +1,195 @@
+---
+import { formatTodayLong } from "@/utils/formatDates";
+import { getRetreatCommunityLetterDataFromDB } from "@/services/retreats";
+
+const { ids } = Astro.params;
+const [retreatIdStr, communityIdStr] = (ids ?? "").split("-");
+const retreatId = Number(retreatIdStr);
+const communityId = Number(communityIdStr);
+
+const fechaHoy = formatTodayLong();
+
+const toOrdinalCommunity = (n: number): string => {
+  const map: Record<number, string> = {
+    1: "PRIMERA",
+    2: "SEGUNDA",
+    3: "TERCERA",
+    4: "CUARTA",
+    5: "QUINTA",
+    6: "SEXTA",
+    7: "SÉPTIMA",
+    8: "OCTAVA",
+    9: "NOVENA",
+    10: "DÉCIMA",
+  };
+  return map[n] ?? `${n}ª`;
+};
+
+const formatDateLong = (dateString: string) => {
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return dateString;
+  return date.toLocaleDateString("es-ES", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+let fetchError: string | null = null;
+let data: Awaited<
+  ReturnType<typeof getRetreatCommunityLetterDataFromDB>
+>["data"] = null;
+
+if (!Number.isNaN(retreatId) && !Number.isNaN(communityId)) {
+  const res = await getRetreatCommunityLetterDataFromDB(retreatId, communityId);
+  if (res.success && res.data) {
+    data = res.data;
+  } else {
+    fetchError = res.message || "Error al obtener los datos de la carta";
+  }
+} else {
+  fetchError = "Parámetros de convivencia o comunidad no válidos";
+}
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Carta de Cobro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="p-8">
+    <div class="max-w-4xl mx-auto bg-white p-12">
+      {fetchError && <p class="text-red-600 font-semibold">{fetchError}</p>}
+
+      {
+        !fetchError && data && (
+          <>
+            <div class="text-right mb-10">
+              <p>Cuenca, {fechaHoy}</p>
+            </div>
+
+            <div class="mb-6">
+              <p class="mb-1">Hermano</p>
+              <p class="font-bold">{data.community.responsable}</p>
+              <p class="font-bold">
+                RESPONSABLE DE LA{" "}
+                {toOrdinalCommunity(data.community.number_community)} COMUNIDAD
+                DE {data.community.parish_name.toUpperCase()}
+              </p>
+            </div>
+
+            <p class="mb-6">De mi consideración:</p>
+
+            <p class="text-justify mb-6">
+              A través de la presente solicito cancelar el valor pendiente de la{" "}
+              <strong>{data.retreat.title}</strong>, realizada del{" "}
+              {formatDateLong(data.retreat.start_date)} al{" "}
+              {formatDateLong(data.retreat.end_date)}, el valor por persona es
+              de <strong>$ {data.retreat.cost_per_person.toFixed(2)}</strong>,
+              que deberá ser cancelado máximo en 15 días.
+            </p>
+
+            <p class="mb-4">
+              Adjunto el detalle del valor de la deuda por comunidad:
+            </p>
+
+            <section class="my-8">
+              <div class="container-table">
+                <table class="w-full">
+                  <thead>
+                    <tr class="">
+                      <th class="col-full">Nombres</th>
+                      <th class="">Estado Civil</th>
+                      <th class="">Hospedaje</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.attendees.map((person) => (
+                      <tr>
+                        <td class="col-full">{person.names}</td>
+                        <td>{person.civil_status}</td>
+                        <td>{person.retreat_house_name}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th colspan="3">
+                        <div class="flex items-center justify-around">
+                          <p>Total asistentes: {data.totals.total_attendees}</p>
+                          <p>
+                            Costo total:{" "}
+                            <span class="text-sky-600">
+                              $ {data.totals.total_cost.toFixed(2)}
+                            </span>
+                          </p>
+                          <p>
+                            Deuda pendiente:{" "}
+                            <span class="text-red-600">
+                              $ {data.totals.total_debt.toFixed(2)}
+                            </span>
+                          </p>
+                        </div>
+                      </th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </section>
+
+            <p class="mb-6">Sírvase depositar en la siguiente cuenta:</p>
+
+            <div class="mb-8">
+              <p class="font-bold">Banco del Pichincha</p>
+              <p>
+                <span class="font-bold">Cuenta de Ahorros N:</span> 2200675196
+              </p>
+              <p>
+                <span class="font-bold">Nombre:</span> Marco López
+              </p>
+              <p>
+                <span class="font-bold">CI:</span> 0102907029
+              </p>
+            </div>
+
+            <p class="mb-8">
+              Seguro de contar con su apoyo, anticipo mi agradecimiento.
+            </p>
+
+            <div class="my-8">
+              <p>La paz</p>
+              <p class="font-bold">Rodrigo Salgado</p>
+              <p>CNC Cuenca</p>
+            </div>
+
+            <div class="mt-8">
+              <p>
+                <span class="font-bold">PD:</span> Enviar el comprobante de
+                depósito al número de <span class="font-bold">Marco López</span>
+                , celular
+                <span class="font-bold">0994822876</span>
+              </p>
+            </div>
+          </>
+        )
+      }
+    </div>
+  </body>
+
+  <style is:global>
+    @import "tailwindcss";
+    @import "@/styles/global.css";
+
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        font-size: 12px;
+        background-color: white;
+      }
+    }
+  </style>
+</html>

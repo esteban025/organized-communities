@@ -11,6 +11,8 @@ import {
   deleteRetreatAttendanceGroupInDB,
   updateRetreatAttendeesStatusInDB,
   updateRetreatStatusInDB,
+  saveRetreatCommunityPaymentsInDB,
+  getRetreatsHistoryFromDB,
 } from "@/services/retreats"
 
 export const getRetreats = defineAction({
@@ -137,6 +139,38 @@ export const updateRetreatStatus = defineAction({
     return {
       success: res.success,
       message: res.message,
+    };
+  },
+})
+
+export const saveRetreatCommunityPayments = defineAction({
+  input: z.object({
+    retreat_id: z.coerce.number(),
+    payments: z.array(
+      z.object({
+        community_id: z.number(),
+        total_attendees: z.number(),
+        total_cost: z.number(),
+        amount_paid: z.number().nonnegative(),
+      }),
+    ),
+  }),
+  async handler(input) {
+    const res = await saveRetreatCommunityPaymentsInDB(input);
+    return {
+      success: res.success,
+      message: res.message,
+    };
+  },
+})
+
+export const getRetreatsHistory = defineAction({
+  async handler() {
+    const res = await getRetreatsHistoryFromDB();
+    return {
+      success: res.success,
+      message: res.message,
+      data: res.data,
     };
   },
 })

@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import FormRetreat from "@/sections/FormRetreat.astro";
 import { ViewConvivencias } from "@/components/react/ViewConvivencias";
+import { HistoryRetreats } from "@/components/react/HistoryRetreat";
 ---
 
 <Layout
@@ -10,11 +11,25 @@ import { ViewConvivencias } from "@/components/react/ViewConvivencias";
 >
   <main class="main-grid">
     <FormRetreat />
-    <section class="card-section" transition:name="section-view">
-      <header>
-        <h2 class="text-2xl font-semibold mb-4">Convivencias</h2>
-      </header>
-      <ViewConvivencias client:load />
+    <section
+      class="card-section flex flex-col gap-8"
+      transition:name="section-view"
+    >
+      <div class="ss">
+        <header>
+          <h2 class="text-2xl font-semibold mb-4">Convivencias</h2>
+        </header>
+        <ViewConvivencias client:load />
+      </div>
+      <div class="ss">
+        <header class="mb-4">
+          <h2 class="text-2xl font-semibold">Historial</h2>
+          <p class="text-neutral-500">
+            Aquí podrás ver el historial de convivencias Finalizadas.
+          </p>
+        </header>
+        <HistoryRetreats client:load />
+      </div>
     </section>
   </main>
 </Layout>

@@ -34,6 +34,8 @@ import {
   deleteRetreatAttendanceGroup,
   updateRetreatAttendeesStatus,
   updateRetreatStatus,
+  saveRetreatCommunityPayments,
+  getRetreatsHistory,
 } from "./retreats"
 
 export const server = {
@@ -64,4 +66,6 @@ export const server = {
   deleteRetreatAttendanceGroup,
   postRetreat,
   updateRetreatStatus,
+  saveRetreatCommunityPayments,
+  getRetreatsHistory,
 }

@@ -60,10 +60,10 @@ export const ViewConvivencias = () => {
                     <span className="text-sky-600/80 bg-sky-100/40 border border-sky-600/40 group-hover:border-sky-600/90 px-3 py-1 rounded-full">Planificada</span>
                   )}
                   {retreat.status === "en_curso" && (
-                    <span className="text-green-600 border border-green-600 bg-green-100/40 px-3 py-1 rounded-full">Activa</span>
+                    <span className="text-green-600 border border-green-600 bg-green-100/30 px-3 py-1 rounded-full">Activa</span>
                   )}
                   {retreat.status === "finalizada" && (
-                    <span className="text-neutral-600 bg-neutral-300 px-3 py-1 rounded-full">Completada</span>
+                    <span className="text-violet-600 bg-violet-100/30 border border-violet-600/40 px-3 py-1 rounded-full">Finalizada</span>
                   )}
                 </p>
               </div>

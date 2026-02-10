@@ -23,7 +23,7 @@ export const SelectCommunitiesMultiple = () => {
           console.error("Error fetching parishes:", error);
           return;
         }
-        setParishes(data.data);
+        setParishes(data.data.parishes);
 
       } catch (error) {
         console.error("Error fetching parishes:", error);
