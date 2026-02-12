@@ -1,5 +1,5 @@
 import { actions } from "astro:actions"
-import { CheckIcon, UserIcon } from "@/icons/iconsReact"
+import { CheckIcon, ReportMoneyIcon, SaveIcon, UserIcon } from "@/icons/iconsReact"
 import { transformDate } from "@/utils/transformDate"
 import { useEffect, useMemo, useState } from "react"
 
@@ -299,14 +299,18 @@ export const PrintConfirmatedList = ({
             {allSelected ? "Desmarcar todos" : "Marcar todos"}
           </button>
           <button
-            className="btn btn-secondary w-full"
+            className="btn btn-secondary w-full flex items-center justify-center gap-2"
             type="button"
             onClick={handleSaveAttendees}
             disabled={saving}
           >
-            {saving ? "Guardando..." : "Guardar asistentes"}
+            <SaveIcon className="size-5 block text-neutral-500" />
+            <span>{saving ? "Guardando..." : "Guardar asistentes"}</span>
           </button>
-          <a href={`/collect-money/${retreatId}`} className="btn btn-primary w-full flex items-center justify-center">Ir a cobros</a>
+          <a href={`/collect-money/${retreatId}`} className="btn btn-primary w-full flex items-center justify-center gap-2">
+            <ReportMoneyIcon className="size-5 block text-white" />
+            <span>Cobrar</span>
+          </a>
         </div>
       </footer>
 

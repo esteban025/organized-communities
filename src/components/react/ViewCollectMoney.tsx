@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
 import { actions } from "astro:actions"
+import { CheckIcon, CheckSquareIcon } from "@/icons/iconsReact";
 
 interface CommunityCharge {
   parish_name: string;
@@ -109,7 +110,7 @@ export const ViewCollectMoney = ({
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl mx-auto">
+    <div className="flex flex-col gap-6 max-w-5xl mx-auto">
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold">Cobros por comunidad</h1>
         <p className="text-sm text-neutral-600">
@@ -195,11 +196,14 @@ export const ViewCollectMoney = ({
           <div className="flex items-center justify-end">
             <button
               type="button"
-              className="btn btn-primary"
+              className="btn btn-primary flex items-center justify-center gap-2"
               onClick={handleFinalize}
               disabled={finalizing}
             >
-              {finalizing ? "Finalizando..." : "Finalizar"}
+              <CheckSquareIcon className="size-5 block text-white" />
+              <span>
+                {finalizing ? "Finalizando..." : "Finalizar"}
+              </span>
             </button>
           </div>
         </>

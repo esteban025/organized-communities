@@ -2,6 +2,7 @@
 import { actions } from "astro:actions";
 import { SelectCommunitiesMultiple } from "@/components/react/SelectCommunitiesMultiple";
 import { ViewSelectedCommunities } from "@/components/react/ViewSelectedCommunities";
+import { CreateIcon, RefreshIcon } from "@/icons/iconsReact";
 ---
 
 <section class="card-section h-min" transition:name="section-form">
@@ -87,8 +88,20 @@ import { ViewSelectedCommunities } from "@/components/react/ViewSelectedCommunit
       <ViewSelectedCommunities client:load />
     </fieldset>
     <div class="content-actions">
-      <button type="reset" class="btn btn-secondary w-full">Limpiar</button>
-      <button type="submit" class="btn btn-primary w-full">Crear</button>
+      <button
+        type="reset"
+        class="btn btn-secondary w-full flex items-center justify-center gap-2"
+      >
+        <RefreshIcon className="size-5 block" />
+        <span>Limpiar</span>
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary w-full flex items-center justify-center gap-2"
+      >
+        <CreateIcon className="size-5 block" />
+        <span>Crear</span>
+      </button>
     </div>
   </form>
 </section>

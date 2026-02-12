@@ -59,7 +59,7 @@ export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) =
                 {responsables.map((leader) => (
                   <li key={leader.group_id} className="">
                     <div className="ss">
-                      <span className="initials">{getInitialsName(leader.names)}</span>
+                      <span className="initials text-sky-400">{getInitialsName(leader.names)}</span>
                       <span className="truncate max-w-37.5">{leader.names}</span>
                     </div>
                   </li>
@@ -87,10 +87,10 @@ export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) =
             {otros.length > 0 && (
               <ul>
                 {otros.map((leader) => (
-                  <li key={leader.group_id} className="flex items-center justify-between">
+                  <li key={leader.group_id} className="flex items-center justify-between gap-2">
                     <div className="ss">
                       <span className="initials">{getInitialsName(leader.names)}</span>
-                      <span className="truncate max-w-37.5">{leader.names}</span>
+                      <span className="truncate max-w-30">{leader.names}</span>
                     </div>
                     <span className="capitalize text-neutral-600 text-sm">{leader.role}</span>
                   </li>

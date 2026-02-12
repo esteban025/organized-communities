@@ -1,3 +1,4 @@
+import { RefreshIcon } from "@/icons/iconsReact"
 import { useState } from "react"
 
 interface FiltersProps {
@@ -46,7 +47,7 @@ export const PrintConfirmatedFilters = ({
           />
         </label>
       </div>
-      <div className="grid gap-4 grid-cols-4">
+      <div className="grid gap-2 grid-cols-4">
         <label className="flex flex-col gap-1" htmlFor="select-parish">
           <select
             name="select-parish"
@@ -95,8 +96,13 @@ export const PrintConfirmatedFilters = ({
           </select>
         </label>
 
-        <button type="button" className="btn btn-secondary" onClick={onClearFilters}>
-          Limpiar filtros
+        <button
+          type="button"
+          className="btn btn-secondary flex justify-center items-center gap-2"
+          onClick={onClearFilters}
+        >
+          <RefreshIcon className="size-5 block" />
+          <span>Limpiar filtros</span>
         </button>
       </div>
     </form>

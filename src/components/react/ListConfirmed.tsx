@@ -1,6 +1,6 @@
 import { actions } from "astro:actions";
 import { useEffect, useState } from "react";
-import { EditIcon, PrintIcon, SaveIcon, TrashIcon } from "@/icons/iconsReact";
+import { CheckCircleIcon, EditIcon, PrintIcon, SaveIcon, TrashIcon } from "@/icons/iconsReact";
 import { warningMessage } from "@/scripts/warning-message";
 import { showNotification } from "@/scripts/notification";
 
@@ -266,6 +266,7 @@ export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
               onClick={handleStartRetreat}
               disabled={starting}
             >
+              <CheckCircleIcon className="size-5 block" />
               <span>{starting ? "Iniciando..." : "Comenzar"}</span>
             </button>
           </div>

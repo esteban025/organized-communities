@@ -1,3 +1,4 @@
+import { CancelIcon, FusionIcon, LoadIcon } from "@/icons/iconsReact";
 import type { CommunityWithBrotherCount } from "@/types/communities";
 import { actions } from "astro:actions";
 import { useEffect, useState } from "react";
@@ -44,7 +45,7 @@ export const FusionCommunity = ({ parishId }: { parishId: number }) => {
       />
       {showCommunities && (
         <span
-          className="text-sm text-neutral-500 leading-4 text-center text-balance w-11/12 mx-auto animate-entry"
+          className="text-sm text-sky-600 leading-4 text-center text-balance w-11/12 mx-auto animate-entry"
         >La primera comunidad seleccionada será la que permanezca"
         </span>
       )}
@@ -89,11 +90,12 @@ export const FusionCommunity = ({ parishId }: { parishId: number }) => {
         <div className="flex justify-center">
           <button
             type="button"
-            className="btn btn-secondary"
+            className="btn btn-secondary flex items-center justify-center gap-2"
             onClick={() => setShowCommunities(true)}
             disabled={communities.length === 0}
           >
-            Cargar Comunidades
+            <LoadIcon className="size-5 block" />
+            <span>Comunidades</span>
           </button>
         </div>
       )}
@@ -101,13 +103,15 @@ export const FusionCommunity = ({ parishId }: { parishId: number }) => {
         <div className="content-actions">
           <button
             type="button"
-            className="btn btn-secondary w-full"
+            className="btn btn-secondary w-full flex items-center justify-center gap-2"
             onClick={() => setShowCommunities(false)}
           >
-            Cancelar
+            <CancelIcon className="size-5 block" />
+            <span>Cancelar</span>
           </button>
-          <button type="submit" className="btn btn-primary w-full">
-            Fusionar
+          <button type="submit" className="btn btn-primary w-full flex justify-center items-center gap-2">
+            <FusionIcon className="size-5 block" />
+            <span>Fusionar</span>
           </button>
         </div>
       )}

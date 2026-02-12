@@ -4,6 +4,7 @@ import { CommunitySelectedList } from "@/components/react/CommunitySelectedList"
 import CivilIndicator from "@/components/CivilIndicator.astro";
 import RolesBrotherChecks from "@/components/RolesBrotherChecks.astro";
 import { actions } from "astro:actions";
+import { RefreshIcon, PlusIcon } from "@/icons/iconsReact";
 const { communityId } = Astro.props;
 ---
 
@@ -177,8 +178,20 @@ const { communityId } = Astro.props;
     </fieldset>
 
     <div class="content-actions">
-      <button type="reset" class="btn btn-secondary w-full">Resetear</button>
-      <button type="submit" class="btn btn-primary w-full">Agregar</button>
+      <button
+        type="reset"
+        class="btn btn-secondary w-full flex items-center justify-center gap-2"
+      >
+        <RefreshIcon className="size-5 block" />
+        <span>Limpiar</span>
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary w-full flex items-center justify-center gap-2"
+      >
+        <PlusIcon className="size-5 block" />
+        <span>Agregar</span>
+      </button>
     </div>
   </form>
 </section>
