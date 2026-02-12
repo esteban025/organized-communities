@@ -22,7 +22,7 @@ export const IfCatechistInput = () => {
         console.error("Error fetching parishes:", error)
         return
       }
-      setParishes(data.data)
+      setParishes(data.data.parishes)
     }
     fetchParishes()
   }, [])
@@ -142,8 +142,7 @@ export const IfCatechistInput = () => {
   }
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-center text-sm text-neutral-500 leading-4">Selecciona la parroquia de la comunidad que deseas encontrar y posteriormente la comunidad</span>
-      <div className="parroquias">
+      <div className="parroquias font-forum">
         <div className="content-input relative">
           <select
             name="parish-selected"
@@ -168,7 +167,7 @@ export const IfCatechistInput = () => {
         )}
 
         {selectedParishId && communities.length === 0 && (
-          <p className="text-red-400 text-sm text-center">No hay comunidades para esta parroquia</p>
+          <p className="message-card">No hay comunidades para esta parroquia</p>
         )}
 
         {selectedParishId && communities.length > 0 && (
@@ -197,7 +196,7 @@ export const IfCatechistInput = () => {
                         handleCommunityToggle(event, community)
                       }
                     />
-                    <span>
+                    <span className="text-sm">
                       {community.number_community} - {community.responsable}
                     </span>
                   </label>

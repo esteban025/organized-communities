@@ -27,6 +27,7 @@ export const FilterBrother = ({
         type="text"
         className="input-text"
         placeholder=" "
+        autoComplete="off"
         value={name}
         onChange={(e) => onNameChange(e.target.value)}
       />

@@ -52,6 +52,7 @@ interface ListProps {
   convivencia: ConvData
   estadisticas: StatsData
   attendedPersonIds: number[]
+  viewTotals?: boolean
 }
 
 export const PrintConfirmatedList = ({
@@ -61,6 +62,7 @@ export const PrintConfirmatedList = ({
   convivencia,
   estadisticas,
   attendedPersonIds,
+  viewTotals = true,
 }: ListProps) => {
   const [selectedPersonIds, setSelectedPersonIds] = useState<Set<number>>(new Set())
   const [saving, setSaving] = useState(false)
@@ -151,8 +153,8 @@ export const PrintConfirmatedList = ({
   }
 
   return (
-    <div className="main flex flex-col">
-      <header>
+    <div className="main flex flex-col gap-4">
+      <header className="mb-6">
         <h1 className="text-3xl font-bold text-center mb-2">
           {convivencia.titulo || "Convivencia"}
         </h1>
@@ -166,12 +168,14 @@ export const PrintConfirmatedList = ({
           </span>
           <span>/ 2026</span>
         </p>
-        <p className="flex justify-center gap-4 mt-2 text-xs text-neutral-700">
-          <span>Total personas: {estadisticas.total_personas}</span>
-          <span>Matrimonios: {estadisticas.total_matrimonios}</span>
-          <span>Solteros: {estadisticas.total_solteros}</span>
-          <span>Solteras: {estadisticas.total_solteras}</span>
-        </p>
+        {viewTotals && (
+          <p className="flex justify-center gap-4 mt-2 text-neutral-700 bg-neutral-200 w-max mx-auto px-4 py-2 rounded-full border border-neutral-400">
+            <strong>Total personas: {estadisticas.total_personas}</strong>
+            <span>Matrimonios: {estadisticas.total_matrimonios}</span>
+            <span>Solteros: {estadisticas.total_solteros}</span>
+            <span>Solteras: {estadisticas.total_solteras}</span>
+          </p>
+        )}
       </header>
       <div className="space-y-10">
         {grouped.map((parish) => (
@@ -206,11 +210,11 @@ export const PrintConfirmatedList = ({
                               key={bro.group_key ?? bro.person_ids ?? bro.nombres_confirmados}
                               className="relative"
                             >
-                              <td className="">
+                              <td className="truncate max-w-60">
                                 {bro.nombres_confirmados}
                               </td>
                               <td className="min capitalize">{bro.civil_status}</td>
-                              <td>{bro.observaciones_combinadas}</td>
+                              <td className="col-full">{bro.observaciones_combinadas}</td>
                               <td className="min">{bro.retreat_house_name}</td>
                               <td className="min no-print">
                                 {bro.civil_status === "matrimonio" && (
@@ -268,6 +272,18 @@ export const PrintConfirmatedList = ({
                           )
                         })}
                       </tbody>
+                      <tfoot>
+                        <tr>
+                          <th colSpan={5}>
+                            <div className="flex items-center justify-around">
+                              <span>Total Personas: {comm.estadisticas.total_personas}</span>
+                              <span>Total Matrimonios: {comm.estadisticas.total_matrimonios}</span>
+                              <span>Total Solteros: {comm.estadisticas.total_solteros}</span>
+                              <span>Total Solteras: {comm.estadisticas.total_solteras}</span>
+                            </div>
+                          </th>
+                        </tr>
+                      </tfoot>
                     </table>
                   </div>
                 </article>
@@ -277,7 +293,7 @@ export const PrintConfirmatedList = ({
         ))}
       </div>
 
-      <footer className="mt-8">
+      <footer className="mt-8 no-print">
         <div className="flex items-center gap-4">
           <button className="btn w-full" type="button" onClick={handleToggleAll}>
             {allSelected ? "Desmarcar todos" : "Marcar todos"}

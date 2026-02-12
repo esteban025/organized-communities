@@ -52,9 +52,12 @@ export const ViewParishes = () => {
     )
   }, [parishes, searchTerm])
 
+  const description = `Parroquias: ${parishes.total_parishes} •  Comunidades: ${parishes.total_communities}`
+
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-4 h-full mt-6">
+      {/* <p className="text-neutral-500 pl-10 mb-2 text-sm">{description}</p> */}
       <FilterParish
         value={searchTerm}
         onChange={setSearchTerm}

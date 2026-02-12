@@ -52,11 +52,11 @@ export const NavbarPage = () => {
       ref={navRef}
       className="flex justify-center relative w-max items-center mx-auto no-print"
     >
-      <ul className="navbar-page flex items-center bg-neutral-100 rounded-full">
+      <ul className="navbar-page flex items-center bg-neutral-200/60 rounded-full border border-neutral-400 shadow-lg text-sm">
         {listNav.map((navItem, index) => (
           <li
             key={navItem.name}
-            className="capitalize z-10"
+            className={`capitalize relative z-10 ${index === activeIndex ? "font-semibold" : ""}`}
             ref={(el) => {
               itemRefs.current[index] = el;
             }}

@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import { ViewParishes } from "@/components/react/ViewParishes";
 import FormParish from "@/sections/FormParish.astro";
+import ChurchIcon from "@/icons/ChurchIcon.astro";
 ---
 
 <Layout
@@ -12,7 +13,10 @@ import FormParish from "@/sections/FormParish.astro";
 		<FormParish />
 		<section class="card-section" transition:name="section-view">
 			<header>
-				<h2 class="text-2xl font-semibold mb-4">Parroquias</h2>
+				<h2 class="text-3xl font-semibold flex items-center gap-2 font-forum">
+					<ChurchIcon class="size-8 block text-neutral-500" />
+					<span>Parroquias</span>
+				</h2>
 			</header>
 			<ViewParishes client:load />
 		</section>

@@ -237,6 +237,7 @@ export const PrintIcon = ({ className }: { className?: string }) => (
     <path d="M7 15a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2l0 -4"></path>
   </svg>
 )
+
 export const UserEditIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
@@ -250,6 +251,43 @@ export const UserEditIcon = ({ className }: { className?: string }) => (
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
     <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
     <path d="M6 21v-2a4 4 0 0 1 4 -4h3.5" /><path d="M18.42 15.61a2.1 2.1 0 0 1 2.97 2.97l-3.39 3.42h-3v-3l3.42 -3.39" />
+  </svg>
+)
+
+export const ConfirmIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  ><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path
+    d="M9 11l3 3l8 -8"></path><path
+      d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9"
+    ></path>
+  </svg>
+
+)
+
+export const InvitedIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  ><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path
+    d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"></path><path
+      d="M6 21v-2a4 4 0 0 1 4 -4h2.5"></path><path
+        d="M17.001 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path><path
+          d="M19.001 15.5v1.5"></path><path d="M19.001 21v1.5"></path><path
+            d="M22.032 17.25l-1.299 .75"></path><path d="M17.27 20l-1.3 .75"
+            ></path><path d="M15.97 17.25l1.3 .75"></path><path d="M20.733 20l1.3 .75"
+            ></path>
   </svg>
 )
 

@@ -2,9 +2,9 @@
 import Layout from "@/layouts/Layout.astro";
 import { db } from "@/lib/db";
 import type { Retreat } from "@/types/retreats";
-import ReplaceUserIcon from "@/icons/ReplaceUserIcon.astro";
 import { ListInvited } from "@/components/react/ListInvited";
 import { ListConfirmed } from "@/components/react/ListConfirmed";
+import { ConfirmIcon, InvitedIcon } from "@/icons/iconsReact";
 
 const { id } = Astro.params;
 let retreat;
@@ -37,25 +37,28 @@ try {
 >
   {error && <p class="message-card ">Error: ID de convivencia no encontrado</p>}
   {!error && retreat && (
-    <header>
+    <header class="font-forum">
       <h2 class="flex items-center gap-2 text-4xl font-semibold">
         {/* <span class="block size-4 bg-neutral-500 rounded-full"></span> */}
         {retreat?.title}
       </h2>
-      <p class="text-neutral-500 text-lg">{retreat?.description}</p>
+      <p class="text-neutral-500 text-lg ">{retreat?.description}</p>
     </header>
     <main>
       <section class="grid grid-cols-[1fr_1.5fr] gap-6">
         <section class="card-section">
-          <h2 class="font-semibold text-xl mb-4">Invitados</h2>
+          <h2 class="font-semibold text-xl mb-4 font-forum flex items-center gap-2">
+            <InvitedIcon className="size-6 block text-neutral-500" />
+            <span>Invitados</span>
+          </h2>
           <ListInvited client:load retreatId={retreat.id} />
         </section>
         {/* <span class="block mt-10">
         <ReplaceUserIcon class="size-8 text-neutral-500" />
         </span> */}
         <section class="card-section h-min">
-          <h2 class="font-semibold text-xl mb-4 text-sky-600 flex items-center gap-2">
-            <span class="size-3 rounded-full bg-sky-600 flex animate-pulse"></span>
+          <h2 class="font-semibold text-xl mb-4 text-sky-600 flex items-center gap-2 font-forum">
+            <ConfirmIcon className="size-6 block text-sky-600" />
             <span>Confirmados</span>
           </h2>
           <ListConfirmed client:load retreatId={retreat.id} />

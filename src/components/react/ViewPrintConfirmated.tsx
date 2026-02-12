@@ -64,6 +64,7 @@ export const ViewPrintConfirmated = ({
   const [parish, setParish] = useState("")
   const [community, setCommunity] = useState("")
   const [hospedaje, setHospedaje] = useState("")
+  const [viewTotals, setViewTotals] = useState(true)
 
   const {
     parishesOptions,
@@ -168,10 +169,13 @@ export const ViewPrintConfirmated = ({
           }}
           onChangeCommunity={setCommunity}
           onChangeRetreatHouse={setHospedaje}
+          viewTotals={viewTotals}
+          onChangeViewTotals={setViewTotals}
           onClearFilters={() => {
             setParish("")
             setCommunity("")
             setHospedaje("")
+            setViewTotals(true)
           }}
         />
       </header>
@@ -190,6 +194,7 @@ export const ViewPrintConfirmated = ({
           convivencia={convivencia}
           estadisticas={estadisticas}
           attendedPersonIds={attendedPersonIds}
+          viewTotals={viewTotals}
         />
       )}
     </div>

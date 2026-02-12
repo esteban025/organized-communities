@@ -34,35 +34,33 @@
       /* background: #ffffff; */
       
       & tr {
-        transition: background-color 0.2s ease;
+        transition: background-color 0.3s ease;
         cursor: pointer;
         overflow: scroll;
         
         &:nth-child(even) {
-          background-color: var(--color-neutral-100);
+          background-color: var(--color-neutral-200);
         }
       }
 
       & tr:hover {
-        background-color: var(--color-neutral-200);
+        background-color: var(--color-neutral-300);
       }
 
       & td {
         padding: .15rem .55rem;
+        padding-left: .875rem;
         border: 1px solid var(--color-neutral-200);
         vertical-align: middle;
       }
     }
     & tfoot {
       & th {
-        padding: 0.2rem 1rem;
-        background-color: var(--color-neutral-200);
-        /* text-transform: uppercase; */
+        padding: 0.3rem 1rem;
         font-weight: 600;
-        letter-spacing: 0.05em;
-        background-color: var(--color-neutral-200);
-        border: 1px solid var(--color-neutral-200);
-        border-top: 2px solid var(--color-neutral-400);
+        background-color: var(--color-slate-700);
+        color: white;
+        border: 1px solid var(--color-slate-700);
       }
     }
   }
@@ -90,11 +88,10 @@ table .col-full {
   table {
     page-break-inside: auto;
     break-inside: auto;
-    font-size: 15px;
+    font-size: 13px;
   }
   
   thead {
-    font-size: 10px;
     display: table-header-group;
   }
 
@@ -118,10 +115,10 @@ table .col-full {
     page-break-inside: avoid;
   } */
 
-  /* .print-keep-with-table-comm {
+  .print-keep-with-table-comm {
     break-inside: avoid;
     page-break-inside: avoid;
-  } */
+  }
 
   /* .print-keep-with-table > header {
     break-after: avoid;

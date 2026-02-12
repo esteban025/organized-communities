@@ -3,6 +3,8 @@ import Layout from "@/layouts/Layout.astro";
 import FormRetreat from "@/sections/FormRetreat.astro";
 import { ViewConvivencias } from "@/components/react/ViewConvivencias";
 import { HistoryRetreats } from "@/components/react/HistoryRetreat";
+import CrossIcon from "@/icons/CrossIcon.astro";
+import HistoryIcon from "@/icons/HistoryIcon.astro";
 ---
 
 <Layout
@@ -17,15 +19,23 @@ import { HistoryRetreats } from "@/components/react/HistoryRetreat";
     >
       <div class="ss">
         <header>
-          <h2 class="text-2xl font-semibold mb-4">Convivencias</h2>
+          <h2
+            class="text-3xl font-semibold mb-4 font-forum flex items-center gap-2"
+          >
+            <CrossIcon class="size-8 text-neutral-500" />
+            <span>Convivencias</span>
+          </h2>
         </header>
         <ViewConvivencias client:load />
       </div>
       <div class="ss">
         <header class="mb-4">
-          <h2 class="text-2xl font-semibold">Historial</h2>
-          <p class="text-neutral-500">
-            Aquí podrás ver el historial de convivencias Finalizadas.
+          <h2 class="text-3xl font-semibold flex items-center gap-2 font-forum">
+            <HistoryIcon class="size-8 text-neutral-500" />
+            <span>Historial</span>
+          </h2>
+          <p class="text-neutral-500 text-sm ml-10">
+            Convivencias Finalizadas.
           </p>
         </header>
         <HistoryRetreats client:load />

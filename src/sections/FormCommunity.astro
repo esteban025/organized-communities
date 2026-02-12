@@ -13,10 +13,11 @@ const { id, name } = Astro.props;
   <form action={actions.postCommunity} class="design-form" id="form-community">
     <fieldset class="flex flex-col gap-4">
       <legend>Nueva comunidad</legend>
-      <span
-        class="text-sm text-neutral-500 leading-4 text-center text-balance w-11/12 mx-auto"
-        >Esta comunidad será parte de "{name}"</span
+      <p
+        class="text-sm text-neutral-500 leading-4 text-center text-balance w-11/12 mx-auto font-forum"
       >
+        Esta comunidad será parte de "{name}"
+      </p>
       <input type="hidden" name="id-comm" id="id-comm" />
 
       <input type="hidden" name="parish-id" id="parish-id" value={id} />

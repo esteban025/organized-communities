@@ -13,6 +13,7 @@ import {
   updateRetreatStatusInDB,
   saveRetreatCommunityPaymentsInDB,
   getRetreatsHistoryFromDB,
+  updateRetreatInDB
 } from "@/services/retreats"
 
 export const getRetreats = defineAction({
@@ -190,7 +191,12 @@ export const postRetreat = defineAction({
   }),
   async handler(input) {
     if (input.id) {
-      // Actualizamos
+      const id = input.id
+      const res = await updateRetreatInDB({ id, ...input })
+      return {
+        success: res.success,
+        message: res.message,
+      }
     }
 
     // creamos
@@ -199,6 +205,5 @@ export const postRetreat = defineAction({
       success: res.success,
       message: res.message,
     }
-
   }
 })

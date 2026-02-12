@@ -4,6 +4,7 @@ import FormBrother from "@/sections/FormBrother.astro";
 import { ViewBrothers } from "@/components/react/ViewBrothers";
 import { ViewLeadersCommunity } from "@/components/react/ViewLeadersCommunity";
 import { actions } from "astro:actions";
+import { UsersGroupIcon } from "@/icons/iconsReact";
 
 const { id } = Astro.params;
 let titlePage = "Comunidades | Plataforma";
@@ -62,7 +63,10 @@ try {
         </section>
         <section class="card-section" style="grid-area: alls;">
           <header>
-            <h2 class="text-2xl font-semibold mb-4">Hermanos de comunidad</h2>
+            <h2 class="text-3xl font-semibold mb-4 flex items-center gap-2 font-forum">
+              <UsersGroupIcon className="size-8 block text-neutral-500" />
+              <span>Hermanos</span>
+            </h2>
           </header>
           <ViewBrothers communityId={Number(id)} client:load />
         </section>

@@ -16,6 +16,7 @@ export const ListInvited = ({ retreatId }: { retreatId: number }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [communityNumberFilter, setCommunityNumberFilter] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   useEffect(() => {
@@ -56,7 +57,8 @@ export const ListInvited = ({ retreatId }: { retreatId: number }) => {
   }, [retreatId]);
 
   const filteredRetreat = retreat.filter((person) =>
-    person.names.toLowerCase().includes(searchTerm.toLowerCase())
+    person.names.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    person.number_community.toString().includes(communityNumberFilter)
   );
 
   const visibleIds = filteredRetreat.map((person) => person.id);
@@ -83,7 +85,7 @@ export const ListInvited = ({ retreatId }: { retreatId: number }) => {
             <div className="flex gap-4">
               <button
                 type="button"
-                className="hover:underline cursor-pointer"
+                className="hover:underline cursor-pointer font-forum"
                 onClick={handleToggleAll}
               >
                 {allVisibleSelected ? "Desmarcar todos" : "Marcar todos"}
@@ -116,7 +118,12 @@ export const ListInvited = ({ retreatId }: { retreatId: number }) => {
 
       {!loading && !error && retreat.length > 0 && (
         <div className="flex flex-col gap-4">
-          <FilterInvited value={searchTerm} onChange={setSearchTerm} />
+          <FilterInvited
+            value={searchTerm}
+            onChange={setSearchTerm}
+            communityNumber={communityNumberFilter}
+            onCommunityNumberChange={setCommunityNumberFilter}
+          />
           <div className="container-table">
             <table>
               <thead>

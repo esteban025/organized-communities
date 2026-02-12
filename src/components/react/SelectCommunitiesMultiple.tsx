@@ -11,6 +11,7 @@ type SelectedCommunity = Pick<
 export const SelectCommunitiesMultiple = () => {
   const [parishes, setParishes] = useState<ParishWithCounts[]>([]);
   const [communities, setCommunities] = useState<CommunityWithBrotherCount[]>([]);
+  const [allCommunities, setAllCommunities] = useState<CommunityWithBrotherCount[]>([]);
   const [selectedParishId, setSelectedParishId] = useState<number | "">("");
   const [selectedCommunityIds, setSelectedCommunityIds] = useState<number[]>([]);
   const [selectedCommunities, setSelectedCommunities] = useState<SelectedCommunity[]>([]);
@@ -48,6 +49,80 @@ export const SelectCommunitiesMultiple = () => {
       window.removeEventListener("communities:clear-selection", handleClear);
     };
   }, []);
+
+  // Listener para setear comunidades seleccionadas cuando se edita un retreat
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleSetSelectedCommunities = async (event: any) => {
+      const communityIds = event.detail;
+
+      if (allCommunities.length === 0 && parishes.length === 0) {
+        return;
+      }
+
+      // Si no tenemos todas las comunidades cargadas, cargarlas
+      if (allCommunities.length === 0) {
+        try {
+          const allComms: CommunityWithBrotherCount[] = [];
+          for (const parish of parishes) {
+            const { data, error } = await actions.getCommunities({ parishId: parish.id });
+            if (!error && data.data) {
+              allComms.push(...data.data);
+            }
+          }
+          setAllCommunities(allComms);
+
+          // Ahora seleccionar las comunidades
+          const selectedComms = allComms.filter(c => communityIds.includes(c.id));
+          setSelectedCommunityIds(communityIds);
+          setSelectedCommunities(selectedComms.map(c => ({
+            id: c.id,
+            number_community: c.number_community,
+            count_persons: c.count_persons,
+            responsable: c.responsable,
+          })));
+
+          // Mostrar la primera parroquia de las comunidades seleccionadas
+          if (selectedComms.length > 0) {
+            const firstComm = selectedComms[0];
+            // Encontrar la parroquia que contiene a la primera comunidad
+            let parishId = 0;
+            for (const parish of parishes) {
+              const { data: pData } = await actions.getCommunities({ parishId: parish.id });
+              if (pData?.data?.some(c => c.id === firstComm.id)) {
+                parishId = parish.id;
+                break;
+              }
+            }
+            if (parishId) {
+              setSelectedParishId(parishId);
+              const { data: commData } = await actions.getCommunities({ parishId });
+              if (commData?.data) {
+                setCommunities(commData.data);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error loading communities:", error);
+        }
+      } else {
+        setSelectedCommunityIds(communityIds);
+        const selectedComms = allCommunities.filter(c => communityIds.includes(c.id));
+        setSelectedCommunities(selectedComms.map(c => ({
+          id: c.id,
+          number_community: c.number_community,
+          count_persons: c.count_persons,
+          responsable: c.responsable,
+        })));
+      }
+    };
+
+    window.addEventListener("setSelectedCommunities", handleSetSelectedCommunities);
+    return () => {
+      window.removeEventListener("setSelectedCommunities", handleSetSelectedCommunities);
+    };
+  }, [parishes, allCommunities]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

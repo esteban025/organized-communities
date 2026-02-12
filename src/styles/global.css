@@ -8,12 +8,17 @@
 /* Supports weights 100-900 */
 @import '@fontsource-variable/inter';
 
+@theme {
+  --font-forum: 'Forum', system-ui;
+  --font-inter: 'Inter Variable', sans-serif;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
-  font-family: 'Forum', system-ui;
+  font-family: var(--font-inter);
   background-color: var(--color-neutral-50);
   color: var(--color-neutral-950);
   padding: 1.5rem;
@@ -58,8 +63,10 @@ main.main-grid-in-retreats {
   border-color: var(--color-sky-600);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
+
 .card-section {
-  background-color: var(--color-white);
+  background-color: #ffffff10;
+  backdrop-filter: blur(5px);
   border: 2px solid var(--color-neutral-200);
   border-radius: 1rem;
   padding: 1rem;

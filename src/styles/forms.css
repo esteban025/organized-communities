@@ -5,9 +5,10 @@
     padding: .5rem;
 
     & legend {
-      padding: 0 .5rem;
+      padding: 0rem .5rem;
       font-weight: 600;
-      font-size: larger;
+      font-family: var(--font-forum);
+      font-size: large;
     }
   }
 }
@@ -24,6 +25,7 @@
     transform: translateY(-50%);
     transition: all 200ms ease;
     pointer-events: none;
+    font-family: var(--font-forum);
   }
 
   & input,
@@ -45,9 +47,27 @@
   }
 
   /* input search */
-  &:has(input:focus) svg,
-  &:has(input:valid) svg{
-    color: var(--color-success-500);
+  &:has(input:focus) .icon-search{
+    color: var(--color-sky-600);
+  }
+}
+
+.content-input:has(input[type="date"]:invalid) label {
+  background-color: white;
+  padding-right: .75rem;
+}
+.content-input:has(input[type="date"]:valid) {
+  & input {
+    border-color: var(--color-sky-600);
+  }
+  & label {
+    top: 0;
+    left: .75rem;
+    transform: translateY(-50%) scale(.95);
+    background-color: var(--color-white);
+    padding: 0 .25rem;
+    color: var(--color-sky-600);
+    font-weight: 600;
   }
 }
 

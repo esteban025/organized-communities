@@ -27,10 +27,11 @@ try {
     <input type="hidden" name="parish-id-in-fusion" value={parishId} />
     <fieldset class="flex flex-col gap-4">
       <legend>Fusionar comunidades</legend>
-      <span
-        class="text-sm text-neutral-500 leading-4 text-center text-balance w-11/12 mx-auto"
-        >Solamente comunidades de "{parishName}"</span
+      <p
+        class="text-sm text-neutral-500 leading-4 text-center text-balance w-11/12 mx-auto font-forum"
       >
+        Solamente comunidades de "{parishName}"
+      </p>
       <FusionCommunity client:load parishId={parishId} />
     </fieldset>
   </form>

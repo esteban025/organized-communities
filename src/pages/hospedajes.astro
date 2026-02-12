@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import FormHospedajes from "@/sections/FormHospedajes.astro";
 import { ViewHospedajes } from "@/components/react/ViewHospedajes";
+import HouseIcon from "@/icons/HouseIcon.astro";
 ---
 
 <Layout
@@ -12,7 +13,12 @@ import { ViewHospedajes } from "@/components/react/ViewHospedajes";
     <FormHospedajes />
     <section class="card-section" transition:name="section-view">
       <header>
-        <h2 class="text-2xl font-semibold mb-4">Casa de Convivencias</h2>
+        <h2
+          class="text-2xl font-semibold mb-4 flex items-center gap-2 font-forum"
+        >
+          <HouseIcon class="block size-8 text-neutral-500" />
+          <span>Casa de Convivencias</span>
+        </h2>
       </header>
       <ViewHospedajes client:load />
     </section>

@@ -190,13 +190,13 @@ export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
           {listConfirmed.map((parish) => (
             <div key={parish.parroquia} className="">
               <header>
-                <h3 className="font-semibold text-3xl p-1 border-b-2 border-neutral-500">{parish.parroquia}</h3>
+                <h3 className="font-semibold font-forum text-3xl p-1 border-b-2 border-neutral-500">{parish.parroquia}</h3>
               </header>
               <div className="main space-y-8">
                 {parish.comunidades.map((comm) => (
                   <div key={comm.numero}>
                     <div className="" key={comm.numero}>
-                      <h4 className="font-semibold text-lg mt-4 mb-1 text-neutral-500">Comunidad N° {comm.numero}</h4>
+                      <h4 className="font-semibold font-forum text-lg mt-4 mb-1 text-neutral-500">Comunidad N° {comm.numero}</h4>
                     </div>
                     <div className="container-table">
                       <table>

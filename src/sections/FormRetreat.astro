@@ -10,7 +10,7 @@ import { ViewSelectedCommunities } from "@/components/react/ViewSelectedCommunit
     id="form-retreat"
     class="design-form space-y-4"
   >
-    <input type="hidden" name="id-retreat" value="" />
+    <input type="hidden" id="id-retreat" name="id-retreat" value="" />
     <fieldset class="space-y-4 fieldset-retreat-data">
       <legend>Nueva Convivencia</legend>
       <!-- title -->
@@ -27,12 +27,14 @@ import { ViewSelectedCommunities } from "@/components/react/ViewSelectedCommunit
       </div>
       <!-- description -->
       <div class="content-input">
-        <textarea
+        <input
+          type="text"
           name="description-retreat"
           id="description-retreat"
-          rows="4"
+          autocomplete="off"
           placeholder=" "
-          required></textarea>
+          required
+        />
         <label for="description-retreat" class="label-text">Descripción</label>
       </div>
       <!-- fechas -->
@@ -43,7 +45,6 @@ import { ViewSelectedCommunities } from "@/components/react/ViewSelectedCommunit
             type="date"
             name="start-date-retreat"
             id="start-date-retreat"
-            placeholder=" "
             required
           />
           <label for="start-date-retreat" class="label-text"
@@ -56,15 +57,11 @@ import { ViewSelectedCommunities } from "@/components/react/ViewSelectedCommunit
             type="date"
             name="end-date-retreat"
             id="end-date-retreat"
-            placeholder=" "
             required
           />
           <label for="end-date-retreat" class="label-text">Fecha de final</label
           >
         </div>
-        <!-- costo por persona -->
-        <!-- status -->
-        <!-- is solo de reponsables -->
       </div>
       <!-- costo de convivencia -->
       <div class="content-input">
@@ -107,11 +104,44 @@ import { ViewSelectedCommunities } from "@/components/react/ViewSelectedCommunit
 
 <script>
   import { showNotification } from "@/scripts/notification";
+  import type { RetreatsGet } from "@/types/retreats";
   import { $id } from "@/utils/getElements";
   import { actions } from "astro:actions";
 
   document.addEventListener("astro:page-load", () => {
     const formRetreat = $id("form-retreat") as HTMLFormElement;
+    const submitButton = formRetreat.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
+
+    // Listener para el evento editRetreat
+    function EditRetreat(retreat: RetreatsGet) {
+      ($id("id-retreat") as HTMLInputElement).value = retreat.id.toString();
+      ($id("title-retreat") as HTMLInputElement).value = retreat.title;
+      ($id("description-retreat") as HTMLInputElement).value =
+        retreat.description || "";
+      ($id("start-date-retreat") as HTMLInputElement).value = new Date(
+        retreat.start_date,
+      )
+        .toISOString()
+        .split("T")[0]; // Formatear a YYYY-MM-DD
+      ($id("end-date-retreat") as HTMLInputElement).value = new Date(
+        retreat.end_date,
+      )
+        .toISOString()
+        .split("T")[0]; // Formatear a YYYY-MM-DD
+      ($id("cost-per-person-retreat") as HTMLInputElement).value =
+        retreat.cost_per_person.toString();
+
+      submitButton.textContent = "Actualizar";
+
+      // Dispatch evento para seleccionar las comunidades asociadas a la convivencia
+      window.dispatchEvent(
+        new CustomEvent("setSelectedCommunities", {
+          detail: retreat.communities.map((c) => c.id),
+        }),
+      );
+    }
 
     formRetreat.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -144,20 +174,37 @@ import { ViewSelectedCommunities } from "@/components/react/ViewSelectedCommunit
             cost_per_person: Number(costRetreat),
             communities_ids: idsCommunities,
           };
+      console.log("Info a enviar:", info);
       try {
         const { data, error } = await actions.postRetreat(info);
         if (!data?.success || error) {
           showNotification("Error al guardar la convivencia.", "error");
           return;
         }
-        showNotification("Convivencia guardada correctamente.", "success");
+
+        const isUpdate = idRetreat ? true : false;
+        showNotification(
+          isUpdate
+            ? "Convivencia actualizada correctamente."
+            : "Convivencia guardada correctamente.",
+          "success",
+        );
         formRetreat.reset();
+        submitButton.textContent = "Crear";
         window.dispatchEvent(new CustomEvent("retreats:updated"));
       } catch (error) {}
     });
 
     formRetreat.addEventListener("reset", () => {
+      submitButton.textContent = "Crear";
       window.dispatchEvent(new CustomEvent("communities:clear-selection"));
     });
+
+    // Listener para el evento editRetreat desde ViewConvivencias
+    window.addEventListener("editRetreat", (event: any) => {
+      EditRetreat(event.detail);
+    });
+
+    (window as any).handleEditRetreat = EditRetreat;
   });
 </script>

@@ -2,12 +2,12 @@ import { useMemo, useState } from "react"
 import { actions } from "astro:actions"
 
 interface CommunityCharge {
-  parish_name: string
-  community_id: number
-  number_community: number
-  total_attendees: number
-  total_cost: number
-  total_debt: number
+  parish_name: string;
+  community_id: number;
+  number_community: number;
+  total_attendees: number;
+  total_cost: number;
+  total_debt: number;
 }
 
 interface ViewCollectMoneyProps {

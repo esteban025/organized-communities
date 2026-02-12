@@ -991,3 +991,66 @@ export const getRetreatsHistoryFromDB = async () => {
     };
   }
 };
+
+export const updateRetreatInDB = async (input: {
+  id: number;
+  title: string;
+  description: string | null;
+  start_date: string;
+  end_date: string;
+  cost_per_person: number;
+  is_leaders_only?: boolean;
+  communities_ids: number[];
+}) => {
+  try {
+    const { id, title, description, start_date, end_date, cost_per_person, is_leaders_only = false, communities_ids } = input;
+
+    // Validar que el retreat existe
+    const [existingRetreat] = await db.query(
+      `SELECT id FROM retreats WHERE id = ?`,
+      [id]
+    );
+
+    if ((existingRetreat as any[]).length === 0) {
+      return {
+        success: false,
+        message: "La convivencia no existe",
+      };
+    }
+
+    // Actualizar los datos básicos de la convivencia
+    const queryUpdate = `
+      UPDATE retreats
+      SET title = ?, description = ?, start_date = ?, end_date = ?, cost_per_person = ?, is_leaders_only = ?, updated_at = NOW()
+      WHERE id = ?
+    `;
+    await db.query(queryUpdate, [title, description, start_date, end_date, cost_per_person, is_leaders_only, id]);
+
+    // Eliminar las asociaciones de comunidades anteriores
+    await db.query(`DELETE FROM retreat_communities WHERE retreat_id = ?`, [id]);
+
+    // Asociar las nuevas comunidades
+    if (communities_ids.length > 0) {
+      const communitiesValues = communities_ids.map(commId => [id, commId]);
+      const placeholders = communitiesValues.map(() => '(?, ?)').join(', ');
+      const queryAssociateCommunities = `
+        INSERT INTO retreat_communities (retreat_id, community_id)
+        VALUES ${placeholders}
+      `;
+      const flattenedValues = communitiesValues.flat();
+      await db.query(queryAssociateCommunities, flattenedValues);
+    }
+
+    return {
+      success: true,
+      message: "Convivencia actualizada con éxito",
+      data: id
+    };
+  } catch (error) {
+    console.error("Error al actualizar convivencia:", error);
+    return {
+      success: false,
+      message: "Error al actualizar la convivencia",
+    };
+  }
+}

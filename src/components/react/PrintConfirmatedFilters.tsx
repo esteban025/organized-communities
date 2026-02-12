@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 interface FiltersProps {
   parishes: string[]
   communities: string[]
@@ -9,6 +11,8 @@ interface FiltersProps {
   onChangeCommunity: (value: string) => void
   onChangeRetreatHouse: (value: string) => void
   onClearFilters: () => void
+  viewTotals: boolean
+  onChangeViewTotals: (value: boolean) => void
 }
 
 export const PrintConfirmatedFilters = ({
@@ -22,15 +26,30 @@ export const PrintConfirmatedFilters = ({
   onChangeCommunity,
   onChangeRetreatHouse,
   onClearFilters,
+  viewTotals,
+  onChangeViewTotals,
 }: FiltersProps) => {
   return (
     <form className="card-section flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
       <header>
         <h2 className="text-xl font-semibold mb-2">Filtros</h2>
       </header>
+      <div className="ss">
+        <label htmlFor="view-totals" className="flex items-center gap-2">
+          <span>Mostrar Totales </span>
+          <input
+            type="checkbox"
+            name="view-totals"
+            id="view-totals"
+            checked={viewTotals}
+            onChange={(e) => onChangeViewTotals(e.target.checked)}
+          />
+        </label>
+      </div>
       <div className="grid gap-4 grid-cols-4">
-        <label className="flex flex-col gap-1">
+        <label className="flex flex-col gap-1" htmlFor="select-parish">
           <select
+            name="select-parish"
             className="input select-input space-y-1"
             value={selectedParish}
             onChange={(e) => onChangeParish(e.target.value)}
@@ -44,8 +63,9 @@ export const PrintConfirmatedFilters = ({
           </select>
         </label>
 
-        <label className="flex flex-col gap-1">
+        <label className="flex flex-col gap-1" htmlFor="select-community">
           <select
+            name="select-community"
             className="input select-input space-y-1"
             value={selectedCommunity}
             onChange={(e) => onChangeCommunity(e.target.value)}
@@ -59,8 +79,9 @@ export const PrintConfirmatedFilters = ({
           </select>
         </label>
 
-        <label className="flex flex-col gap-1">
+        <label className="flex flex-col gap-1" htmlFor="select-retreat-house">
           <select
+            name="select-retreat-house"
             className="input select-input space-y-1"
             value={selectedRetreatHouse}
             onChange={(e) => onChangeRetreatHouse(e.target.value)}

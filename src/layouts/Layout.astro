@@ -6,6 +6,7 @@ import HeaderPage from "@/sections/HeaderPage.astro";
 import { NavbarPage } from "@/sections/react/NavbarPage";
 import { ClientRouter } from "astro:transitions";
 import ModalObservation from "@/components/ModalObservation.astro";
+import WaterMark from "@/assets/WaterMark.astro";
 
 interface Props {
   title?: string;
@@ -31,10 +32,11 @@ const {
     <meta name="description" content={description} />
     <ClientRouter />
   </head>
-  <body class={print ? "print" : ""}>
+  <body class:list="relative" class={print ? "print" : ""}>
     <NotificationMessage />
     <ModalMessage />
     <ModalObservation />
+    <WaterMark />
     <div class="flex flex-col gap-6">
       <HeaderPage />
       {

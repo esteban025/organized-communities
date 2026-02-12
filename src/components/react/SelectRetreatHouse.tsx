@@ -30,7 +30,7 @@ export const SelectRetreatHouse = () => {
   }, [])
   return (
     <select name="select-house" id="select-house" className="select-input">
-      <option className="options-select" value="" disabled selected>-- Selecciona un hospedaje</option>
+      <option className="options-select" disabled>-- Selecciona un hospedaje</option>
       {retreatHouses.map((home) => (
         <option key={home.id} value={home.id} className="options-select">{home.name}</option>
       ))}

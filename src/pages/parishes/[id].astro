@@ -4,6 +4,7 @@ import FormCommunity from "@/sections/FormCommunity.astro";
 import FormFusionCommunities from "@/sections/FormFusionCommunities.astro";
 import { ViewCommunities } from "@/components/react/ViewCommunities";
 import { actions } from "astro:actions";
+import StackBackIcon from "@/icons/StackBackIcon.astro";
 const { id } = Astro.params;
 
 let titlePage = "Comunidades | Plataforma";
@@ -45,8 +46,11 @@ try {
         </section>
         <section class="card-section" transition:name="section-view">
           <header>
-            <h2 class="text-2xl font-semibold mb-4">
-              Comunidades de "{infoParish ? infoParish.name : "la parroquia"}"
+            <h2 class="text-3xl font-semibold mb-4 flex items-center gap-2 font-forum">
+              <StackBackIcon class="block size-8 text-neutral-500" />
+              <span>
+                Comunidades de "{infoParish ? infoParish.name : "la parroquia"}"
+              </span>
             </h2>
           </header>
           <ViewCommunities client:load parishId={Number(id)} />

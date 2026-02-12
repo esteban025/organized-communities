@@ -1,4 +1,5 @@
 ---
+import { PlusIcon, RefreshIcon } from "@/icons/iconsReact";
 import { actions } from "astro:actions";
 ---
 
@@ -58,8 +59,20 @@ import { actions } from "astro:actions";
       </div>
 
       <div class="content-actions">
-        <button type="reset" class="btn btn-secondary w-full">Resetear</button>
-        <button type="submit" class="btn btn-primary w-full">Agregar</button>
+        <button
+          type="reset"
+          class="btn btn-secondary w-full flex items-center justify-center gap-2"
+        >
+          <RefreshIcon className="size-5 block" />
+          <span>Limpiar</span>
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary w-full flex items-center justify-center gap-2"
+        >
+          <PlusIcon className="size-5 block" />
+          <span>Agregar</span>
+        </button>
       </div>
 
       <!-- localizacion proximamente -->
@@ -72,23 +85,18 @@ import { actions } from "astro:actions";
   import { actions } from "astro:actions";
   import { showNotification } from "@/scripts/notification";
   import { warningMessage } from "@/scripts/warning-message";
+  import type { Parish } from "@/types/parishes";
 
   document.addEventListener("astro:page-load", () => {
     const formParish = $id("form-parish") as HTMLFormElement;
 
     // funcion para editar parroquia
-    function fillOutParishForm(data: {
-      id: number;
-      name: string;
-      tag: string;
-      aka: string;
-      locality: string;
-    }) {
+    function fillOutParishForm(data: Parish) {
       ($id("id-parish") as HTMLInputElement).value = data.id.toString();
       ($id("name-parish") as HTMLInputElement).value = data.name;
       ($id("tag-parish") as HTMLInputElement).value = data.tag;
       ($id("aka-parish") as HTMLInputElement).value = data.aka;
-      ($id("locality-parish") as HTMLInputElement).value = data.locality;
+      ($id("locality-parish") as HTMLInputElement).value = data.locality || "";
     }
 
     formParish.addEventListener("submit", async (e) => {
