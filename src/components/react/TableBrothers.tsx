@@ -1,7 +1,7 @@
 import { EditIcon, TrashIcon, UserIcon } from "@/icons/iconsReact";
-import type { BrotherwithRolesOutDB } from "@/types/brothers";
+import type { BrotherwithRolesOutDB, TotalsBrothers } from "@/types/brothers";
 
-export const TableBrothers = ({ brothers }: { brothers: BrotherwithRolesOutDB[] }) => {
+export const TableBrothers = ({ brothers, totals }: { brothers: BrotherwithRolesOutDB[], totals: TotalsBrothers }) => {
   console.log(brothers)
   const headTable = [
     'Nombres',
@@ -112,8 +112,11 @@ export const TableBrothers = ({ brothers }: { brothers: BrotherwithRolesOutDB[] 
         <tfoot>
           <tr>
             <th colSpan={4}>
-              <div className="flex">
-                Total de Hermanos: {brothers.length}
+              <div className="flex items-center gap-4 justify-around">
+                <p>Total hermanos: {totals.total_personas}</p>
+                <p>Total matrimonios: {totals.total_matrimonios}</p>
+                <p>Total solteros: {totals.total_solteros}</p>
+                <p>Total solteras: {totals.total_solteras}</p>
               </div>
             </th>
           </tr>

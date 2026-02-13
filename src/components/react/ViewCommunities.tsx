@@ -1,12 +1,15 @@
-import type { CommunityWithBrotherCount } from "@/types/communities";
+import type { CommunityResume } from "@/types/communities";
 import { TableCommunities } from "./TableCommunities";
-import { FilterCommunity, type CommunityFilters } from "./FilterCommunity";
+import { FilterCommunity } from "./FilterCommunity";
 import { RefreshIcon } from "@/icons/iconsReact";
+
+import type { CommunityFilters } from "@/types/communities";
+
 import { actions } from "astro:actions";
 import { useEffect, useMemo, useState } from "react";
 
 export const ViewCommunities = ({ parishId }: { parishId: number }) => {
-  const [communities, setCommunities] = useState<CommunityWithBrotherCount[]>([]);
+  const [communities, setCommunities] = useState<CommunityResume[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
   const [filters, setFilters] = useState<CommunityFilters>({

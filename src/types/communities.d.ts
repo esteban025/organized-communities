@@ -5,9 +5,15 @@ export interface Community {
   parish_id: number;
 }
 
-export interface CommunityWithBrotherCount extends Community, Omit<Community, "parish_id"> {
+export interface CommunityResume extends Community {
   count_persons: number;
-  count_marriages: number;
-  count_singles: number;
+  total_communities: number;
   responsable: string | null;
+}
+
+export interface CommunityFilters {
+  responsable: string;
+  parity: "all" | "even" | "odd";
+  number: string;
+  paso: string;
 }

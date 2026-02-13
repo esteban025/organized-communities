@@ -1,23 +1,16 @@
 import { RefreshIcon } from "@/icons/iconsReact";
+import type { CommunityFilters } from "@/types/communities";
 
-type ParityFilter = "all" | "even" | "odd";
-
-export interface CommunityFilters {
-  responsable: string;
-  parity: ParityFilter;
-  number: string;
-  paso: string;
+interface FilterCommunityProps {
+  filters: CommunityFilters;
+  onChange: (filters: CommunityFilters) => void;
+  onReset: () => void;
 }
-
 export const FilterCommunity = ({
   filters,
   onChange,
   onReset,
-}: {
-  filters: CommunityFilters;
-  onChange: (filters: CommunityFilters) => void;
-  onReset: () => void;
-}) => {
+}: FilterCommunityProps) => {
   const handleInputChange = (
     field: keyof CommunityFilters,
     value: string,

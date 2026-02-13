@@ -1,22 +1,18 @@
 import { PlusIcon, SearchIcon } from "@/icons/iconsReact";
 
+interface FilterBrotherProps {
+  name: string;
+  onNameChange: (newValue: string) => void;
+  onReset: () => void;
+}
 export const FilterBrother = ({
   name,
   onNameChange,
-  selectedRoles,
-  onRolesChange,
   onReset,
-}: {
-  name: string;
-  onNameChange: (newValue: string) => void;
-  selectedRoles: string[];
-  onRolesChange: (roles: string[]) => void;
-  onReset: () => void;
-}) => {
+}: FilterBrotherProps) => {
 
   const handleReset = () => {
     onNameChange("");
-    onRolesChange([]);
     onReset();
   };
 

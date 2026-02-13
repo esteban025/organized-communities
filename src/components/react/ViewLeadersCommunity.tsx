@@ -42,14 +42,14 @@ export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) =
   const catequistas = groupLeaders.filter(gl => gl.role?.includes('catequista'));
   console.log(responsables)
   return (
-    <div className="ss">
+    <div>
       {isLoading && (
         <div className="message-card loading h-full">
           <span>Cargando hermanos...</span>
           <RefreshIcon className="animate-spin size-4 block" />
         </div>
       )}
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="message-cardtext-red-500">{error}</p>}
       {!isLoading && !error && (
         <div className="grid gap-4 grid-areas-group-leaders">
           <div className="responsables">
@@ -58,7 +58,7 @@ export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) =
               <ul>
                 {responsables.map((leader) => (
                   <li key={leader.group_id} className="">
-                    <div className="ss">
+                    <div className="content-person">
                       <span className="initials text-sky-400">{getInitialsName(leader.names)}</span>
                       <span className="truncate max-w-37.5">{leader.names}</span>
                     </div>
@@ -73,7 +73,7 @@ export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) =
               <ul>
                 {corresponsables.map((leader) => (
                   <li key={leader.group_id}>
-                    <div className="ss">
+                    <div className="content-person">
                       <span className="initials">{getInitialsName(leader.names)}</span>
                       <span className="truncate max-w-37.5">{leader.names}</span>
                     </div>
@@ -88,7 +88,7 @@ export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) =
               <ul>
                 {otros.map((leader) => (
                   <li key={leader.group_id} className="flex items-center justify-between gap-2">
-                    <div className="ss">
+                    <div className="content-person">
                       <span className="initials">{getInitialsName(leader.names)}</span>
                       <span className="truncate max-w-30">{leader.names}</span>
                     </div>
@@ -104,7 +104,7 @@ export const ViewLeadersCommunity = ({ communityId }: { communityId: number }) =
               <ul>
                 {catequistas.map((leader) => (
                   <li key={leader.group_id}>
-                    <div className="ss">
+                    <div className="content-person">
                       <span className="initials">{getInitialsName(leader.names)}</span>
                       <span className="truncate max-w-37.5">{leader.names}</span>
                     </div>

@@ -1,12 +1,8 @@
 import { db } from "@/lib/db"
-import type { Community, CommunityWithBrotherCount } from "@/types/communities"
+import type { Community, CommunityResume } from "@/types/communities"
 
 export const getComunityByIdFromDB = async (id: number) => {
-  const query = `
-    SELECT id, number_community, parish_id, level_paso
-    FROM communities
-    WHERE id = ?;
-  `
+  const query = `SELECT * FROM communities WHERE id = ?;`
   const [rows] = await db.query(query, [id])
   const data = rows as Community[]
   return {
@@ -15,6 +11,7 @@ export const getComunityByIdFromDB = async (id: number) => {
     data: data[0]
   }
 }
+
 export const getCommunitiesByParishIdFromDB = async (parishId: number) => {
   // verificamos que id exista
   const checkQuery = `SELECT id FROM parishes WHERE id = ?;`
@@ -52,7 +49,7 @@ export const getCommunitiesByParishIdFromDB = async (parishId: number) => {
     ORDER BY c.number_community;
   `
   const [rows] = await db.query(query, [parishId, parishId])
-  const data = rows as CommunityWithBrotherCount[]
+  const data = rows as CommunityResume[]
   console.log("Communities with counts:", data)
 
   return {

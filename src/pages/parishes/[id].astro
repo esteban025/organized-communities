@@ -3,8 +3,10 @@ import Layout from "@/layouts/Layout.astro";
 import FormCommunity from "@/sections/FormCommunity.astro";
 import FormFusionCommunities from "@/sections/FormFusionCommunities.astro";
 import { ViewCommunities } from "@/components/react/ViewCommunities";
-import { actions } from "astro:actions";
 import StackBackIcon from "@/icons/StackBackIcon.astro";
+import { BugIcon } from "@/icons/iconsReact";
+
+import { actions } from "astro:actions";
 const { id } = Astro.params;
 
 let titlePage = "Comunidades | Plataforma";
@@ -19,10 +21,11 @@ try {
     throw new Error(
       error?.message || data?.message || "Error al obtener la parroquia",
     );
+  } else {
+    infoParish = data.data;
+    titlePage = `Comunidades de ${infoParish?.name} | Plataforma`;
+    descriptionPage = `Gestión de comunidades de la parroquia ${infoParish?.name}`;
   }
-  infoParish = data.data;
-  titlePage = `Comunidades de ${infoParish?.name} | Plataforma`;
-  descriptionPage = `Gestión de comunidades de la parroquia ${infoParish?.name}`;
 } catch (error) {
   console.error("Error fetching parish data:", error);
   titlePage = "Error al cargar parroquia";
@@ -35,23 +38,20 @@ try {
     infoParish && (
       <main class="main-grid">
         <section class="flex flex-col gap-4">
-          <FormCommunity
-            id={Number(id)}
-            name={infoParish ? infoParish.name : undefined}
-          />
-          <FormFusionCommunities
-            parishId={Number(id)}
-            parishName={infoParish ? infoParish.name : undefined}
-          />
+          <FormCommunity parishId={Number(id)} />
+          <FormFusionCommunities parishId={Number(id)} />
         </section>
         <section class="card-section" transition:name="section-view">
-          <header>
-            <h2 class="text-3xl font-semibold mb-4 flex items-center gap-2 font-forum">
+          <header class="mb-6">
+            <h2 class="text-3xl font-semibold flex items-center gap-2 font-forum">
               <StackBackIcon class="block size-8 text-neutral-500" />
-              <span>
-                Comunidades de "{infoParish ? infoParish.name : "la parroquia"}"
-              </span>
+              <span>Comunidades de "{infoParish.name}"</span>
             </h2>
+            <p class="text-neutral-500 pt-1 ml-10">
+              * Solamente se podrá{" "}
+              <strong class="text-sky-600">Crear o Fusionar</strong> comunidades
+              dentro de esta parroquia
+            </p>
           </header>
           <ViewCommunities client:load parishId={Number(id)} />
         </section>
@@ -66,9 +66,12 @@ try {
         transition:name="section-view"
       >
         <header>
-          <h2 class="text-center text-2xl font-semibold mb-4">Error</h2>
+          <h2 class="text-center text-3xl font-semibold mb-4 text-red-500 flex items-center justify-center gap-2 font-forum">
+            <BugIcon className="block size-8" />
+            <span>Error al cargar la parroquia</span>
+          </h2>
         </header>
-        <div class="text-red-500 flex flex-col gap-1 items-center text-lg">
+        <div class="text-red-800 flex flex-col gap-1 items-center text-lg">
           <p>
             No se pudo cargar la información de la parroquia. Por favor, intenta
             nuevamente más tarde.

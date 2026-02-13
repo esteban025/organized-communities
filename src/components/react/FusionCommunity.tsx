@@ -46,7 +46,7 @@ export const FusionCommunity = ({ parishId }: { parishId: number }) => {
       {showCommunities && (
         <span
           className="text-sm text-sky-600 leading-4 text-center text-balance w-11/12 mx-auto animate-entry"
-        >La primera comunidad seleccionada será la que permanezca"
+        >"La primera comunidad seleccionada será la que permanezca"
         </span>
       )}
       <div className={`container-communities ${showCommunities ? "" : "hidden"}`}>

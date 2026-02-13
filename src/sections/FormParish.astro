@@ -64,14 +64,14 @@ import { actions } from "astro:actions";
           class="btn btn-secondary w-full flex items-center justify-center gap-2"
         >
           <RefreshIcon className="size-5 block" />
-          <span>Limpiar</span>
+          <span class="text-reset">Limpiar</span>
         </button>
         <button
           type="submit"
           class="btn btn-primary w-full flex items-center justify-center gap-2"
         >
           <PlusIcon className="size-5 block" />
-          <span>Agregar</span>
+          <span class="text-submit">Agregar</span>
         </button>
       </div>
 
@@ -81,7 +81,7 @@ import { actions } from "astro:actions";
 </section>
 
 <script>
-  import { $id } from "@/utils/getElements";
+  import { $, $id } from "@/utils/getElements";
   import { actions } from "astro:actions";
   import { showNotification } from "@/scripts/notification";
   import { warningMessage } from "@/scripts/warning-message";
@@ -89,6 +89,8 @@ import { actions } from "astro:actions";
 
   document.addEventListener("astro:page-load", () => {
     const formParish = $id("form-parish") as HTMLFormElement;
+    const btnSubmitText = $(".text-submit") as HTMLSpanElement;
+    const btnResetText = $(".text-reset") as HTMLSpanElement;
 
     // funcion para editar parroquia
     function fillOutParishForm(data: Parish) {
@@ -97,6 +99,8 @@ import { actions } from "astro:actions";
       ($id("tag-parish") as HTMLInputElement).value = data.tag;
       ($id("aka-parish") as HTMLInputElement).value = data.aka;
       ($id("locality-parish") as HTMLInputElement).value = data.locality || "";
+      btnSubmitText.textContent = "Actualizar";
+      btnResetText.textContent = "Cancelar";
     }
 
     formParish.addEventListener("submit", async (e) => {
@@ -145,6 +149,8 @@ import { actions } from "astro:actions";
     formParish.addEventListener("reset", () => {
       // limpiamos el campo oculto de id
       ($id("id-parish") as HTMLInputElement).value = "";
+      btnSubmitText.textContent = "Agregar";
+      btnResetText.textContent = "Limpiar";
     });
 
     // funcion para eliminar parroquia
@@ -175,6 +181,7 @@ import { actions } from "astro:actions";
         }
       });
     }
+
     (window as any).fillOutParishForm = fillOutParishForm;
     (window as any).deleteParish = handleDeleteParish;
   });

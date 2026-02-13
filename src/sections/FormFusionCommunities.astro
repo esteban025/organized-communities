@@ -3,20 +3,21 @@ import type { CommunityWithBrotherCount } from "@/types/communities";
 import { FusionCommunity } from "@/components/react/FusionCommunity";
 import { actions } from "astro:actions";
 
-const { parishId, parishName } = Astro.props;
+const { parishId } = Astro.props;
 
 let communities: CommunityWithBrotherCount[] = [];
 
 try {
-  const res = await Astro.callAction(actions.getCommunities, {
+  const { data, error } = await Astro.callAction(actions.getCommunities, {
     parishId: Number(parishId),
   });
-  if (res.error || !res.data.success) {
+  if (error || !data.success) {
     throw new Error(
-      res.error?.message || res.data?.message || "Error al obtener comunidades",
+      error?.message || data?.message || "Error al obtener comunidades",
     );
+  } else {
+    communities = data.data;
   }
-  communities = res.data.data;
 } catch (error) {
   console.error(`Error fetching communities for parish ${parishId}:`, error);
 }
@@ -27,11 +28,6 @@ try {
     <input type="hidden" name="parish-id-in-fusion" value={parishId} />
     <fieldset class="flex flex-col gap-4">
       <legend>Fusionar comunidades</legend>
-      <p
-        class="text-sm text-neutral-500 leading-4 text-center text-balance w-11/12 mx-auto font-forum"
-      >
-        Solamente comunidades de "{parishName}"
-      </p>
       <FusionCommunity client:load parishId={parishId} />
     </fieldset>
   </form>
@@ -39,12 +35,10 @@ try {
 
 <script>
   import { showNotification } from "@/scripts/notification";
-  import { warningMessage } from "@/scripts/warning-message";
   import { $id } from "@/utils/getElements";
   import { actions } from "astro:actions";
 
   document.addEventListener("astro:page-load", () => {
-    // Your page load logic here
     const form = $id("form-fusion-community") as HTMLFormElement;
 
     form.addEventListener("submit", async (e) => {
@@ -85,7 +79,6 @@ try {
         // Fallback por si no se pudo determinar el primero
         comunitiesIds = selectedCommunities.map((id) => Number(id));
       }
-      console.log("Fusionar comunidades:", parishId, comunitiesIds);
 
       try {
         const { data, error } = await actions.mergeCommunities({

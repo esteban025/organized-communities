@@ -4,33 +4,28 @@ import { LEVELS } from "@/utils/pasos-camino";
 import { PlusIcon, RefreshIcon } from "@/icons/iconsReact";
 
 interface Props {
-  id: number;
-  name?: string;
+  parishId: number;
+  parishName?: string;
 }
-const { id, name } = Astro.props;
+const { parishId } = Astro.props;
 ---
 
 <section class="card-section h-min" transition:name="section-form">
   <form action={actions.postCommunity} class="design-form" id="form-community">
     <fieldset class="flex flex-col gap-4">
       <legend>Nueva comunidad</legend>
-      <p
-        class="text-sm text-neutral-500 leading-4 text-center text-balance w-11/12 mx-auto font-forum"
-      >
-        Esta comunidad será parte de "{name}"
-      </p>
       <input type="hidden" name="id-comm" id="id-comm" />
 
-      <input type="hidden" name="parish-id" id="parish-id" value={id} />
+      <input type="hidden" name="parish-id" id="parish-id" value={parishId} />
 
       <div class="content-input">
         <input
           type="number"
           id="number-comm"
           name="number-comm"
-          required
           min="1"
           placeholder=" "
+          required
         />
         <label for="number-comm" class="label-text">Número de comunidad</label>
       </div>
@@ -56,14 +51,14 @@ const { id, name } = Astro.props;
           class="btn btn-secondary w-full flex items-center justify-center gap-2"
         >
           <RefreshIcon className="size-5 block" />
-          <span>Limpiar</span>
+          <span class="reset-text-comm">Limpiar</span>
         </button>
         <button
           type="submit"
           class="btn btn-primary w-full flex items-center justify-center gap-2"
         >
           <PlusIcon className="size-5 block" />
-          <span>Agregar</span>
+          <span class="submit-text-comm">Agregar</span>
         </button>
       </div>
     </fieldset>
@@ -74,18 +69,21 @@ const { id, name } = Astro.props;
   import { showNotification } from "@/scripts/notification";
   import { warningMessage } from "@/scripts/warning-message";
   import type { Community } from "@/types/communities";
-  import { $id } from "@/utils/getElements";
+  import { $id, $ } from "@/utils/getElements";
   import { actions } from "astro:actions";
 
   document.addEventListener("astro:page-load", () => {
     const form = $id("form-community") as HTMLFormElement;
+    const btnSubmitText = $(".submit-text-comm") as HTMLSpanElement;
+    const btnResetText = $(".reset-text-comm") as HTMLSpanElement;
 
     function editCommunity(data: Community) {
-      ($id("id-comm") as HTMLInputElement).value = String(data.id);
-      ($id("number-comm") as HTMLInputElement).value = String(
-        data.number_community,
-      );
-      ($id("level-paso") as HTMLInputElement).value = data.level_paso;
+      const { id, number_community, level_paso } = data;
+      ($id("id-comm") as HTMLInputElement).value = String(id);
+      ($id("number-comm") as HTMLInputElement).value = String(number_community);
+      ($id("level-paso") as HTMLInputElement).value = level_paso;
+      btnSubmitText.textContent = "Actualizar";
+      btnResetText.textContent = "Cancelar";
     }
 
     async function deleteCommunity(id: number) {
@@ -156,6 +154,8 @@ const { id, name } = Astro.props;
 
     form.addEventListener("reset", () => {
       ($id("id-comm") as HTMLInputElement).value = "";
+      btnSubmitText.textContent = "Agregar";
+      btnResetText.textContent = "Limpiar";
     });
 
     (window as any).editCommunity = editCommunity;

@@ -1,4 +1,4 @@
-import type { BrotherwithRolesOutDB } from "@/types/brothers";
+import type { BrotherwithRolesOutDB, TotalsBrothers } from "@/types/brothers";
 import { actions } from "astro:actions";
 import { useEffect, useState } from "react";
 import { TableBrothers } from "./TableBrothers";
@@ -7,10 +7,15 @@ import { RefreshIcon } from "@/icons/iconsReact";
 
 export const ViewBrothers = ({ communityId }: { communityId: number }) => {
   const [brothers, setBrothers] = useState<BrotherwithRolesOutDB[]>([]);
+  const [totals, setTotals] = useState<TotalsBrothers>({
+    total_personas: 0,
+    total_matrimonios: 0,
+    total_solteros: 0,
+    total_solteras: 0,
+  })
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterName, setFilterName] = useState("");
-  const [filterRoles, setFilterRoles] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchBrothers = async () => {
@@ -22,7 +27,8 @@ export const ViewBrothers = ({ communityId }: { communityId: number }) => {
         setError(data?.message || error?.message || "Unknown error");
         return;
       }
-      setBrothers(data.data);
+      setBrothers(data.data.brothers);
+      setTotals(data.data.totals);
       setLoading(false);
     };
 
@@ -40,20 +46,13 @@ export const ViewBrothers = ({ communityId }: { communityId: number }) => {
   }, [communityId]);
   const handleResetFilters = () => {
     setFilterName("");
-    setFilterRoles([]);
   };
 
   const filteredBrothers = brothers.filter((brother) => {
     const matchName =
       filterName.trim() === "" ||
-      brother.names.toLowerCase().includes(filterName.toLowerCase());
-
-    const roles = brother.roles ?? [];
-    const matchRoles =
-      filterRoles.length === 0 ||
-      filterRoles.every((role) => roles.includes(role));
-
-    return matchName && matchRoles;
+      brother.names.toLowerCase().includes(filterName.toLowerCase())
+    return matchName;
   });
 
   return (
@@ -61,8 +60,6 @@ export const ViewBrothers = ({ communityId }: { communityId: number }) => {
       <FilterBrother
         name={filterName}
         onNameChange={setFilterName}
-        selectedRoles={filterRoles}
-        onRolesChange={setFilterRoles}
         onReset={handleResetFilters}
       />
       {loading && (
@@ -83,7 +80,7 @@ export const ViewBrothers = ({ communityId }: { communityId: number }) => {
         </div>
       )}
       {!loading && !error && filteredBrothers.length > 0 && (
-        <TableBrothers brothers={filteredBrothers} />
+        <TableBrothers brothers={filteredBrothers} totals={totals} />
       )}
     </div>
   );

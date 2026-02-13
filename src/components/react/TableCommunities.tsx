@@ -1,7 +1,7 @@
-import type { CommunityWithBrotherCount } from "@/types/communities"
+import type { CommunityResume } from "@/types/communities"
 import { EyeIcon, TrashIcon, EditIcon } from "@/icons/iconsReact"
 
-export const TableCommunities = ({ communities }: { communities: CommunityWithBrotherCount[] }) => {
+export const TableCommunities = ({ communities }: { communities: CommunityResume[] }) => {
   const headTable = [
     'N° Com',
     'Responsable',
@@ -10,7 +10,7 @@ export const TableCommunities = ({ communities }: { communities: CommunityWithBr
     'Acciones',
   ]
 
-  const handleEditComm = (e: React.MouseEvent<HTMLButtonElement>, community: Partial<CommunityWithBrotherCount>) => {
+  const handleEditComm = (e: React.MouseEvent<HTMLButtonElement>, community: Partial<CommunityResume>) => {
     e.preventDefault()
     if (typeof (window as any).editCommunity === "function") {
       (window as any).editCommunity(community)
@@ -47,7 +47,7 @@ export const TableCommunities = ({ communities }: { communities: CommunityWithBr
                   <a href={`/communities/${id}`} title="Ver Comunidad" className="atn-btn">
                     <EyeIcon className="size-5 block stroke-1" />
                   </a>
-                  <button className="atn-btn" title="Editar Comunidad" onClick={(e) => handleEditComm(e, { id, number_community, responsable, level_paso })}>
+                  <button className="atn-btn" title="Editar Comunidad" onClick={(e) => handleEditComm(e, { id, number_community, level_paso })}>
                     <EditIcon className="size-5 block stroke-1" />
                   </button>
                   <button className="atn-btn" title="Eliminar Comunidad" onClick={() => handleDeleteComm(id)}>

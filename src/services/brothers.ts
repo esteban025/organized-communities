@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import type { BrotherOutDB, BrotherwithRoles, BrotherwithRolesOutDB, SingleBrotherInput, CreateMarriageInput, BrotherLeader } from "@/types/brothers";
+import type { BrotherOutDB, BrotherwithRoles, BrotherwithRolesOutDB, SingleBrotherInput, CreateMarriageInput, BrotherLeader, TotalsBrothers } from "@/types/brothers";
 
 export const getBrohterByIdFromDB = async (id: number) => {
   const query = `
@@ -128,17 +128,33 @@ export const getBrothersByCommunityIdFromDB = async (communityId: number) => {
       names;
   `
   const [rows] = await db.query(query, [communityId]);
-  const raw = rows as any[];
+  const brothers = rows as any[];
 
-  const data: BrotherwithRolesOutDB[] = raw.map((row) => ({
-    ...row,
-    roles: row.roles
-      ? (row.roles as string)
-        .split(",")
-        .map((r) => r.trim())
-        .filter(Boolean)
-      : [],
-  }));
+  const queryTotal = `
+    SELECT 
+      COUNT(DISTINCT p.id) AS total_personas,
+      COUNT(DISTINCT m.id) AS total_matrimonios,
+      COUNT(DISTINCT CASE WHEN m.id IS NULL AND p.civil_status = 'soltero' THEN p.id END) AS total_solteros,
+      COUNT(DISTINCT CASE WHEN m.id IS NULL AND p.civil_status = 'soltera' THEN p.id END) AS total_solteras
+    FROM persons p
+    LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id) AND m.community_id = p.community_id
+    WHERE p.community_id = ?;
+  `
+  const [totals] = await db.query(queryTotal, [communityId])
+  const totalsData = (totals as TotalsBrothers[])[0]
+
+  const data = {
+    brothers: brothers.map((row) => ({
+      ...row,
+      roles: row.roles
+        ? (row.roles as string)
+          .split(",")
+          .map((r) => r.trim())
+          .filter(Boolean)
+        : [],
+    })),
+    totals: totalsData
+  }
 
   return {
     success: true,

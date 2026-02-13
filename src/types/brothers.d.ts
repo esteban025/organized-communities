@@ -78,3 +78,10 @@ export interface BrotherLeader {
   role: string;
   own_community_id: number;
 }
+
+export interface TotalsBrothers {
+  total_personas: number;
+  total_matrimonios: number;
+  total_solteros: number;
+  total_solteras: number;
+}

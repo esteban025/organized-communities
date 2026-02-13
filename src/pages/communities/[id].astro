@@ -4,7 +4,7 @@ import FormBrother from "@/sections/FormBrother.astro";
 import { ViewBrothers } from "@/components/react/ViewBrothers";
 import { ViewLeadersCommunity } from "@/components/react/ViewLeadersCommunity";
 import { actions } from "astro:actions";
-import { UsersGroupIcon } from "@/icons/iconsReact";
+import { BugIcon, UsersGroupIcon } from "@/icons/iconsReact";
 
 const { id } = Astro.params;
 let titlePage = "Comunidades | Plataforma";
@@ -20,10 +20,11 @@ try {
     throw new Error(
       error?.message || data?.message || "Error al obtener la comunidad",
     );
+  } else {
+    infoCommunity = data.data;
+    titlePage = `Información de la comunidad ${infoCommunity.number_community} | Plataforma`;
+    descriptionPage = `Gestión de hermanos de comunidad dentro de la comunidad ${infoCommunity.number_community}`;
   }
-  infoCommunity = data.data;
-  titlePage = `Hermanos de ${infoCommunity?.number_community} | Plataforma`;
-  descriptionPage = `Gestión de comunidades de la parroquia`;
 } catch (error) {
   titlePage = "Error obtener la comunidad";
   descriptionPage = "No se pudo cargar la información de la parroquia";
@@ -38,9 +39,12 @@ try {
         transition:name="section-view"
       >
         <header>
-          <h2 class="text-center text-2xl font-semibold mb-4">Error</h2>
+          <h2 class="text-center text-3xl font-semibold mb-4 text-red-500 flex items-center justify-center gap-2 font-forum">
+            <BugIcon className="block size-8" />
+            <span>Error al cargar la comunidad</span>
+          </h2>
         </header>
-        <div class="text-red-500 flex flex-col gap-1 items-center text-lg">
+        <div class="text-red-800 flex flex-col gap-1 items-center text-lg">
           <p>
             No se pudo cargar la información de la Comunidad. Por favor, intenta
             nuevamente más tarde.
@@ -62,11 +66,17 @@ try {
           <ViewLeadersCommunity communityId={Number(id)} client:load />
         </section>
         <section class="card-section" style="grid-area: alls;">
-          <header>
-            <h2 class="text-3xl font-semibold mb-4 flex items-center gap-2 font-forum">
+          <header class="mb-6">
+            <h2 class="text-3xl font-semibold flex items-center gap-2 font-forum">
               <UsersGroupIcon className="size-8 block text-neutral-500" />
               <span>Hermanos</span>
             </h2>
+            <p class="text-neutral-500 pt-1 ml-10">
+              *Todos los hermanos agregados serán asignados automáticamente a la
+              <strong class="text-sky-600">
+                Comunidad {infoCommunity.number_community}
+              </strong>
+            </p>
           </header>
           <ViewBrothers communityId={Number(id)} client:load />
         </section>
