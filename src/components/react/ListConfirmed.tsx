@@ -211,7 +211,7 @@ export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
                           {comm.confirmados.map((bro) => (
                             <tr key={bro.group_key}>
                               <td className="truncate max-w-60">{bro.nombres_confirmados}</td>
-                              <td>{bro.marriage_id ? "Matrimonio" : "Soltero"}</td>
+                              <td>{bro.civil_status}</td>
                               <td>{bro.observaciones_combinadas}</td>
                               <td>{bro.retreat_house_name}</td>
                               <td className="min">

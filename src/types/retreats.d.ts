@@ -71,6 +71,8 @@ export interface ParishesConf {
   community_total_matrimonios: number;
   community_total_solteros: number;
   community_total_solteras: number;
+  community_incompletos_solteros: number;
+  community_incompletos_solteras: number;
 }
 
 export interface AttendeesConf {

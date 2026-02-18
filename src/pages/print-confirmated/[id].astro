@@ -3,6 +3,7 @@ import PrintListConfirmated from "@/layouts/PrintListConfirmated.astro";
 import { getRetreatConfirmedAttendeesFromDB } from "@/services/retreats";
 import { ViewPrintConfirmated } from "@/components/react/ViewPrintConfirmated";
 import HeaderPage from "@/sections/HeaderPage.astro";
+import type { StatsConf } from "@/types/retreats";
 
 const { id } = Astro.params;
 const retreatId = Number(id);
@@ -44,16 +45,9 @@ interface ConvData {
   status: string;
 }
 
-interface StatsData {
-  total_personas: number;
-  total_matrimonios: number;
-  total_solteros: number;
-  total_solteras: number;
-}
-
 interface RetreatPrintData {
   convivencia: ConvData;
-  estadisticas: StatsData;
+  estadisticas: StatsConf;
   attended_person_ids: number[];
   parroquias: ParishData[];
 }

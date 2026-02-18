@@ -115,13 +115,13 @@ table .col-full {
     page-break-inside: avoid;
   } */
 
-  .print-keep-with-table-comm {
+  /* .print-keep-with-table-comm {
     break-inside: avoid;
     page-break-inside: avoid;
-  }
+  } */
 
-  /* .print-keep-with-table > header {
+  .print-keep-with-table > header {
     break-after: avoid;
     page-break-after: avoid;
-  } */
+  }
 }

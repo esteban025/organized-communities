@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { PrintConfirmatedFilters } from "./PrintConfirmatedFilters"
 import { PrintConfirmatedList } from "./PrintConfirmatedList"
+import type { StatsConf } from "@/types/retreats"
 
 interface ConfirmedGroup {
   group_key: string
@@ -37,19 +38,12 @@ interface ConvData {
   status: string
 }
 
-interface StatsData {
-  total_personas: number
-  total_matrimonios: number
-  total_solteros: number
-  total_solteras: number
-}
-
 interface ViewPrintConfirmatedProps {
   retreatId: number
   parroquias: ParishData[]
   headTable: string[]
   convivencia: ConvData
-  estadisticas: StatsData
+  estadisticas: StatsConf
   attendedPersonIds: number[]
 }
 

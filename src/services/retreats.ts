@@ -162,7 +162,7 @@ export const createRetreatInDB = async (retreatData: CreateRetreatInput) => {
 
 export const confirmRetreatAttendanceInDB = async (input: {
   retreat_id: number;
-  person_ids: number[]; // Array de IDs
+  person_ids: number[];
   observation?: string;
   retreat_house_id: number | null;
 }) => {
@@ -207,11 +207,11 @@ export const confirmRetreatAttendanceInDB = async (input: {
     if (newIds.length === 0) {
       return {
         success: false,
-        message: "Todas las personas ya están confirmadas"
+        message: "Todas las personas ya están confirmadas. Usa la función de actualización para modificar datos de confirmados."
       };
     }
 
-    // 3. Insertar confirmaciones para los que no están confirmados
+    // 3. Insertar confirmaciones solo para los que NO estaban confirmados
     const attendeeValues = newIds.map(id => [
       retreat_id,
       id,
@@ -225,29 +225,6 @@ export const confirmRetreatAttendanceInDB = async (input: {
        VALUES ${attendeePlaceholders}`,
       attendeeValues.flat()
     );
-
-    // 4. Si hay observación y algunos ya estaban confirmados, actualizar su observación
-    if (observation && confirmedIds.length > 0) {
-      const updatePlaceholders = confirmedIds.map(() => '?').join(',');
-      await db.execute(
-        `UPDATE retreat_attendees 
-         SET observation = ? 
-         WHERE retreat_id = ? AND person_id IN (${updatePlaceholders})
-         AND (observation IS NULL OR observation = '')`,
-        [observation, retreat_id, ...confirmedIds]
-      );
-    }
-
-    // 5. Si se envía casa de retiro y algunos ya estaban confirmados, actualizar su hospedaje
-    if (retreat_house_id !== null && confirmedIds.length > 0) {
-      const updatePlaceholders = confirmedIds.map(() => '?').join(',');
-      await db.execute(
-        `UPDATE retreat_attendees
-         SET retreat_house_id = ?
-         WHERE retreat_id = ? AND person_id IN (${updatePlaceholders})`,
-        [retreat_house_id, retreat_id, ...confirmedIds]
-      );
-    }
 
     return {
       success: true,
@@ -264,41 +241,6 @@ export const confirmRetreatAttendanceInDB = async (input: {
     return {
       success: false,
       message: "Error al confirmar asistencia"
-    };
-  }
-};
-
-export const deleteRetreatAttendanceGroupInDB = async (input: {
-  retreat_id: number;
-  person_ids: number[];
-}) => {
-  const { retreat_id, person_ids } = input;
-
-  if (!person_ids || person_ids.length === 0) {
-    return {
-      success: false,
-      message: "Debes proporcionar al menos una persona",
-    };
-  }
-
-  const placeholders = person_ids.map(() => "?").join(",");
-
-  try {
-    await db.execute(
-      `DELETE FROM retreat_attendees
-       WHERE retreat_id = ? AND person_id IN (${placeholders})`,
-      [retreat_id, ...person_ids],
-    );
-
-    return {
-      success: true,
-      message: "Confirmación eliminada correctamente",
-    };
-  } catch (error) {
-    console.error("Error deleting attendance group:", error);
-    return {
-      success: false,
-      message: "Error al eliminar confirmación",
     };
   }
 };
@@ -337,6 +279,41 @@ export const updateRetreatAttendanceGroupInDB = async (input: {
     return {
       success: false,
       message: "Error al actualizar asistencia",
+    };
+  }
+};
+
+export const deleteRetreatAttendanceGroupInDB = async (input: {
+  retreat_id: number;
+  person_ids: number[];
+}) => {
+  const { retreat_id, person_ids } = input;
+
+  if (!person_ids || person_ids.length === 0) {
+    return {
+      success: false,
+      message: "Debes proporcionar al menos una persona",
+    };
+  }
+
+  const placeholders = person_ids.map(() => "?").join(",");
+
+  try {
+    await db.execute(
+      `DELETE FROM retreat_attendees
+       WHERE retreat_id = ? AND person_id IN (${placeholders})`,
+      [retreat_id, ...person_ids],
+    );
+
+    return {
+      success: true,
+      message: "Confirmación eliminada correctamente",
+    };
+  } catch (error) {
+    console.error("Error deleting attendance group:", error);
+    return {
+      success: false,
+      message: "Error al eliminar confirmación",
     };
   }
 };
@@ -472,18 +449,57 @@ export const getRetreatConfirmedAttendeesFromDB = async (retreat_id: number) => 
     const [statsData] = await db.query(
       `SELECT 
         COUNT(DISTINCT p.id) AS total_personas,
-        COUNT(DISTINCT m.id) AS total_matrimonios,
-        COUNT(DISTINCT CASE WHEN m.id IS NULL AND p.civil_status = 'soltero' THEN p.id END) AS total_solteros,
-        COUNT(DISTINCT CASE WHEN m.id IS NULL AND p.civil_status = 'soltera' THEN p.id END) AS total_solteras
-       FROM retreat_attendees ra
-       JOIN persons p ON ra.person_id = p.id
-       LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id)
-       WHERE ra.retreat_id = ?`,
-      [retreat_id]
+        
+        -- Matrimonios completos (ambos cónyuges asistieron)
+        COUNT(DISTINCT CASE 
+          WHEN m.id IS NOT NULL 
+            AND EXISTS (
+              SELECT 1 FROM retreat_attendees ra2 
+              WHERE ra2.retreat_id = ? AND ra2.person_id = m.person1_id
+            )
+            AND EXISTS (
+              SELECT 1 FROM retreat_attendees ra2 
+              WHERE ra2.retreat_id = ? AND ra2.person_id = m.person2_id
+            )
+          THEN m.id 
+        END) AS total_matrimonios,
+        
+        -- Solteros: nunca casados O matrimonios incompletos donde el que asiste tiene ID menor
+        COUNT(DISTINCT CASE 
+          WHEN m.id IS NULL AND p.civil_status = 'soltero' THEN p.id
+          WHEN m.id IS NOT NULL
+            AND NOT EXISTS (
+              SELECT 1 FROM retreat_attendees ra_spouse 
+              WHERE ra_spouse.retreat_id = ? 
+              AND ra_spouse.person_id = CASE WHEN p.id = m.person1_id THEN m.person2_id ELSE m.person1_id END
+            )
+            AND p.id < CASE WHEN p.id = m.person1_id THEN m.person2_id ELSE m.person1_id END
+            THEN p.id
+          END) AS total_solteros,
+        
+        -- Solteras: nunca casadas O matrimonios incompletos donde el que asiste tiene ID mayor
+        COUNT(DISTINCT CASE 
+          WHEN m.id IS NULL AND p.civil_status = 'soltera' THEN p.id
+          WHEN m.id IS NOT NULL
+            AND NOT EXISTS (
+              SELECT 1 FROM retreat_attendees ra_spouse 
+              WHERE ra_spouse.retreat_id = ? 
+              AND ra_spouse.person_id = CASE WHEN p.id = m.person1_id THEN m.person2_id ELSE m.person1_id END
+            )
+            AND p.id > CASE WHEN p.id = m.person1_id THEN m.person2_id ELSE m.person1_id END
+            THEN p.id
+          END) AS total_solteras
+        
+      FROM retreat_attendees ra
+      JOIN persons p ON ra.person_id = p.id
+      LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id)
+      WHERE ra.retreat_id = ?`,
+      [retreat_id, retreat_id, retreat_id, retreat_id, retreat_id]
     );
     const stats = statsData as StatsConf[];
 
     const estadisticas = stats[0];
+    console.log("Estadísticas generales:", estadisticas);
 
     // 2b. QUERY: Personas marcadas como que asistieron (attended = TRUE)
     const [attendedRows] = await db.query(
@@ -513,6 +529,8 @@ export const getRetreatConfirmedAttendeesFromDB = async (retreat_id: number) => 
           JOIN persons p2 ON ra2.person_id = p2.id
           LEFT JOIN marriages m2 ON (p2.id = m2.person1_id OR p2.id = m2.person2_id)
           WHERE ra2.retreat_id = ? AND p2.community_id = c.id AND m2.id IS NOT NULL
+            AND EXISTS (SELECT 1 FROM retreat_attendees ra3 WHERE ra3.retreat_id = ? AND ra3.person_id = m2.person1_id)
+            AND EXISTS (SELECT 1 FROM retreat_attendees ra3 WHERE ra3.retreat_id = ? AND ra3.person_id = m2.person2_id)
         ) AS community_total_matrimonios,
         (
           SELECT COUNT(DISTINCT p2.id)
@@ -527,14 +545,44 @@ export const getRetreatConfirmedAttendeesFromDB = async (retreat_id: number) => 
           JOIN persons p2 ON ra2.person_id = p2.id
           LEFT JOIN marriages m2 ON (p2.id = m2.person1_id OR p2.id = m2.person2_id)
           WHERE ra2.retreat_id = ? AND p2.community_id = c.id AND m2.id IS NULL AND p2.civil_status = 'soltera'
-        ) AS community_total_solteras
+        ) AS community_total_solteras,
+        (
+          SELECT COUNT(DISTINCT p2.id)
+          FROM retreat_attendees ra2
+          JOIN persons p2 ON ra2.person_id = p2.id
+          LEFT JOIN marriages m2 ON (p2.id = m2.person1_id OR p2.id = m2.person2_id)
+          WHERE ra2.retreat_id = ? 
+            AND p2.community_id = c.id 
+            AND m2.id IS NOT NULL
+            AND NOT EXISTS (
+              SELECT 1 FROM retreat_attendees ra_spouse 
+              WHERE ra_spouse.retreat_id = ? 
+              AND ra_spouse.person_id = CASE WHEN p2.id = m2.person1_id THEN m2.person2_id ELSE m2.person1_id END
+            )
+            AND p2.id < CASE WHEN p2.id = m2.person1_id THEN m2.person2_id ELSE m2.person1_id END
+        ) AS community_incompletos_solteros,
+        (
+          SELECT COUNT(DISTINCT p2.id)
+          FROM retreat_attendees ra2
+          JOIN persons p2 ON ra2.person_id = p2.id
+          LEFT JOIN marriages m2 ON (p2.id = m2.person1_id OR p2.id = m2.person2_id)
+          WHERE ra2.retreat_id = ? 
+            AND p2.community_id = c.id 
+            AND m2.id IS NOT NULL
+            AND NOT EXISTS (
+              SELECT 1 FROM retreat_attendees ra_spouse 
+              WHERE ra_spouse.retreat_id = ? 
+              AND ra_spouse.person_id = CASE WHEN p2.id = m2.person1_id THEN m2.person2_id ELSE m2.person1_id END
+            )
+            AND p2.id > CASE WHEN p2.id = m2.person1_id THEN m2.person2_id ELSE m2.person1_id END
+        ) AS community_incompletos_solteras
        FROM retreat_attendees ra
        JOIN persons p ON ra.person_id = p.id
        JOIN communities c ON p.community_id = c.id
        JOIN parishes pa ON c.parish_id = pa.id
        WHERE ra.retreat_id = ?
        ORDER BY pa.name, c.number_community`,
-      [retreat_id, retreat_id, retreat_id, retreat_id, retreat_id]
+      [retreat_id, retreat_id, retreat_id, retreat_id, retreat_id, retreat_id, retreat_id, retreat_id, retreat_id, retreat_id, retreat_id, retreat_id]
     );
     const parishesInfo = parishesData as ParishesConf[];
 
@@ -591,8 +639,8 @@ export const getRetreatConfirmedAttendeesFromDB = async (retreat_id: number) => 
         estadisticas: {
           total_personas: row.community_total_personas,
           total_matrimonios: row.community_total_matrimonios,
-          total_solteros: row.community_total_solteros,
-          total_solteras: row.community_total_solteras,
+          total_solteros: row.community_total_solteros + row.community_incompletos_solteros,
+          total_solteras: row.community_total_solteras + row.community_incompletos_solteras,
         },
         confirmados: [],
       });

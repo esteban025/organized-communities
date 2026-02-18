@@ -2,6 +2,7 @@ import { actions } from "astro:actions"
 import { CheckIcon, ReportMoneyIcon, SaveIcon, UserIcon } from "@/icons/iconsReact"
 import { transformDate } from "@/utils/transformDate"
 import { useEffect, useMemo, useState } from "react"
+import type { StatsConf } from "@/types/retreats"
 
 interface ConfirmedGroup {
   group_key: string
@@ -38,19 +39,12 @@ interface ConvData {
   status: string
 }
 
-interface StatsData {
-  total_personas: number
-  total_matrimonios: number
-  total_solteros: number
-  total_solteras: number
-}
-
 interface ListProps {
   retreatId: number
   grouped: ParishData[]
   headTable: string[]
   convivencia: ConvData
-  estadisticas: StatsData
+  estadisticas: StatsConf
   attendedPersonIds: number[]
   viewTotals?: boolean
 }
