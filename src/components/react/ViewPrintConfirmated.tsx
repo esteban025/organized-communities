@@ -47,6 +47,43 @@ interface ViewPrintConfirmatedProps {
   attendedPersonIds: number[]
 }
 
+const emptyStats: StatsConf = {
+  total_personas: 0,
+  total_matrimonios: 0,
+  total_solteros: 0,
+  total_solteras: 0,
+}
+
+const buildStatsFromConfirmados = (confirmados: ConfirmedGroup[]): StatsConf => {
+  const stats = { ...emptyStats }
+
+  for (const bro of confirmados) {
+    const status = String(bro.civil_status || "").trim().toLowerCase()
+
+    if (status === "matrimonio") {
+      stats.total_personas += 2
+      stats.total_matrimonios += 1
+      continue
+    }
+
+    if (status === "soltero") {
+      stats.total_personas += 1
+      stats.total_solteros += 1
+      continue
+    }
+
+    if (status === "soltera") {
+      stats.total_personas += 1
+      stats.total_solteras += 1
+      continue
+    }
+
+    stats.total_personas += 1
+  }
+
+  return stats
+}
+
 export const ViewPrintConfirmated = ({
   retreatId,
   parroquias,
@@ -65,7 +102,9 @@ export const ViewPrintConfirmated = ({
     communitiesOptions,
     retreatHousesOptions,
     filteredGrouped,
+    filteredStats,
   } = useMemo(() => {
+    const hasFilters = Boolean(parish || community || hospedaje)
     const parishesSet = new Set<string>()
     const communitiesSet = new Set<string>()
     const retreatHousesSet = new Set<string>()
@@ -131,7 +170,13 @@ export const ViewPrintConfirmated = ({
 
             if (filteredConfirmados.length === 0) return null
 
-            return { ...comm, confirmados: filteredConfirmados }
+            return {
+              ...comm,
+              confirmados: filteredConfirmados,
+              estadisticas: hasFilters
+                ? buildStatsFromConfirmados(filteredConfirmados)
+                : comm.estadisticas,
+            }
           })
           .filter((comm): comm is CommunityData => comm !== null)
 
@@ -141,10 +186,28 @@ export const ViewPrintConfirmated = ({
       })
       .filter((parishItem): parishItem is ParishData => parishItem !== null)
 
-    return { parishesOptions, communitiesOptions, retreatHousesOptions, filteredGrouped }
+    const filteredStats = filteredGrouped.reduce<StatsConf>((acc, parishItem) => {
+      for (const comm of parishItem.comunidades) {
+        acc.total_personas += comm.estadisticas.total_personas
+        acc.total_matrimonios += comm.estadisticas.total_matrimonios
+        acc.total_solteros += comm.estadisticas.total_solteros
+        acc.total_solteras += comm.estadisticas.total_solteras
+      }
+
+      return acc
+    }, { ...emptyStats })
+
+    return {
+      parishesOptions,
+      communitiesOptions,
+      retreatHousesOptions,
+      filteredGrouped,
+      filteredStats,
+    }
   }, [parroquias, parish, community, hospedaje])
 
   const hasFilters = Boolean(parish || community || hospedaje)
+  const statsToDisplay = hasFilters ? filteredStats : estadisticas
 
   return (
     <div className="flex flex-col gap-9 w-full max-w-3xl mx-auto">
@@ -186,9 +249,10 @@ export const ViewPrintConfirmated = ({
           grouped={filteredGrouped}
           headTable={headTable}
           convivencia={convivencia}
-          estadisticas={estadisticas}
+          estadisticas={statsToDisplay}
           attendedPersonIds={attendedPersonIds}
           viewTotals={viewTotals}
+          showFooterTable={!hasFilters}
         />
       )}
     </div>

@@ -47,6 +47,7 @@ interface ListProps {
   estadisticas: StatsConf
   attendedPersonIds: number[]
   viewTotals?: boolean
+  showFooterTable?: boolean
 }
 
 export const PrintConfirmatedList = ({
@@ -57,6 +58,7 @@ export const PrintConfirmatedList = ({
   estadisticas,
   attendedPersonIds,
   viewTotals = true,
+  showFooterTable = true,
 }: ListProps) => {
   const [selectedPersonIds, setSelectedPersonIds] = useState<Set<number>>(new Set())
   const [newInvites, setNewInvites] = useState<any[]>([])
@@ -228,8 +230,8 @@ export const PrintConfirmatedList = ({
                               </td>
                               <td className="min capitalize">{bro.civil_status}</td>
                               <td className="col-full">{bro.observaciones_combinadas}</td>
-                              {/* <td className="min">{bro.retreat_house_name}</td> */}
-                              <td className="min"></td>
+                              <td className="min">{bro.retreat_house_name}</td>
+                              {/* <td className="min"></td> */}
                               <td className="min no-print">
                                 {bro.civil_status === "matrimonio" && (
                                   <div className="flex items-center justify-center gap-1">
@@ -285,16 +287,18 @@ export const PrintConfirmatedList = ({
                             </tr>
                           )
                         })}
-                        <tr className="tr-foot">
-                          <th colSpan={5}>
-                            <div className="flex items-center justify-around">
-                              <span>Total Personas: {comm.estadisticas.total_personas}</span>
-                              <span>Total Matrimonios: {comm.estadisticas.total_matrimonios}</span>
-                              <span>Total Solteros: {comm.estadisticas.total_solteros}</span>
-                              <span>Total Solteras: {comm.estadisticas.total_solteras}</span>
-                            </div>
-                          </th>
-                        </tr>
+                        {showFooterTable && (
+                          <tr className="tr-foot">
+                            <th colSpan={5}>
+                              <div className="flex items-center justify-around">
+                                <span>Total Personas: {comm.estadisticas.total_personas}</span>
+                                <span>Total Matrimonios: {comm.estadisticas.total_matrimonios}</span>
+                                <span>Total Solteros: {comm.estadisticas.total_solteros}</span>
+                                <span>Total Solteras: {comm.estadisticas.total_solteras}</span>
+                              </div>
+                            </th>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   </div>

@@ -235,9 +235,7 @@ export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
                               </td>
                             </tr>
                           ))}
-                        </tbody>
-                        <tfoot>
-                          <tr>
+                          <tr className="tr-foot">
                             <th colSpan={5}>
                               <div className="flex items-center justify-around">
                                 <span>Total Personas: {comm.estadisticas.total_personas}</span>
@@ -247,7 +245,7 @@ export const ListConfirmed = ({ retreatId }: { retreatId: number }) => {
                               </div>
                             </th>
                           </tr>
-                        </tfoot>
+                        </tbody>
                       </table>
                     </div>
                   </div>
