@@ -177,20 +177,17 @@ export const confirmRetreatAttendanceInDB = async (input: {
       };
     }
 
-    // 1. Verificar que todas las personas estén en las comunidades invitadas
+    // 1. Validar que todas las personas existan
     const placeholders = person_ids.map(() => '?').join(',');
-    const [rows] = await db.query(
-      `SELECT p.id 
-       FROM persons p
-       INNER JOIN retreat_communities rc ON p.community_id = rc.community_id
-       WHERE p.id IN (${placeholders}) AND rc.retreat_id = ?`,
-      [...person_ids, retreat_id]
+    const [personsRows] = await db.query(
+      `SELECT p.id FROM persons p WHERE p.id IN (${placeholders})`,
+      person_ids
     );
-    const invited = (rows as any[]).map(row => row.id);
-    if (invited.length !== person_ids.length) {
+    const existingPersonIds = (personsRows as any[]).map(row => row.id);
+    if (existingPersonIds.length !== person_ids.length) {
       return {
         success: false,
-        message: "Algunas personas no están en las comunidades invitadas"
+        message: "Algunas personas no existen en el sistema"
       };
     }
 
@@ -211,7 +208,42 @@ export const confirmRetreatAttendanceInDB = async (input: {
       };
     }
 
-    // 3. Insertar confirmaciones solo para los que NO estaban confirmados
+    // 3. Para nuevos invitados, agregar automáticamente sus comunidades a la convivencia si no están ya
+    const newIdsPlaceholders = newIds.map(() => '?').join(',');
+    const [communitiesRows] = await db.query(
+      `SELECT DISTINCT c.id FROM persons p
+       INNER JOIN communities c ON p.community_id = c.id
+       WHERE p.id IN (${newIdsPlaceholders})`,
+      newIds
+    );
+    const personCommunityIds = (communitiesRows as any[]).map(row => row.id);
+
+    // Verificar cuáles comunidades ya están en la convivencia
+    const communityPlaceholders = personCommunityIds.map(() => '?').join(',');
+    if (personCommunityIds.length > 0) {
+      const [existingCommunalitiesRows] = await db.query(
+        `SELECT community_id FROM retreat_communities 
+         WHERE retreat_id = ? AND community_id IN (${communityPlaceholders})`,
+        [retreat_id, ...personCommunityIds]
+      );
+      const existingCommunityIds = (existingCommunalitiesRows as any[]).map(row => row.community_id);
+
+      // Agregar las comunidades que no existen
+      const communitiesToAdd = personCommunityIds.filter(id => !existingCommunityIds.includes(id));
+
+      if (communitiesToAdd.length > 0) {
+        const communitiesValues = communitiesToAdd.map(cid => [retreat_id, cid]);
+        const communitiesInsertPlaceholders = communitiesValues.map(() => '(?, ?)').join(', ');
+
+        await db.execute(
+          `INSERT INTO retreat_communities (retreat_id, community_id)
+           VALUES ${communitiesInsertPlaceholders}`,
+          communitiesValues.flat()
+        );
+      }
+    }
+
+    // 4. Insertar confirmaciones solo para los que NO estaban confirmados
     const attendeeValues = newIds.map(id => [
       retreat_id,
       id,

@@ -7,6 +7,7 @@ import {
   deleteBrotherInDB,
   updateSingleBrotherInDB,
   updateMarriageInDB,
+  searchBrothersByNameFromDB,
 } from "@/services/brothers";
 
 import { defineAction } from "astro:actions";
@@ -149,6 +150,20 @@ export const deleteBrother = defineAction({
   }),
   async handler({ ids }) {
     const res = await deleteBrotherInDB(ids);
+    return {
+      success: res.success,
+      message: res.message,
+      data: res.data,
+    };
+  },
+});
+
+export const searchBrothers = defineAction({
+  input: z.object({
+    name: z.string().min(1),
+  }),
+  async handler(input) {
+    const res = await searchBrothersByNameFromDB(input.name);
     return {
       success: res.success,
       message: res.message,

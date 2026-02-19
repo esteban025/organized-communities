@@ -640,4 +640,38 @@ export const updateMarriageInDB = async (input: CreateMarriageInput) => {
   }
 }
 
+export const searchBrothersByNameFromDB = async (nameSearch: string) => {
+  const query = `
+    SELECT 
+      CONCAT('p_', p.id) as group_id,
+      p.id as person_id,
+      m.id as marriage_id,
+      p.names,
+      CASE 
+        WHEN m.id IS NOT NULL THEN 'matrimonio'
+        ELSE p.civil_status
+      END as civil_status,
+      p.community_id,
+      c.number_community,
+      par.name as parroquia,
+      p.phone
+    FROM persons p
+    LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id) AND m.community_id = p.community_id
+    INNER JOIN communities c ON p.community_id = c.id
+    INNER JOIN parishes par ON c.parish_id = par.id
+    WHERE p.names LIKE ?
+    ORDER BY p.names
+    LIMIT 50
+  `;
+
+  const [rows] = await db.query(query, [`%${nameSearch}%`]);
+  const results = rows as any[];
+
+  return {
+    success: true,
+    message: "Búsqueda completada",
+    data: results
+  };
+}
+
 

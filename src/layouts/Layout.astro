@@ -7,6 +7,7 @@ import { NavbarPage } from "@/sections/react/NavbarPage";
 import { ClientRouter } from "astro:transitions";
 import ModalObservation from "@/components/ModalObservation.astro";
 import WaterMark from "@/assets/WaterMark.astro";
+import ModalInvitedPerson from "@/components/ModalInvitedPerson.astro";
 
 interface Props {
   title?: string;
@@ -36,7 +37,9 @@ const {
     <NotificationMessage />
     <ModalMessage />
     <ModalObservation />
+    <ModalInvitedPerson />
     <WaterMark />
+
     <div class="flex flex-col gap-6">
       <HeaderPage />
       {

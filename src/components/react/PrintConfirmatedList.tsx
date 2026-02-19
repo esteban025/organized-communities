@@ -59,6 +59,7 @@ export const PrintConfirmatedList = ({
   viewTotals = true,
 }: ListProps) => {
   const [selectedPersonIds, setSelectedPersonIds] = useState<Set<number>>(new Set())
+  const [newInvites, setNewInvites] = useState<any[]>([])
   const [saving, setSaving] = useState(false)
 
   // Inicializar selección con los que ya tienen attended = TRUE en BD
@@ -66,7 +67,25 @@ export const PrintConfirmatedList = ({
     if (attendedPersonIds && attendedPersonIds.length > 0) {
       setSelectedPersonIds(new Set(attendedPersonIds))
     }
-  }, [attendedPersonIds])
+
+    const handleNewInvites = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        retreat_id: number
+        invites: any[]
+      }>
+      const eventRetreatId = customEvent.detail?.retreat_id
+      // Solo agregar invitados si es para esta convivencia
+      if (eventRetreatId && eventRetreatId === retreatId) {
+        setNewInvites((prev) => [...prev, ...customEvent.detail.invites])
+      }
+    }
+
+    window.addEventListener("retreat:new-invites", handleNewInvites)
+
+    return () => {
+      window.removeEventListener("retreat:new-invites", handleNewInvites)
+    }
+  }, [attendedPersonIds, retreatId])
 
   const allPersonIds = useMemo(() => {
     const ids: number[] = []
@@ -209,7 +228,8 @@ export const PrintConfirmatedList = ({
                               </td>
                               <td className="min capitalize">{bro.civil_status}</td>
                               <td className="col-full">{bro.observaciones_combinadas}</td>
-                              <td className="min">{bro.retreat_house_name}</td>
+                              {/* <td className="min">{bro.retreat_house_name}</td> */}
+                              <td className="min"></td>
                               <td className="min no-print">
                                 {bro.civil_status === "matrimonio" && (
                                   <div className="flex items-center justify-center gap-1">
@@ -265,9 +285,7 @@ export const PrintConfirmatedList = ({
                             </tr>
                           )
                         })}
-                      </tbody>
-                      <tfoot>
-                        <tr>
+                        <tr className="tr-foot">
                           <th colSpan={5}>
                             <div className="flex items-center justify-around">
                               <span>Total Personas: {comm.estadisticas.total_personas}</span>
@@ -277,11 +295,64 @@ export const PrintConfirmatedList = ({
                             </div>
                           </th>
                         </tr>
-                      </tfoot>
+                      </tbody>
                     </table>
                   </div>
                 </article>
               ))}
+              {/* Nuevos invitados */}
+              {newInvites.length > 0 && (
+                <article className="print-keep-with-table-comm mt-8">
+                  <h3 className="font-semibold text-lg mb-2 text-neutral-500">
+                    Nuevos invitados
+                  </h3>
+                  <div className="container-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Asis.</th>
+                          <th>N° Com</th>
+                          <th>Nombres</th>
+                          <th>Estado Civil</th>
+                          <th>Parroquia</th>
+                          <th>Observaciones</th>
+                          <th>Hospedaje</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {newInvites.map((invite) => (
+                          <tr
+                            key={`new-${invite.person_id}`}
+                            className="relative"
+                          >
+                            <td className="min no-print">
+                              <div className="content-asist flex items-center justify-center">
+                                <input
+                                  type="checkbox"
+                                  className="absolute inset-0 m-auto cursor-pointer opacity-0"
+                                  checked={selectedPersonIds.has(invite.person_id)}
+                                  onChange={() => togglePersonSelection(invite.person_id)}
+                                />
+                                {selectedPersonIds.has(invite.person_id) && (
+                                  <span className="span-icon animate-entry-checks pointer-events-none">
+                                    <CheckIcon className="size-6 block text-sky-500" />
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="min">{invite.number_community}</td>
+                            <td>{invite.names}</td>
+                            <td className="min capitalize">{invite.civil_status}</td>
+                            <td className="min">{invite.parroquia}</td>
+                            <td className="col-full">--</td>
+                            <td className="min">--</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </article>
+              )}
             </div>
           </section>
         ))}

@@ -18,7 +18,8 @@ import {
   getBrothers,
   getGroupLeaders,
   postBrother,
-  deleteBrother
+  deleteBrother,
+  searchBrothers
 } from "./brothers"
 
 import { getRetreatHouses, postRetreatHouses, deleteRetreatHouse } from "./retreatHouses"
@@ -53,6 +54,7 @@ export const server = {
   getGroupLeaders,
   postBrother,
   deleteBrother,
+  searchBrothers,
   getRetreatHouses,
   postRetreatHouses,
   deleteRetreatHouse,

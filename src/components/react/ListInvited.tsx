@@ -13,6 +13,7 @@ const headTable = [
 
 export const ListInvited = ({ retreatId }: { retreatId: number }) => {
   const [retreat, setRetreat] = useState<BrotherInvited[]>([]);
+  const [newInvites, setNewInvites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -48,11 +49,26 @@ export const ListInvited = ({ retreatId }: { retreatId: number }) => {
 
     window.addEventListener("retreat:attendance-updated", handleAttendanceUpdated);
 
+    const handleNewInvites = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        retreat_id: number;
+        invites: any[];
+      }>;
+      const eventRetreatId = customEvent.detail?.retreat_id;
+      // Solo agregar invitados si es para esta convivencia
+      if (eventRetreatId && eventRetreatId === retreatId) {
+        setNewInvites((prev) => [...prev, ...customEvent.detail.invites]);
+      }
+    };
+
+    window.addEventListener("retreat:new-invites", handleNewInvites);
+
     return () => {
       window.removeEventListener(
         "retreat:attendance-updated",
         handleAttendanceUpdated,
       );
+      window.removeEventListener("retreat:new-invites", handleNewInvites);
     };
   }, [retreatId]);
 
@@ -73,12 +89,22 @@ export const ListInvited = ({ retreatId }: { retreatId: number }) => {
     }
   };
 
+  const handleOpenModalInvited = () => {
+    // abrir la modal
+    const anyWindow = window as any;
+    if (anyWindow.openModalInvited) {
+      anyWindow.openModalInvited(retreatId);
+    } else {
+      console.warn("La función openModalInvited no está disponible en window.");
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <header className="flex items-center justify-between">
         {retreat && (
           <>
-            <button className="btn btn-secondary flex items-center gap-2">
+            <button className="btn btn-secondary flex items-center gap-2" onClick={handleOpenModalInvited}>
               <PlusIcon className="size-4 block" />
               <span>Invitar</span>
             </button>
@@ -162,6 +188,57 @@ export const ListInvited = ({ retreatId }: { retreatId: number }) => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="ss">
+            <header>
+              <h2>Mas invitados</h2>
+            </header>
+            <div className="container-table">
+              {newInvites.length > 0 ? (
+                <table>
+                  <thead>
+                    <tr>
+                      {headTable.map((item) => (
+                        <th key={item}>{item}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {newInvites.map((invite, idx) => (
+                      <tr key={`${invite.person_id}-${idx}`} className="relative">
+                        <td className="min">
+                          <div className="content-asist">
+                            <input
+                              type="checkbox"
+                              className="absolute inset-0 m-auto cursor-pointer opacity-0"
+                              checked={selectedIds.includes(invite.person_id)}
+                              onChange={() =>
+                                setSelectedIds((prev) =>
+                                  prev.includes(invite.person_id)
+                                    ? prev.filter((id) => id !== invite.person_id)
+                                    : [...prev, invite.person_id]
+                                )
+                              }
+                            />
+                            <span className="span-icon animate-entry-checks pointer-events-none">
+                              <CheckIcon className="size-6 block text-sky-500" />
+                            </span>
+                          </div>
+                        </td>
+                        <td className="min">{invite.number_community}</td>
+                        <td>{invite.names}</td>
+                        <td>{invite.civil_status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-gray-500 text-sm text-center py-4">
+                  Sin nuevos invitados aún
+                </p>
+              )}
+            </div>
           </div>
         </div>
       )}
