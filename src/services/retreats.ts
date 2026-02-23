@@ -208,42 +208,7 @@ export const confirmRetreatAttendanceInDB = async (input: {
       };
     }
 
-    // 3. Para nuevos invitados, agregar automáticamente sus comunidades a la convivencia si no están ya
-    const newIdsPlaceholders = newIds.map(() => '?').join(',');
-    const [communitiesRows] = await db.query(
-      `SELECT DISTINCT c.id FROM persons p
-       INNER JOIN communities c ON p.community_id = c.id
-       WHERE p.id IN (${newIdsPlaceholders})`,
-      newIds
-    );
-    const personCommunityIds = (communitiesRows as any[]).map(row => row.id);
-
-    // Verificar cuáles comunidades ya están en la convivencia
-    const communityPlaceholders = personCommunityIds.map(() => '?').join(',');
-    if (personCommunityIds.length > 0) {
-      const [existingCommunalitiesRows] = await db.query(
-        `SELECT community_id FROM retreat_communities 
-         WHERE retreat_id = ? AND community_id IN (${communityPlaceholders})`,
-        [retreat_id, ...personCommunityIds]
-      );
-      const existingCommunityIds = (existingCommunalitiesRows as any[]).map(row => row.community_id);
-
-      // Agregar las comunidades que no existen
-      const communitiesToAdd = personCommunityIds.filter(id => !existingCommunityIds.includes(id));
-
-      if (communitiesToAdd.length > 0) {
-        const communitiesValues = communitiesToAdd.map(cid => [retreat_id, cid]);
-        const communitiesInsertPlaceholders = communitiesValues.map(() => '(?, ?)').join(', ');
-
-        await db.execute(
-          `INSERT INTO retreat_communities (retreat_id, community_id)
-           VALUES ${communitiesInsertPlaceholders}`,
-          communitiesValues.flat()
-        );
-      }
-    }
-
-    // 4. Insertar confirmaciones solo para los que NO estaban confirmados
+    // 3. Insertar confirmaciones solo para los que NO estaban confirmados
     const attendeeValues = newIds.map(id => [
       retreat_id,
       id,
