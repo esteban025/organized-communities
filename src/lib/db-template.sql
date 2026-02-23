@@ -26,6 +26,8 @@ CREATE TABLE persons (
   names VARCHAR(200) NOT NULL,
   phone VARCHAR(20) DEFAULT NULL,
   community_id INT NOT NULL,
+  civil_status ENUM('matrimonio', 'soltero', 'soltera') NOT NULL,
+  
   FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
   UNIQUE KEY unique_name_per_community (names, community_id)
 );
@@ -105,6 +107,11 @@ CREATE TABLE retreat_attendees (
   FOREIGN KEY (retreat_house_id) REFERENCES retreat_houses(id) ON DELETE SET NULL,
   UNIQUE KEY unique_retreat_person (retreat_id, person_id)
 );
+
+-- elimianar de la tabla confirmed_at y agregamos una nueva columna que se llame "confirmation" que por defecto sea false
+
+ALTER TABLE retreat_attendees DROP COLUMN confirmed_at;
+ALTER TABLE retreat_attendees ADD COLUMN confirmation BOOLEAN DEFAULT FALSE;
 
 -- TABLA COBRANZAS POR COMUNIDAD
 CREATE TABLE retreat_charges (
