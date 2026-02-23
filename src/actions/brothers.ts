@@ -161,9 +161,10 @@ export const deleteBrother = defineAction({
 export const searchBrothers = defineAction({
   input: z.object({
     name: z.string().min(1),
+    retreat_id: z.coerce.number(),
   }),
   async handler(input) {
-    const res = await searchBrothersByNameFromDB(input.name);
+    const res = await searchBrothersByNameFromDB(input.name, input.retreat_id);
     return {
       success: res.success,
       message: res.message,

@@ -136,6 +136,7 @@ import ModalDesign from "./ModalDesign.astro";
         try {
           const { data, error } = await actions.searchBrothers({
             name: searchValue,
+            retreat_id: retreatIdSelected,
           });
           if (!error && data?.success && data?.data) {
             displaySearchResults(data.data as SearchResult[]);

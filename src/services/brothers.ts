@@ -640,7 +640,7 @@ export const updateMarriageInDB = async (input: CreateMarriageInput) => {
   }
 }
 
-export const searchBrothersByNameFromDB = async (nameSearch: string) => {
+export const searchBrothersByNameFromDB = async (nameSearch: string, retreatId: number) => {
   const query = `
     SELECT 
       CONCAT('p_', p.id) as group_id,
@@ -659,12 +659,19 @@ export const searchBrothersByNameFromDB = async (nameSearch: string) => {
     LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id) AND m.community_id = p.community_id
     INNER JOIN communities c ON p.community_id = c.id
     INNER JOIN parishes par ON c.parish_id = par.id
+    LEFT JOIN retreat_attendees ra ON p.id = ra.person_id AND ra.retreat_id = ?
     WHERE p.names LIKE ?
+      AND p.community_id NOT IN (
+        SELECT rc.community_id 
+        FROM retreat_communities rc 
+        WHERE rc.retreat_id = ?
+      )
+      AND ra.id IS NULL
     ORDER BY p.names
     LIMIT 50
   `;
 
-  const [rows] = await db.query(query, [`%${nameSearch}%`]);
+  const [rows] = await db.query(query, [retreatId, `%${nameSearch}%`, retreatId]);
   const results = rows as any[];
 
   return {
