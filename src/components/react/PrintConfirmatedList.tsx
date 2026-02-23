@@ -304,59 +304,6 @@ export const PrintConfirmatedList = ({
                   </div>
                 </article>
               ))}
-              {/* Nuevos invitados */}
-              {newInvites.length > 0 && (
-                <article className="print-keep-with-table-comm mt-8">
-                  <h3 className="font-semibold text-lg mb-2 text-neutral-500">
-                    Nuevos invitados
-                  </h3>
-                  <div className="container-table">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Asis.</th>
-                          <th>N° Com</th>
-                          <th>Nombres</th>
-                          <th>Estado Civil</th>
-                          <th>Parroquia</th>
-                          <th>Observaciones</th>
-                          <th>Hospedaje</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {newInvites.map((invite) => (
-                          <tr
-                            key={`new-${invite.person_id}`}
-                            className="relative"
-                          >
-                            <td className="min no-print">
-                              <div className="content-asist flex items-center justify-center">
-                                <input
-                                  type="checkbox"
-                                  className="absolute inset-0 m-auto cursor-pointer opacity-0"
-                                  checked={selectedPersonIds.has(invite.person_id)}
-                                  onChange={() => togglePersonSelection(invite.person_id)}
-                                />
-                                {selectedPersonIds.has(invite.person_id) && (
-                                  <span className="span-icon animate-entry-checks pointer-events-none">
-                                    <CheckIcon className="size-6 block text-sky-500" />
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="min">{invite.number_community}</td>
-                            <td>{invite.names}</td>
-                            <td className="min capitalize">{invite.civil_status}</td>
-                            <td className="min">{invite.parroquia}</td>
-                            <td className="col-full">--</td>
-                            <td className="min">--</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </article>
-              )}
             </div>
           </section>
         ))}

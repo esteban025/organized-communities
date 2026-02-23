@@ -3,7 +3,7 @@ import ModalDesign from "./ModalDesign.astro";
 ---
 
 <ModalDesign id="modal-invited-person">
-  <article class="flex flex-col gap-6 min-w-75">
+  <article class="flex flex-col gap-6 min-w-100">
     <header class="border-b border-neutral-300">
       <h2>Invitar hermanos</h2>
     </header>
@@ -15,6 +15,7 @@ import ModalDesign from "./ModalDesign.astro";
           placeholder=" "
           class="border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           id="search-invited-person"
+          autocomplete="off"
         />
         <label for="search-invited-person" class="label-text">
           Buscar por nombre
@@ -285,28 +286,49 @@ import ModalDesign from "./ModalDesign.astro";
 
     closeButton.addEventListener("click", closeModal);
 
-    confirmButton.addEventListener("click", () => {
+    confirmButton.addEventListener("click", async () => {
       if (selectedInvitesData.length === 0) {
         alert("Por favor selecciona al menos una persona para invitar");
         return;
       }
-      console.log(
-        `Invitando ${selectedInvitesData.length} personas a convivencia ${retreatIdSelected}`,
-        selectedInvitesData,
-      );
 
-      // Emitir evento con los invitados seleccionados
-      window.dispatchEvent(
-        new CustomEvent("retreat:new-invites", {
-          detail: {
-            retreat_id: retreatIdSelected,
-            invites: selectedInvitesData,
-          },
-        }),
-      );
+      const personIds = selectedInvitesData.map((item) => item.person_id);
 
-      // Cerrar modal después de invitar
-      closeModal();
+      try {
+        confirmButton.disabled = true;
+        confirmButton.textContent = "Invitando...";
+
+        const { data, error } = await actions.confirmRetreatAttendance({
+          retreat_id: retreatIdSelected,
+          person_ids: personIds,
+          retreat_house_id: null,
+        });
+
+        if (error || !data?.success) {
+          console.error(data?.message || error?.message || "Error al invitar");
+          alert("Error al invitar hermanos");
+          confirmButton.disabled = false;
+          confirmButton.textContent = "Invitar";
+          return;
+        }
+
+        // Emitir evento con los invitados seleccionados
+        window.dispatchEvent(
+          new CustomEvent("retreat:attendance-updated", {
+            detail: {
+              retreat_id: retreatIdSelected,
+            },
+          }),
+        );
+
+        // Cerrar modal después de invitar
+        closeModal();
+      } catch (err) {
+        console.error("Error al invitar:", err);
+        alert("Error al invitar hermanos");
+        confirmButton.disabled = false;
+        confirmButton.textContent = "Invitar";
+      }
     });
 
     (window as any).openModalInvited = openModal;
