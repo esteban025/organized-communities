@@ -39,7 +39,6 @@ try {
   {!error && retreat && (
     <header class="font-forum">
       <h2 class="flex items-center gap-2 text-4xl font-semibold">
-        {/* <span class="block size-4 bg-neutral-500 rounded-full"></span> */}
         {retreat?.title}
       </h2>
       <p class="text-neutral-500 text-lg ">{retreat?.description}</p>
@@ -53,9 +52,6 @@ try {
           </h2>
           <ListInvited client:load retreatId={retreat.id} />
         </section>
-        {/* <span class="block mt-10">
-        <ReplaceUserIcon class="size-8 text-neutral-500" />
-        </span> */}
         <section class="card-section h-min">
           <h2 class="font-semibold text-xl mb-4 text-sky-600 flex items-center gap-2 font-forum">
             <ConfirmIcon className="size-6 block text-sky-600" />

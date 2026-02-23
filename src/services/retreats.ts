@@ -93,40 +93,58 @@ export const getRetreatByIdFromDB = async ({ id }: { id: number }) => {
 
 export const getBrotherOfRetreatByIdFromDB = async ({ id }: { id: number }) => {
   const query = `
+    -- Hermanos de comunidades sin confirmar (invitados regulares)
     SELECT 
-    p.id,
-    p.names,
-    p.civil_status,
-    p.community_id,
-    c.number_community,
-    m.id AS marriage_id,
-    -- Obtenemos el ID de la pareja mediante lógica de comparación simple sin subqueries
-    CASE 
-        WHEN m.person1_id = p.id THEN m.person2_id 
-        ELSE m.person1_id 
-    END AS spouse_id,
-    -- Agregamos el nombre de la pareja por si lo necesitas en la UI
-    spouse.names AS spouse_name,
-    -- Agregamos el rol principal del hermano
-    pr.role AS person_role
-FROM persons p
-INNER JOIN communities c ON p.community_id = c.id
-INNER JOIN retreat_communities rc ON c.id = rc.community_id
--- Join con matrimonios
-LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id)
--- Join con la tabla de personas de nuevo para traer datos del cónyuge rápidamente
-LEFT JOIN persons spouse ON spouse.id = (CASE WHEN m.person1_id = p.id THEN m.person2_id ELSE m.person1_id END)
--- Join para traer el rol (opcional)
-LEFT JOIN person_roles pr ON p.id = pr.person_id AND p.community_id = pr.community_id
--- El filtro clave: LEFT JOIN con los que ya asistieron
-LEFT JOIN retreat_attendees ra ON ra.retreat_id = rc.retreat_id AND ra.person_id = p.id
-WHERE rc.retreat_id = ? 
-  AND ra.id IS NULL
-ORDER BY c.number_community, p.names;
-  `
-  const [rows] = await db.query(query, [id]);
+      p.id,
+      p.names,
+      p.civil_status,
+      p.community_id,
+      c.number_community,
+      m.id AS marriage_id,
+      CASE 
+          WHEN m.person1_id = p.id THEN m.person2_id 
+          ELSE m.person1_id 
+      END AS spouse_id,
+      spouse.names AS spouse_name,
+      pr.role AS person_role
+    FROM persons p
+    INNER JOIN communities c ON p.community_id = c.id
+    INNER JOIN retreat_communities rc ON c.id = rc.community_id
+    LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id)
+    LEFT JOIN persons spouse ON spouse.id = (CASE WHEN m.person1_id = p.id THEN m.person2_id ELSE m.person1_id END)
+    LEFT JOIN person_roles pr ON p.id = pr.person_id AND p.community_id = pr.community_id
+    LEFT JOIN retreat_attendees ra ON ra.retreat_id = rc.retreat_id AND ra.person_id = p.id
+    WHERE rc.retreat_id = ? 
+      AND ra.id IS NULL
+    
+    UNION
+    
+    -- Invitados especiales sin confirmar (con attended = NULL)
+    SELECT 
+      p.id,
+      p.names,
+      p.civil_status,
+      p.community_id,
+      c.number_community,
+      m.id AS marriage_id,
+      CASE 
+          WHEN m.person1_id = p.id THEN m.person2_id 
+          ELSE m.person1_id 
+      END AS spouse_id,
+      spouse.names AS spouse_name,
+      pr.role AS person_role
+    FROM persons p
+    INNER JOIN communities c ON p.community_id = c.id
+    INNER JOIN retreat_attendees ra ON ra.retreat_id = ? AND ra.person_id = p.id
+    LEFT JOIN marriages m ON (p.id = m.person1_id OR p.id = m.person2_id)
+    LEFT JOIN persons spouse ON spouse.id = (CASE WHEN m.person1_id = p.id THEN m.person2_id ELSE m.person1_id END)
+    LEFT JOIN person_roles pr ON p.id = pr.person_id AND p.community_id = pr.community_id
+    WHERE ra.attended IS NULL
+    
+    ORDER BY number_community, names;
+  `;
+  const [rows] = await db.query(query, [id, id]);
   const data = rows as BrotherInvited[];
-  console.log(data);
   return {
     success: true,
     message: "Hermanos de la convivencia obtenidos con éxito",
@@ -191,44 +209,63 @@ export const confirmRetreatAttendanceInDB = async (input: {
       };
     }
 
-    // 2. Verificar cuáles ya están confirmados
-    const [alreadyConfirmedRows] = await db.query(
-      `SELECT person_id FROM retreat_attendees 
+    // 2. Verificar estado en retreat_attendees
+    const [attendanceRows] = await db.query(
+      `SELECT person_id, attended FROM retreat_attendees 
        WHERE retreat_id = ? AND person_id IN (${placeholders})`,
       [retreat_id, ...person_ids]
     );
-    const alreadyConfirmed = alreadyConfirmedRows as any[];
-    const confirmedIds = alreadyConfirmed.map(row => row.person_id);
-    const newIds = person_ids.filter(id => !confirmedIds.includes(id));
+    const attendanceMap = new Map((attendanceRows as any[]).map(row => [row.person_id, row.attended]));
 
-    if (newIds.length === 0) {
+    // Separar en grupos
+    const completlyNew = person_ids.filter(id => !attendanceMap.has(id)); // No están en BD
+    const pendingSpecialInvites = person_ids.filter(id => attendanceMap.get(id) === null); // Están con NULL
+    const alreadyConfirmed = person_ids.filter(id => attendanceMap.get(id) !== null && attendanceMap.get(id) !== undefined); // Ya confirmadas
+
+    if (completlyNew.length === 0 && pendingSpecialInvites.length === 0) {
       return {
         success: false,
         message: "Todas las personas ya están confirmadas. Usa la función de actualización para modificar datos de confirmados."
       };
     }
 
-    // 3. Insertar confirmaciones solo para los que NO estaban confirmados
-    const attendeeValues = newIds.map(id => [
-      retreat_id,
-      id,
-      observation || null,
-      retreat_house_id,
-    ]);
-    const attendeePlaceholders = attendeeValues.map(() => '(?, ?, ?, ?)').join(', ');
+    // 3. Actualizar invitados especiales que estaban pendientes (NULL → FALSE)
+    if (pendingSpecialInvites.length > 0) {
+      const pendingPlaceholders = pendingSpecialInvites.map(() => '?').join(',');
+      await db.execute(
+        `UPDATE retreat_attendees
+         SET attended = FALSE, retreat_house_id = ?
+         WHERE retreat_id = ? AND person_id IN (${pendingPlaceholders})`,
+        [retreat_house_id, retreat_id, ...pendingSpecialInvites]
+      );
+    }
 
-    await db.execute(
-      `INSERT INTO retreat_attendees (retreat_id, person_id, observation, retreat_house_id)
-       VALUES ${attendeePlaceholders}`,
-      attendeeValues.flat()
-    );
+    // 4. Insertar nuevos confirmados (no estaban en BD)
+    if (completlyNew.length > 0) {
+      const attendeeValues = completlyNew.map(id => [
+        retreat_id,
+        id,
+        observation || null,
+        retreat_house_id,
+        false // attended = FALSE (confirmó asistencia)
+      ]);
+      const attendeePlaceholders = attendeeValues.map(() => '(?, ?, ?, ?, ?)').join(', ');
+
+      await db.execute(
+        `INSERT INTO retreat_attendees (retreat_id, person_id, observation, retreat_house_id, attended)
+         VALUES ${attendeePlaceholders}`,
+        attendeeValues.flat()
+      );
+    }
+
+    const totalConfirmed = completlyNew.length + pendingSpecialInvites.length;
 
     return {
       success: true,
-      message: `${newIds.length} persona(s) confirmada(s) exitosamente`,
+      message: `${totalConfirmed} persona(s) confirmada(s) exitosamente`,
       data: {
-        confirmed: newIds.length,
-        already_confirmed: confirmedIds.length,
+        confirmed: totalConfirmed,
+        already_confirmed: alreadyConfirmed.length,
         total: person_ids.length
       }
     };
