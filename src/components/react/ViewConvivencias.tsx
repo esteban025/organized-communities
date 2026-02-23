@@ -58,7 +58,7 @@ export const ViewConvivencias = () => {
                 </button>
               </div>
               <a
-                className="rounded-2xl p-2 px-4 bg-neutral-50/50 hover:bg-neutral-100 transition-colors duration-300 space-y-2 flex justify-between gap-4 border-2 border-neutral-200 hover:border-neutral-300 cursor-pointer"
+                className="rounded-2xl p-2 px-4 bg-neutral-50/50 hover:bg-neutral-100 transition-colors duration-300 space-y-2 flex justify-between gap-4 border-2 border-neutral-200 hover:border-neutral-300 cursor-pointer h-full"
                 href={`/retreat/${retreat.id}`}
               >
 

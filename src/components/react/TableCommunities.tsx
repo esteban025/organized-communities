@@ -57,16 +57,14 @@ export const TableCommunities = ({ communities }: { communities: CommunityResume
               </td>
             </tr>
           ))}
-        </tbody>
-        <tfoot>
-          <tr>
+          <tr className="tr-foot">
             <th colSpan={5}>
               <div className="flex">
                 Total de Comunidades: {communities.length}
               </div>
             </th>
           </tr>
-        </tfoot>
+        </tbody>
       </table>
     </div>
   )

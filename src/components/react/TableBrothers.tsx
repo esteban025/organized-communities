@@ -108,9 +108,7 @@ export const TableBrothers = ({ brothers, totals }: { brothers: BrotherwithRoles
               </td>
             </tr>
           ))}
-        </tbody>
-        <tfoot>
-          <tr>
+          <tr className="tr-foot">
             <th colSpan={4}>
               <div className="flex items-center gap-4 justify-around">
                 <p>Total hermanos: {totals.total_personas}</p>
@@ -120,7 +118,7 @@ export const TableBrothers = ({ brothers, totals }: { brothers: BrotherwithRoles
               </div>
             </th>
           </tr>
-        </tfoot>
+        </tbody>
       </table>
     </div>
   )

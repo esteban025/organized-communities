@@ -69,9 +69,7 @@ export const TableParishes = ({ parishes, total }: TableParishesProps) => {
               </td>
             </tr>
           ))}
-        </tbody>
-        <tfoot>
-          <tr>
+          <tr className="tr-foot">
             <th colSpan={6}>
               <div className="flex items-center justify-around">
                 <span>Parroquias: {parishes.length} / {total.total_parishes}</span>
@@ -79,7 +77,7 @@ export const TableParishes = ({ parishes, total }: TableParishesProps) => {
               </div>
             </th>
           </tr>
-        </tfoot>
+        </tbody>
       </table>
     </div>
   )
