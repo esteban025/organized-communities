@@ -67,12 +67,6 @@ export interface ParishesConf {
   parish_name: string;
   community_id: number;
   number_community: string;
-  community_total_personas: number;
-  community_total_matrimonios: number;
-  community_total_solteros: number;
-  community_total_solteras: number;
-  community_incompletos_solteros: number;
-  community_incompletos_solteras: number;
 }
 
 export interface AttendeesConf {
@@ -84,6 +78,8 @@ export interface AttendeesConf {
   retreat_house_name: string | null;
   person_ids: string; // Este campo vendrá como string con IDs separados por comas, lo convertiremos a array luego
   marriage_id: number | null;
+  marriage_person1_id: number | null;
+  marriage_person2_id: number | null;
   civil_status: string;
 }
 
