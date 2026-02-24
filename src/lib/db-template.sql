@@ -142,3 +142,8 @@ CREATE TABLE retreat_payments (
 CREATE INDEX idx_retreats_status ON retreats(status);
 CREATE INDEX idx_retreat_attendees_retreat ON retreat_attendees(retreat_id);
 CREATE INDEX idx_retreat_attendees_attended ON retreat_attendees(retreat_id, attended);
+CREATE INDEX idx_retreat_attendees_retreat_conf ON retreat_attendees(retreat_id, confirmation);
+CREATE INDEX idx_retreat_attendees_person ON retreat_attendees(person_id);
+CREATE INDEX idx_persons_community ON persons(community_id);
+CREATE INDEX idx_marriages_person1 ON marriages(person1_id);
+CREATE INDEX idx_marriages_person2 ON marriages(person2_id);
