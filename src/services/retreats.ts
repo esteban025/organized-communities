@@ -184,7 +184,7 @@ export const confirmRetreatAttendanceInDB = async (input: {
     if (toInsert.length > 0) {
       const values = toInsert.map(id => [retreat_id, id, observation || null, retreat_house_id, true]);
       const insertPlaceholders = values.map(() => '(?, ?, ?, ?, ?)').join(', ');
-      await db.execute(
+      await db.query(
         `INSERT INTO retreat_attendees (retreat_id, person_id, observation, retreat_house_id, confirmation)
          VALUES ${insertPlaceholders}`,
         values.flat()
@@ -194,7 +194,7 @@ export const confirmRetreatAttendanceInDB = async (input: {
     // Actualizar existentes a confirmation = TRUE
     if (toUpdate.length > 0) {
       const updatePlaceholders = toUpdate.map(() => '?').join(',');
-      await db.execute(
+      await db.query(
         `UPDATE retreat_attendees
          SET confirmation = TRUE, observation = ?, retreat_house_id = ?
          WHERE retreat_id = ? AND person_id IN (${updatePlaceholders})`,
@@ -240,7 +240,7 @@ export const updateRetreatAttendanceGroupInDB = async (input: {
   const placeholders = person_ids.map(() => "?").join(",");
 
   try {
-    await db.execute(
+    await db.query(
       `UPDATE retreat_attendees
        SET observation = ?, retreat_house_id = ?
        WHERE retreat_id = ? AND person_id IN (${placeholders})`,
@@ -276,7 +276,7 @@ export const deleteRetreatAttendanceGroupInDB = async (input: {
   const placeholders = person_ids.map(() => "?").join(",");
 
   try {
-    await db.execute(
+    await db.query(
       `DELETE FROM retreat_attendees
        WHERE retreat_id = ? AND person_id IN (${placeholders})`,
       [retreat_id, ...person_ids],
@@ -322,7 +322,7 @@ export const updateRetreatAttendeesStatusInDB = async (input: {
   try {
     if (attended_person_ids.length > 0) {
       const attendedPlaceholders = attended_person_ids.map(() => "?").join(",");
-      await db.execute(
+      await db.query(
         `UPDATE retreat_attendees
          SET attended = TRUE
          WHERE retreat_id = ? AND person_id IN (${attendedPlaceholders})`,
@@ -334,7 +334,7 @@ export const updateRetreatAttendeesStatusInDB = async (input: {
       const notAttendedPlaceholders = not_attended_person_ids
         .map(() => "?")
         .join(",");
-      await db.execute(
+      await db.query(
         `UPDATE retreat_attendees
          SET attended = FALSE
          WHERE retreat_id = ? AND person_id IN (${notAttendedPlaceholders})`,
@@ -481,9 +481,9 @@ export const getRetreatConfirmedAttendeesFromDB = async (retreat_id: number) => 
         [retreat_id, retreat_id, retreat_id, retreat_id, retreat_id]
       ),
 
-      // 2b. QUERY: Personas marcadas como que asistieron (attended = TRUE)
+      // 2b. QUERY: Personas marcadas como que confirmaron (confirmation = TRUE)
       db.query(
-        `SELECT person_id FROM retreat_attendees WHERE retreat_id = ? AND attended = TRUE`,
+        `SELECT person_id FROM retreat_attendees WHERE retreat_id = ? AND confirmation = TRUE`,
         [retreat_id],
       ),
 
