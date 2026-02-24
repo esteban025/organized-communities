@@ -113,9 +113,7 @@ if (!Number.isNaN(retreatId) && !Number.isNaN(communityId)) {
                         <td>{person.retreat_house_name}</td>
                       </tr>
                     ))}
-                  </tbody>
-                  <tfoot>
-                    <tr>
+                    <tr class="tr-foot">
                       <th colspan="3">
                         <div class="flex items-center justify-around py-1">
                           <p>Total asistentes: {data.totals.total_attendees}</p>
@@ -134,7 +132,7 @@ if (!Number.isNaN(retreatId) && !Number.isNaN(communityId)) {
                         </div>
                       </th>
                     </tr>
-                  </tfoot>
+                  </tbody>
                 </table>
               </div>
             </section>

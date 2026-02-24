@@ -1,13 +1,7 @@
 import { EditIcon, EyeIcon, TrashIcon } from "@/icons/iconsReact"
-import type { ParishWithCounts } from "@/types/parishes"
+import type { ParishWithCounts, TableParishesProps } from "@/types/parishes"
 
-interface TableParishesProps {
-  parishes: ParishWithCounts[]
-  total: {
-    total_parishes: number
-    total_communities: number
-  }
-}
+
 
 export const TableParishes = ({ parishes, total }: TableParishesProps) => {
   const headTable = [

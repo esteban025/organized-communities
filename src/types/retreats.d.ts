@@ -103,6 +103,31 @@ export interface CommunityInfo {
   }[];
 }
 
+export interface ConfirmadoInternal {
+  group_key: string;
+  nombres_confirmados: string;
+  observaciones_combinadas: string | null;
+  retreat_house_id: number | null;
+  retreat_house_name: string | null;
+  person_ids: number[];
+  marriage_id: number | null;
+  civil_status: string;
+  marriage_person1_id: number | null;
+  marriage_person2_id: number | null;
+}
+
+export interface CommunityInternal {
+  community_id: number;
+  numero: string;
+  estadisticas: StatsConf;
+  confirmados: ConfirmadoInternal[];
+}
+
+export interface ParishMapValue {
+  parroquia: string;
+  comunidades: CommunityInternal[];
+}
+
 export interface RetreatHistory {
   id: number;
   title: string;
@@ -110,5 +135,14 @@ export interface RetreatHistory {
   end_date: string;
   total_communities: number;
   total_personas: number;
+  total_debt: number;
+}
+
+export interface CommunityCharge {
+  parish_name: string;
+  community_id: number;
+  number_community: number;
+  total_attendees: number;
+  total_cost: number;
   total_debt: number;
 }

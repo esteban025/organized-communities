@@ -8,3 +8,11 @@ export interface Parish {
 export interface ParishWithCounts extends Parish {
   count_communities: number;
 }
+
+export interface TableParishesProps {
+  parishes: ParishWithCounts[]
+  total: {
+    total_parishes: number
+    total_communities: number
+  }
+}

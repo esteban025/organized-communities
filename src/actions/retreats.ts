@@ -12,6 +12,7 @@ import {
   updateRetreatAttendeesStatusInDB,
   updateRetreatStatusInDB,
   saveRetreatCommunityPaymentsInDB,
+  getRetreatCommunityChargesFromDB,
   getRetreatsHistoryFromDB,
   updateRetreatInDB
 } from "@/services/retreats"
@@ -161,6 +162,20 @@ export const saveRetreatCommunityPayments = defineAction({
     return {
       success: res.success,
       message: res.message,
+    };
+  },
+})
+
+export const getRetreatCommunityCharges = defineAction({
+  input: z.object({
+    retreat_id: z.coerce.number(),
+  }),
+  async handler(input) {
+    const res = await getRetreatCommunityChargesFromDB(input.retreat_id);
+    return {
+      success: res.success,
+      message: res.message,
+      data: res.data,
     };
   },
 })

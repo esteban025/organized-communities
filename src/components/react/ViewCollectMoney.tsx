@@ -1,21 +1,13 @@
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { actions } from "astro:actions"
-import { CheckIcon, CheckSquareIcon } from "@/icons/iconsReact";
-
-interface CommunityCharge {
-  parish_name: string;
-  community_id: number;
-  number_community: number;
-  total_attendees: number;
-  total_cost: number;
-  total_debt: number;
-}
+import { CheckSquareIcon } from "@/icons/iconsReact";
+import type { CommunityCharge } from "@/types/retreats";
 
 interface ViewCollectMoneyProps {
   retreatId: number
   title: string
   costPerPerson: number
-  communities: CommunityCharge[]
+  initialCommunities: CommunityCharge[]
 }
 
 interface PaymentState {
@@ -26,16 +18,29 @@ export const ViewCollectMoney = ({
   retreatId,
   title,
   costPerPerson,
-  communities,
+  initialCommunities,
 }: ViewCollectMoneyProps) => {
+  const [communities, setCommunities] = useState<CommunityCharge[]>(initialCommunities)
   const [payments, setPayments] = useState<PaymentState>({})
   const [saving, setSaving] = useState(false)
   const [finalizing, setFinalizing] = useState(false)
 
+  const fetchCharges = useCallback(async () => {
+    try {
+      const { data, error } = await actions.getRetreatCommunityCharges({ retreat_id: retreatId })
+      if (data?.success && data.data) {
+        setCommunities(data.data.communities)
+        setPayments({}) // limpiar pagos locales para usar los valores frescos
+      }
+    } catch (err) {
+      console.error("Error recargando cargos:", err)
+    }
+  }, [retreatId])
+
   const rows = useMemo(() => {
     return communities.map((comm) => {
       const initialPaid = Math.max(
-        comm.total_cost - ("total_debt" in comm ? comm.total_debt : comm.total_cost),
+        comm.total_cost - (comm.total_debt ?? comm.total_cost),
         0,
       )
       const paid = payments[comm.community_id] ?? initialPaid
@@ -44,22 +49,9 @@ export const ViewCollectMoney = ({
     })
   }, [communities, payments])
 
-  const handleChangePayment = (communityId: number, value: string) => {
-    const num = Number(value.replace(/[^0-9.]/g, ""))
-    if (Number.isNaN(num)) return
-    setPayments((prev) => ({ ...prev, [communityId]: num }))
-  }
-
-  const handleBlurPayment = async (
-    communityId: number,
-    total_attendees: number,
-    total_cost: number,
-    fallbackInitialPaid: number,
-  ) => {
-    if (saving) return
-
-    const paid = payments[communityId] ?? fallbackInitialPaid ?? 0
-
+  const savePayment = async (communityId: number, amountPaid: number) => {
+    const comm = communities.find((c) => c.community_id === communityId)
+    if (!comm || saving) return
     try {
       setSaving(true)
       await actions.saveRetreatCommunityPayments({
@@ -67,16 +59,31 @@ export const ViewCollectMoney = ({
         payments: [
           {
             community_id: communityId,
-            total_attendees,
-            total_cost,
-            amount_paid: paid,
+            total_attendees: comm.total_attendees,
+            total_cost: comm.total_cost,
+            amount_paid: amountPaid,
           },
         ],
       })
+      await fetchCharges()
     } catch (error) {
       console.error("Error guardando pago de comunidad:", error)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleChangePayment = (communityId: number, value: string) => {
+    const num = Number(value.replace(/[^0-9.]/g, ""))
+    if (Number.isNaN(num)) return
+    setPayments((prev) => ({ ...prev, [communityId]: num }))
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, communityId: number, fallbackInitialPaid: number) => {
+    if (e.key === "Enter") {
+      e.currentTarget.blur()
+      const paid = payments[communityId] ?? fallbackInitialPaid ?? 0
+      savePayment(communityId, paid)
     }
   }
 
@@ -154,14 +161,8 @@ export const ViewCollectMoney = ({
                         className="input w-full text-right"
                         value={row.paid || ""}
                         onChange={(e) => handleChangePayment(row.community_id, e.target.value)}
-                        onBlur={() =>
-                          handleBlurPayment(
-                            row.community_id,
-                            row.total_attendees,
-                            row.total_cost,
-                            row.initialPaid,
-                          )
-                        }
+                        onKeyDown={(e) => handleKeyDown(e, row.community_id, row.initialPaid)}
+                        disabled={saving}
                         placeholder="0.00"
                       />
                     </td>
@@ -178,9 +179,7 @@ export const ViewCollectMoney = ({
                     </td>
                   </tr>
                 ))}
-              </tbody>
-              <tfoot>
-                <tr>
+                <tr className="tr-foot">
                   <th colSpan={2} className="text-right">
                     Totales
                   </th>
@@ -190,7 +189,7 @@ export const ViewCollectMoney = ({
                   <th className="min text-right">${totalSummary.totalDebt.toFixed(2)}</th>
                   <th></th>
                 </tr>
-              </tfoot>
+              </tbody>
             </table>
           </div>
           <div className="flex items-center justify-end">

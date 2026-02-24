@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import type { CreateRetreatInput, RetreatsGet, RetreatConf, StatsConf, ParishesConf, AttendeesConf, CommunityInfo, RetreatHistory } from "@/types/retreats";
-import type { BrotherInvited, BrotherConfirmated } from "@/types/brothers";
+import type { CreateRetreatInput, RetreatsGet, RetreatConf, StatsConf, ParishesConf, AttendeesConf, CommunityInfo, RetreatHistory, ConfirmadoInternal, CommunityInternal, ParishMapValue } from "@/types/retreats";
+import type { BrotherInvited } from "@/types/brothers";
 
 export const getRetreatsFromDB = async () => {
   const query = `
@@ -545,32 +545,6 @@ export const getRetreatConfirmedAttendeesFromDB = async (retreat_id: number) => 
     const attendeesInfo = attendeesData as AttendeesConf[];
 
     // 5. ESTRUCTURAR DATOS
-
-    // Estructura interna con campos extra para calcular estadísticas
-    interface ConfirmadoInternal {
-      group_key: string;
-      nombres_confirmados: string;
-      observaciones_combinadas: string | null;
-      retreat_house_id: number | null;
-      retreat_house_name: string | null;
-      person_ids: number[];
-      marriage_id: number | null;
-      civil_status: string;
-      marriage_person1_id: number | null;
-      marriage_person2_id: number | null;
-    }
-
-    interface CommunityInternal {
-      community_id: number;
-      numero: string;
-      estadisticas: StatsConf;
-      confirmados: ConfirmadoInternal[];
-    }
-
-    interface ParishMapValue {
-      parroquia: string;
-      comunidades: CommunityInternal[];
-    }
 
     const parishesMap = new Map<number, ParishMapValue>();
 

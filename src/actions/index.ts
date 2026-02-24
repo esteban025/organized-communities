@@ -36,6 +36,7 @@ import {
   updateRetreatAttendeesStatus,
   updateRetreatStatus,
   saveRetreatCommunityPayments,
+  getRetreatCommunityCharges,
   getRetreatsHistory,
 } from "./retreats"
 
@@ -69,5 +70,6 @@ export const server = {
   postRetreat,
   updateRetreatStatus,
   saveRetreatCommunityPayments,
+  getRetreatCommunityCharges,
   getRetreatsHistory,
 }
